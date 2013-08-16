@@ -10,5 +10,6 @@
 #define ESTIMATION_METHODS_H
 
 #include "estimation/MovingMedian.h"
+#include "estimation/MovingAverage.h"
 
 #endif

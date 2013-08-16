@@ -164,25 +164,26 @@ estimation::IEstimationMethod* getEstimator(boost::program_options::variables_ma
   if (method.compare("MovingAverage") == 0)
   {
     std::cout << "method = MovingAverage" << std::endl;
-    // TODO estimation::MovingAverage ma();
+    estimation::MovingAverage* ma = new estimation::MovingAverage();
 
     // required: none
     // optional: -w -b
+    unsigned int ws = ma->getWindowSize();	// default window size
     if (vm.count("window-size"))
     {
-      unsigned int ws = vm["window-size"].as<unsigned int>();
+      ws = vm["window-size"].as<unsigned int>();
 
       // debug
       std::stringstream ss;
       ss << ws;
       std::cout << "window-size = " << ss.str() << std::endl;
 
-      // TODO
+      ma->setWindowSize(ws);
     }
 
     if (vm.count("weighting-coefficients"))
     {
-      std::vector<float> wc = vm["weighting-coefficients"].as< std::vector<float> >();
+      std::vector<double> wc = vm["weighting-coefficients"].as< std::vector<double> >();
 
       // debug
       std::stringstream ss;
@@ -192,10 +193,23 @@ estimation::IEstimationMethod* getEstimator(boost::program_options::variables_ma
 	ss << wc[i] << " ";
       std::cout << ss.str() << std::endl;
 
-      // TODO
+      if (wc.size() == ws) {
+	// only b_k coefficients are passed
+	ma->setWeightingCoefficientsIn(&wc[0], ws);
+      } else if (wc.size() == 2*ws-1) {
+	// a_k coefficients also passed through arguments
+	// first #window-size numbers
+	ma->setWeightingCoefficientsOut(&wc[0], ws-1);
+	ma->setWeightingCoefficientsIn(&wc[ws-1], ws);
+      } else {
+	throw boost::program_options::error("Invalid number of "
+					    "weighting-coefficients "
+					    "(must equal "
+					    "1x or 2x-1 window size).");
+      }
     }
 
-    //TODO return ma;
+    return ma;
   }
 
   throw boost::program_options::error("Unknown method! "
@@ -235,12 +249,18 @@ int createAndInitEstimator(int argc, char** argv, estimation::IEstimationMethod*
      "The number of data values to use for estimation. "
      "arg must be a positive integer. Default value is 3.") 
     ("weighting-coefficients", 
-     po::value< std::vector<float> >()->multitoken(), 
-     "The weighting coefficients b_k for moving filters. "
-     "The number of coefficients must equal the window size "
-     "(b_k, where k=1..window-size), e.g. window-size=3, "
-     "weighting-coefficients=\"1 3 1\". "
-     "Default values will be set to apply a hamming window."); 
+     po::value< std::vector<double> >()->multitoken(), 
+     "The weighting coefficients for a moving filter. "
+     "The number of coefficients must equal the 1x window size or 2x "
+     "window size - 1, e.g. window-size=3, weighting-coefficients=\"1 3 1\" "
+     "corresponds to an FIR filter, i.e. the only the input is weighted. "
+     "Default values will be set to apply an FIR filter with hamming "
+     "window. 2x window-size - 1 causes the moving average "
+     "filter to be in autoregressive mode, i.e. also (old) output "
+     "values are weighted and added to a new one (e.g. window-size=3, "
+     "weighting-coefficients=\"1 0 3 2 1\" where the first two "
+     "coefficients are used for the old output values and the last "
+     "three coefficients for the input values).");
 
     /*
       // allowing short options

@@ -12,12 +12,14 @@ add_library(estimation
   src/estimation/InputValue.cpp
   src/estimation/OutputValue.cpp
   src/estimation/MovingMedian.cpp
+  src/estimation/MovingAverage.cpp
 
   include/estimation/InputValue.h
   include/estimation/OutputValue.h
   include/estimation/IEstimationMethod.h
   include/estimation/methods.h
   include/estimation/MovingMedian.h
+  include/estimation/MovingAverage.h
   )
 # find_library(estimation 
 #   NAMES estimation libestimation #name
