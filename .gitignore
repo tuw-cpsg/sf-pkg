@@ -1,0 +1,60 @@
+*~
+*.swp
+*#
+~*
+#*
+*.log
+*.d
+*.orig
+
+*.eps
+
+###############
+# directories #
+###############
+html/
+
+#################
+# ROS workspace #
+#################
+*.o
+*.a
+*.d
+*.so
+*.lo
+*.la
+*.gcda
+*.gcno
+*.gcov
+*.pyc
+build/
+devel/
+install/
+
+.hg*
+.hg*/
+
+###########
+# Eclipse #
+###########
+RemoteSystemsTempFiles/
+# from github/gitinore:
+.project
+.metadata
+bin/**
+tmp/**
+tmp/**/*
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.classpath
+.settings/
+.loadpath
+# External tool builders
+.externalToolBuilders/
+# CDT-specific
+.cproject
+# PDT-specific
+.buildpath
