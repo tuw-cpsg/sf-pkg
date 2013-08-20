@@ -122,6 +122,23 @@ namespace estimation
      * Returns the last estimated value.
      */
     OutputValue getLastEstimate (void);
+
+  private:
+    /**
+     * Returns the normalization factor for the weighting
+     * coefficients.
+     *
+     * @param coefficients The array of coefficients.
+     * @param size The size of the array of coefficients.
+     * @return Normalization factor.
+     */
+    double getNormalizationFactor(const double *coefficients, unsigned int size);
+
+    /**
+     * Creates and initializes the weighting coefficients with default
+     * values.
+     */
+    void createAndInitCoefficientsWithDefaults(void);
   };
 
 }

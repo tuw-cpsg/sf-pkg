@@ -8,23 +8,15 @@
  */
 
 #include "estimation/MovingAverage.h"
-#include <iostream>
-using namespace std;
 
 namespace estimation 
 {
-
   MovingAverage::MovingAverage ()
   {
     // set parameters to default values
     windowSize = 3;
-
-    b = new double[windowSize];
-    b[0] = 1; b[1] = 3; b[2] = 1;
-
     isIIR = false;
-    a = new double[windowSize-1];
-    a[0] = a[1] = 0;
+    createAndInitCoefficientsWithDefaults();
   }
 
   MovingAverage::~MovingAverage () 
@@ -51,13 +43,7 @@ namespace estimation
     delete[] b;
 
     // create arrays for coefficients and initialize
-    this->b = new double[windowSize];
-    this->a = new double[windowSize-1];
-    for (int i = 0; i < windowSize-1; i++) {
-      b[i] = 1;		// TODO replace with hamming!
-      a[i] = 0;
-    }
-    b[windowSize-1] = 1;
+    createAndInitCoefficientsWithDefaults();
   }
 
   void MovingAverage::setWeightingCoefficientsIn (double *b, unsigned int size)
@@ -65,10 +51,8 @@ namespace estimation
     if (size != windowSize)
       return;		// TODO replace with throw exception
     
-    // calculate normalization factor
-    double norm = 0;
-    for (int i = 0; i < windowSize; i++)
-      norm += b[i];
+    // get normalization factor for weighting coefficients
+    double norm = getNormalizationFactor((const double *) b, windowSize);
 
     // save normalized coefficients
     for (int i = 0; i < windowSize; i++)
@@ -80,15 +64,13 @@ namespace estimation
     if (size != windowSize)
       return;		// TODO replace with throw exception
 
-    // calculate normalization factor
-    double norm = 0;
-    for (int i = 0; i < windowSize-1; i++)
-      norm += a[i];
+    // get normalization factor for weighting coefficients
+    double norm = getNormalizationFactor((const double *) a, windowSize-1);
 
-    if (norm > 0)	// there is at least one coefficient != 0
+    if (norm > 0)
       isIIR = true;
 
-    // save normalized coefficients
+    // save coefficients
     for (int i = 0; i < windowSize-1; i++)
       this->a[i] = a[i] / norm;
   }
@@ -109,10 +91,6 @@ namespace estimation
       double y = b[0] * in[0].getValue();
       for (int i = 1; i < windowSize; i++) {
 	// in[0] ... front/new, in[windowSize-1] ... back/old
-	// cout << i << ": " << y 
-	//      << " + (a=" << a[i-1] << " * out=" << out[i-1].getValue() << ")"
-	//      << " + (b=" << b[i] << " * in=" << in[i].getValue() << ")" 
-	//      << endl;
 	y += a[i-1] * out[i-1].getValue() + b[i] * in[i].getValue();
       }
       // normalization
@@ -144,5 +122,31 @@ namespace estimation
   OutputValue MovingAverage::getLastEstimate(void) 
   {
     return out.front();
+  }
+
+  // -----------------------------------------
+  // private functions
+  // -----------------------------------------
+  double MovingAverage::getNormalizationFactor(const double *coefficients, unsigned int size)
+  {
+    // calculate normalization factor
+    double norm = 0;
+
+    for (int i = 0; i < size; i++)
+      norm += coefficients[i];
+
+    return norm;
+  }
+
+  void MovingAverage::createAndInitCoefficientsWithDefaults(void)
+  {
+    this->b = new double[windowSize];
+    this->a = new double[windowSize-1];
+
+    for (int i = 0; i < windowSize-1; i++) {
+      b[i] = 1.0/windowSize;		// TODO replace with hamming! normalized!
+      a[i] = 0;
+    }
+    b[windowSize-1] = 1.0/windowSize;	// normalized!
   }
 }

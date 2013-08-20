@@ -2,13 +2,13 @@ cmake_minimum_required(VERSION 2.8.3)
 project(sf_single)
 
 ## Find catkin and any catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS roscpp std_msgs)
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS program_options system filesystem)
 
 ## Declare the estimation library
-add_library(estimation 
+add_library(estimation
   src/estimation/InputValue.cpp
   src/estimation/OutputValue.cpp
   src/estimation/MovingMedian.cpp

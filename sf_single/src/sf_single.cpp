@@ -9,14 +9,17 @@
 
 // cpp includes
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <string>
 
 #include "boost/program_options.hpp"
 #include "boost/filesystem.hpp" 
+namespace po = boost::program_options; 
 
 // ROS includes
 #include "ros/ros.h"
+#include "std_msgs/Float64.h"
 
 // estimation framework includes
 #include "estimation/IEstimationMethod.h"
@@ -27,19 +30,39 @@
 #define MSG_BUFFER_SIZE			1000
 
 // Forward declarations.
+po::variables_map getArgumentMap(int argc, char** argv);
+estimation::IEstimationMethod* getEstimator(boost::program_options::variables_map vm);
 int createAndInitEstimator(int argc, char** argv, estimation::IEstimationMethod** estimator);
 
-// error codes
-const size_t SUCCESS = 0;  
-const size_t ERROR_UNHANDLED_EXCEPTION = 1; 
-const size_t ERROR_IN_COMMAND_LINE = 2;
-const size_t PRINTED_HELP = 3;
+// Message objects.
+std_msgs::Float64 sample;
+std_msgs::Float64 sampleFused;
 
-/** Name of the estimation method. */
-std::string method;
+/** Sample publisher (global because publishing is done in callback
+    function); */
+ros::Publisher pub_signalFused;
 
-// Instantiate the message object.
-//estimation_msgs::InputValue in;
+/** Estimator, which does the filtering of a signal. */
+estimation::IEstimationMethod* estimator;
+
+/**
+ * Called when a sample is received.
+ */
+void sampleReceived(const std_msgs::Float64::ConstPtr& msg)
+{
+    sample = *msg;
+    
+    // Estimation
+    estimation::InputValue in(sample.data,0);
+    estimation::OutputValue out = estimator->estimate(in);
+
+    // Fill the message with data.
+    sampleFused.data = out.getValue();
+
+    // Send message.
+    pub_signalFused.publish(sampleFused);
+    ROS_DEBUG("sample | sample-fused: %.2f | %.2f", sample.data, sampleFused.data);
+}
 
 /**
  * This node implements a specified sensor fusion method. 
@@ -53,21 +76,49 @@ int main(int argc, char **argv)
 {
   try 
   {
+    // --------------------------------------------
+    // Initialization
+    // --------------------------------------------
     // Initialize for ROS.
-    //ros::init(argc, argv, "sf_single");
+    ros::init(argc, argv, "sf_single");
 
     // ROS specific arguments are handled and removed by ros::init(..),
     // f.e. remapping arguments added by roslaunch.
 
-    estimation::IEstimationMethod* estimator;
-
     // Check arguments and create an estimator according to it.
-    int parseResult = createAndInitEstimator(argc, argv, &estimator);
-    if (parseResult == PRINTED_HELP)	
-      return SUCCESS;		// printed help is not really an error
-    else if (parseResult != 0)	// something else wrong with arguments?
-      return parseResult;	// return error code
+    try {
+      // Get arguments/options in a map.
+      po::variables_map vm = getArgumentMap(argc, argv);
+      if (vm.empty())	// No arguments for estimator (e.g. help message printed).
+	return 0;	// Exit application.
 
+      // Get estimator according to the arguments.
+      estimator = getEstimator(vm);
+      ROS_DEBUG("Estimator initialized.");
+    } catch(po::error& e) { 
+      ROS_ERROR_STREAM(e.what() << std::endl << std::endl
+		       << "Use --help or -h to print a help message."
+		       << std::endl); 
+      return 1; 
+    }
+ 
+    // Create main access point to communicate with the ROS system.
+    ros::NodeHandle n;
+    
+    // Tell ROS that we want to subscribe to the sensor fusion input
+    // (the entity to estimate) and publish a fused version of it (the
+    // estimate).
+    ros::Subscriber sub_signal = n.subscribe<std_msgs::Float64>("signal", 20, sampleReceived);
+    //ros::Subscriber entity_sub = n.subscribe<estimation_msgs::InputValue>("input", 10, dataReceived);
+    pub_signalFused = n.advertise<std_msgs::Float64>("signal_fused", MSG_BUFFER_SIZE);
+
+    // --------------------------------------------
+    // Running application.
+    // --------------------------------------------
+    // Check repeatedly whether there are samples to estimate.
+    ros::spin();	// blocking (until roscore sends "kill")
+
+    /*
     // for testing: create a "noisy signal", pass it to an estimator
     // and print the results ("x y \n" for gnuplot)
     std::string line;
@@ -83,46 +134,27 @@ int main(int argc, char **argv)
       
       std::cout << out.getValue() << std::endl;
     }
-    
-/*
-    // Create main access point to communicate with the ROS system.
-    ros::NodeHandle n;
-    
-    // Tell ROS that we want to subscribe to the sensor fusion input
-    // (the entity to estimate) and publish a fused version of it (the
-    // estimate).
-    ros::Subscriber entity_sub = n.subscribe<estimation_msgs::InputValue>("input", 10, dataReceived);
-    ros::Publisher fusedEntity_pub = n.advertise<estimation_msgs::OutputValue>("estimate", MSG_BUFFER_SIZE);
+    */
 
-    while (ros::ok())
-    {
-      // TODO
-
-      // Handle callbacks if any.
-      ros::spinOnce();
-    }
+    // --------------------------------------------
+    // Clean up.
+    // --------------------------------------------
+    delete estimator;
 
     // Close connections.
-    entity_sub.shutdown();
-    fusedEntity_pub.shutdown();
-    ROS_INFO("Closed connection.");*/
+    sub_signal.shutdown();
+    pub_signalFused.shutdown();
+    ROS_DEBUG("Closed connections.");
   }
   catch (std::exception& e)
   {
-    std::cerr << "Unhandled Exception reached the top of main: " 
-              << e.what() << ", application will now exit" << std::endl; 
-    return ERROR_UNHANDLED_EXCEPTION; 
+    ROS_ERROR_STREAM("Unhandled Exception reached the top of main: " 
+		     << e.what() << ", application will now exit." << std::endl); 
+    return 1; 
   }
 
-  return SUCCESS;
+  return 0;
 }
-
-/*
-void dataReceived(const estimation_msgs::InputValue::ConstPtr& msg)
-{
-    in = *msg;
-}
-*/
 
 /**
  * Checks the arguments for validity, i.e. if the right parameters for
@@ -131,14 +163,16 @@ void dataReceived(const estimation_msgs::InputValue::ConstPtr& msg)
  * @param vm Variable map which holds the arguments.
  * @return An instance of the specified estimation method.
  */
-estimation::IEstimationMethod* getEstimator(boost::program_options::variables_map vm) 
+estimation::IEstimationMethod* getEstimator(po::variables_map vm) 
 {
+  std::string method = vm["method"].as<std::string>();
+
   // --------------------------------------------------------------------------------
   // Moving Median
   // --------------------------------------------------------------------------------
   if (method.compare("MovingMedian") == 0)
   {
-    std::cout << "method = MovingMedian" << std::endl;
+    ROS_INFO("MovingMedian.");
     estimation::MovingMedian* mm = new estimation::MovingMedian();
 
     // required: none
@@ -163,7 +197,7 @@ estimation::IEstimationMethod* getEstimator(boost::program_options::variables_ma
   // --------------------------------------------------------------------------------
   if (method.compare("MovingAverage") == 0)
   {
-    std::cout << "method = MovingAverage" << std::endl;
+    ROS_INFO("MovingAverage.");
     estimation::MovingAverage* ma = new estimation::MovingAverage();
 
     // required: none
@@ -202,40 +236,45 @@ estimation::IEstimationMethod* getEstimator(boost::program_options::variables_ma
 	ma->setWeightingCoefficientsOut(&wc[0], ws-1);
 	ma->setWeightingCoefficientsIn(&wc[ws-1], ws);
       } else {
-	throw boost::program_options::error("Invalid number of "
-					    "weighting-coefficients "
-					    "(must equal "
-					    "1x or 2x-1 window size).");
+	throw po::error("Invalid number of "
+			"weighting-coefficients "
+			"(must equal "
+			"1x or 2x-1 window size).");
       }
     }
 
     return ma;
   }
 
-  throw boost::program_options::error("Unknown method! "
-				      "See help for available methods.");
+  throw po::error("Unknown method! "
+		  "See help for available methods.");
 }
 
 /**
- * Parse the arguments passed to specify estimation method and its
- * needed parameters.
+ * Collects the arguments into a map.
  *
  * @param argc The number of arguments given in the command line.
  * @param argv Pointer to the arguments.
- * @param config Parameters and estimation method will be stored there.
- * @return Error code.
+ * @return The arguments in a map.
  */
-int createAndInitEstimator(int argc, char** argv, estimation::IEstimationMethod** estimator) 
+po::variables_map getArgumentMap(int argc, char** argv) 
 {
   std::string appName = boost::filesystem::basename(argv[0]);
- 
-  // Define and parse the program options.
-  namespace po = boost::program_options; 
-  po::options_description desc("Options:"); 
-  desc.add_options() 
+
+  // Define general options.
+  po::options_description desc_general("Basic Options");
+  desc_general.add_options()
+    ("configuration-file,c", po::value<std::string>(),
+     "Use configuration file for arguments.")
+    ("help,h", "Print help message.")    
+    ;
+
+  // Define sensor fusion specific options.
+  po::options_description desc_sf("Single Sensor Fusion Options:"); 
+  desc_sf.add_options() 
     // no short options allowed!
-    ("help", "Print this help message.")
-    ("method", po::value<std::string>(&method)->required(), 
+    //("help", "Print this help message.")
+    ("method", po::value<std::string>()->required(), 
      "The estimation method.\n\nExample values are:\n"
      "MovingMedian, MovingAverage, KalmanFilter, etc.\n\n"
      "According to the method the parameters must be specified. "
@@ -260,74 +299,62 @@ int createAndInitEstimator(int argc, char** argv, estimation::IEstimationMethod*
      "values are weighted and added to a new one (e.g. window-size=3, "
      "weighting-coefficients=\"1 0 3 2 1\" where the first two "
      "coefficients are used for the old output values and the last "
-     "three coefficients for the input values).");
-
-    /*
-      // allowing short options
-    ("help,h", "Print this help message.")
-    ("method,m", po::value<std::string>(&method)->required(), 
-     "The estimation method.\n\nExample values are:\n"
-     "MovingMedian, MovingAverage, KalmanFilter, etc.\n\n"
-     "According to the method the parameters must be specified. "
-     "In the following list the required and optional parameters "
-     "for a particular method are listed:\n"
-     "  MovingMedian: windowSize\n"
-     "  MovingAverage: windowSize, weighting-coefficients\n"
-     "\nParameters which are specified but not required for a"
-     "method will be ignored.")
-    ("windowSize,w", po::value<unsigned int>(),
-     "The number of data values to use for estimation. "
-     "arg must be a positive integer. Default value is 3.") 
-    ("weighting-coefficients,b", 
-     po::value< std::vector<float> >()->multitoken(), 
-     "The weighting coefficients b_k for moving filters. "
-     "The number of coefficients must equal the window size "
-     "(b_k, where k=1..windowSize), e.g. windowSize=3, "
-     "weighting-coefficients=\"1 3 1\". "
-     "Default values will be set to apply a hamming window."); 
-    */
+     "three coefficients for the input values).")
+    ;
  
   po::variables_map vm; 
- 
-  try 
-  { 
-    // Parse and store arguments into variable map.
-/*
-    po::store(po::command_line_parser(argc, argv).options(desc).run(), 
-	      vm); // throws on error
-*/
+  
+  // Parse and store arguments into variable map.
+  // Parse general options.
+  po::store(po::command_line_parser(argc, argv)
+	    .options(desc_general).run(), 
+	    vm); // throws on error
+
+  // Help option.
+  if ( vm.count("help") ) { 
+    std::cout << "This node implements a specified sensor fusion method." 
+	      << std::endl << std::endl 
+	      << "The method and its parameters can be passed as "
+	      << "arguments or in a configuration file. According to "
+	      << "these settings an estimation class is instantiated "
+	      << "which fuses the subscribed input value. With every "
+	      << "new input value the estimate is updated and published." 
+	      << std::endl << std::endl 
+	      << desc_general << std::endl
+	      << desc_sf << std::endl; 
+    vm.clear();
+    return vm; 
+  } 
+
+  // A configuration file provides the arguments?
+  if ( vm.count("configuration-file") ) {
+    // Parse sensor fusion options from configuration file.
+    std::string configFilepath = vm["configuration-file"].as< std::string >();
+    std::ifstream configFile;
+    configFile.open(configFilepath.c_str(), std::ios::in);
+    if (!configFile.is_open()) {
+      throw po::error("Cannot open configuration file.");
+    }
+
+    vm.clear();
+    po::store(po::parse_config_file(configFile, desc_sf), 
+	      vm);
+
+    po::notify(vm);	// throws on error, so do after help in case there
+			// are any problems
+  } else {
+    // Parse sensor fusion options from argument list.
     po::store(po::command_line_parser(argc, argv)
-	      .options(desc)
+	      .options(desc_sf)
 	      .style(po::command_line_style::allow_long | 
 		     po::command_line_style::long_allow_adjacent | 
 		     po::command_line_style::long_allow_next)
-	      .run(), vm);
+	      .run(), 
+	      vm);
 
-    // Help option.
-    if ( vm.count("help")  ) 
-    { 
-      std::cout << "This node implements a specified sensor fusion method." 
-		<< std::endl << std::endl 
-		<< "The method and its parameters can be passed as "
-		<< "arguments or in a configuration file. According to "
-		<< "these settings an estimation class is instantiated "
-		<< "which fuses the subscribed input value. With every "
-		<< "new input value the estimate is updated and published." 
-		<< std::endl << std::endl << desc << std::endl; 
-      return PRINTED_HELP; 
-    } 
- 
-    po::notify(vm); // throws on error, so do after help in case there
-		    // are any problems
-
-    *estimator = getEstimator(vm);	// throws on error
+    po::notify(vm);	// throws on error, so do after help in case there
+			// are any problems
   }
-  catch(po::error& e) 
-  { 
-    std::cerr << "ERROR: " << e.what()
-	      << std::endl << std::endl << desc << std::endl; 
-    return ERROR_IN_COMMAND_LINE; 
-  } 
 
-  return SUCCESS;
+  return vm;
 }
