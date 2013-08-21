@@ -50,18 +50,18 @@ estimation::IEstimationMethod* estimator;
  */
 void sampleReceived(const std_msgs::Float64::ConstPtr& msg)
 {
-    sample = *msg;
+  sample = *msg;
     
-    // Estimation
-    estimation::InputValue in(sample.data,0);
-    estimation::OutputValue out = estimator->estimate(in);
+  // Estimation
+  estimation::InputValue in(sample.data,0);
+  estimation::OutputValue out = estimator->estimate(in);
 
-    // Fill the message with data.
-    sampleFused.data = out.getValue();
+  // Fill the message with data.
+  sampleFused.data = out.getValue();
 
-    // Send message.
-    pub_signalFused.publish(sampleFused);
-    ROS_DEBUG("sample | sample-fused: %.2f | %.2f", sample.data, sampleFused.data);
+  // Send message.
+  pub_signalFused.publish(sampleFused);
+  ROS_DEBUG("sample | sample-fused: %.2f | %.2f", sample.data, sampleFused.data);
 }
 
 /**
@@ -156,6 +156,65 @@ int main(int argc, char **argv)
   return 0;
 }
 
+// ===================================================================
+// models and validators for multitoken options
+// ===================================================================
+
+// needed because multiple tokens cannot be parsed like arg = 1 2 3 in
+// the config file, with a custom validator arg = "1 2 3" and above
+// example should be possible
+
+/**
+ * Structure for validation of double tokens of a multitoken option.
+ *
+ * Use as option type for boost::program_options when multiple tokens
+ * should be allowed, e.g. coefficients. Needed because multitokens
+ * don't work out of the box with a configuration file, although they
+ * work when parsing from the console.
+ */
+struct multi_double {
+  std::vector<double> vector;
+};
+
+/**
+ * Validates double tokens of a multitoken option.
+ *
+ * Called by boost::program_options when converting the option
+ * arguments from string to specified types.
+ */
+void validate(boost::any& v, const std::vector<std::string>& values,
+	      multi_double* target_type, int) 
+{
+  multi_double md;
+
+  /*
+  std::cout << "----------" << std::endl
+	    << "| values: " << std::endl;
+  for (int i = 0; i < values.size(); i++)
+    std::cout << values[i] << std::endl;
+  std::cout << "----------" << std::endl;
+  */
+  if (values.size() == 0)
+    throw po::validation_error(po::validation_error::invalid_option_value);
+  else {
+    // Extract tokens from values (string vector) and populate multi_double.
+    for(std::vector<std::string>::const_iterator it = values.begin();
+	it != values.end();
+	it++) {
+      std::stringstream ss(*it);
+
+      copy(std::istream_iterator<double>(ss), std::istream_iterator<double>(),
+	   back_inserter(md.vector));
+
+      if(!ss.eof())
+	throw po::validation_error(po::validation_error::invalid_option_value);
+    }
+  }
+
+  v = md;
+}
+// ===================================================================
+
 /**
  * Checks the arguments for validity, i.e. if the right parameters for
  * the specified methods are set an estimator is returned.
@@ -217,7 +276,7 @@ estimation::IEstimationMethod* getEstimator(po::variables_map vm)
 
     if (vm.count("weighting-coefficients"))
     {
-      std::vector<double> wc = vm["weighting-coefficients"].as< std::vector<double> >();
+      std::vector<double> wc = vm["weighting-coefficients"].as< multi_double >().vector;
 
       // debug
       std::stringstream ss;
@@ -288,7 +347,7 @@ po::variables_map getArgumentMap(int argc, char** argv)
      "The number of data values to use for estimation. "
      "arg must be a positive integer. Default value is 3.") 
     ("weighting-coefficients", 
-     po::value< std::vector<double> >()->multitoken(), 
+     po::value<multi_double>()->multitoken(), 
      "The weighting coefficients for a moving filter. "
      "The number of coefficients must equal the 1x window size or 2x "
      "window size - 1, e.g. window-size=3, weighting-coefficients=\"1 3 1\" "
