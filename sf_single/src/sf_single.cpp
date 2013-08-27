@@ -38,15 +38,15 @@ estimation::IEstimationMethod* getEstimator(boost::program_options::variables_ma
 std_msgs::Float64 sample;
 std_msgs::Float64 sampleFused;
 
-/** Sample publisher (global because publishing is done in callback
-    function); */
+/** @brief Sample publisher (global because publishing is done in
+    callback function); */
 ros::Publisher pub_signalFused;
 
-/** Estimator, which does the filtering of a signal. */
+/** @brief Estimator, which does the filtering of a signal. */
 estimation::IEstimationMethod* estimator;
 
 /**
- * Called when a sample is received.
+ * @brief Called when a sample is received.
  */
 void sampleReceived(const std_msgs::Float64::ConstPtr& msg)
 {
@@ -65,7 +65,7 @@ void sampleReceived(const std_msgs::Float64::ConstPtr& msg)
 }
 
 /**
- * This node implements a specified sensor fusion method. 
+ * @brief This node implements a specified sensor fusion method.
  *
  * The method and its parameters can be passed as arguments or in a
  * configuration file. According to these settings an estimation class
@@ -165,7 +165,8 @@ int main(int argc, char **argv)
 // example should be possible
 
 /**
- * Structure for validation of double tokens of a multitoken option.
+ * @brief Structure for validation of double tokens of a multitoken
+ * option.
  *
  * Use as option type for boost::program_options when multiple tokens
  * should be allowed, e.g. coefficients. Needed because multitokens
@@ -177,7 +178,7 @@ struct multi_double {
 };
 
 /**
- * Validates double tokens of a multitoken option.
+ * @brief Validates double tokens of a multitoken option.
  *
  * Called by boost::program_options when converting the option
  * arguments from string to specified types.
@@ -216,8 +217,9 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 // ===================================================================
 
 /**
- * Checks the arguments for validity, i.e. if the right parameters for
- * the specified methods are set an estimator is returned.
+ * @brief Checks the arguments for validity, i.e. if the right
+ * parameters for the specified methods are set an estimator is
+ * returned.
  *
  * @param vm Variable map which holds the arguments.
  * @return An instance of the specified estimation method.
@@ -310,7 +312,7 @@ estimation::IEstimationMethod* getEstimator(po::variables_map vm)
 }
 
 /**
- * Collects the arguments into a map.
+ * @brief Collects the arguments into a map.
  *
  * @param argc The number of arguments given in the command line.
  * @param argv Pointer to the arguments.

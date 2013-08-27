@@ -16,17 +16,17 @@ namespace estimation
 {
 
   /** 
-   * Interface for all estimation algorithms.
+   * @brief Interface for all estimation algorithms.
    */
   class IEstimationMethod {
 
   public:
-    /** Destructor. */
+    /** @brief Destructor. */
     virtual ~IEstimationMethod () { };
 
     /** 
-     * Triggers an estimation cycle with new data and returns an
-     * estimate.
+     * @brief Triggers an estimation cycle with new data and returns
+     * an estimate.
      *
      * @param next The new data.
      */

@@ -19,29 +19,28 @@ namespace estimation
 
   class MovingMedian : public IEstimationMethod
   { 
-    /** Input data. */
+    /** @brief Input data. */
     std::deque<Input> in;
-    /** Result of an estimation, i.e. representation of an
+    /** @brief Result of an estimation, i.e. representation of an
      * estimate. */
     Output out;
 
-    /** The number of data values to use for estimation. */
+    /** @brief The number of data values to use for estimation. */
     unsigned int windowSize;
 
   public: 
     /**
-     * Constructor of this class.
-     *
+     * @brief Constructor of this class.
      */
     MovingMedian ();
 
     /**
-     * Destructor of this class.
+     * @brief Destructor of this class.
      */
     ~MovingMedian ();
 
     /** 
-     * Sets the window size.
+     * @brief Sets the window size.
      *
      * @param windowSize Number of input values used for estimation,
      * i.e. length of moving window over the data stream (input
@@ -50,12 +49,13 @@ namespace estimation
     void setWindowSize (unsigned int windowSize);
 
     /**
-     * Returns an estimate calculated with the given new data value.
+     * @brief Returns an estimate calculated with the given new data
+     * value.
      */
     Output estimate (Input next);
 
     /**
-     * Returns the last estimated value.
+     * @brief Returns the last estimated value.
      */
     Output getLastEstimate (void);
   };

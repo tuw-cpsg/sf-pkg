@@ -39,40 +39,42 @@ namespace estimation
    */
   class MovingAverage : public IEstimationMethod
   { 
-    /** Array of input data. Corresponds to x[n-windowSize]..x[n]. */
+    /** @brief Array of input data. Corresponds to
+     * x[n-windowSize]..x[n]. */
     std::deque<Input> in;
 
-    /** Array of output data. Corresponds to y[n-windowSize]..y[n]. */
+    /** @brief Array of output data. Corresponds to
+     * y[n-windowSize]..y[n]. */
     std::deque<Output> out;
 
-    /** True if there is an a-coefficient != 0, i.e. filter is in
-     * "autoregressive mode". */
+    /** @brief True if there is an a-coefficient != 0, i.e. filter is
+     * in "autoregressive mode". */
     bool isIIR;
 
     // -----------------------------------------
     // parameters
     // -----------------------------------------
-    /** The number of data values to use for estimation. */
+    /** @brief The number of data values to use for estimation. */
     unsigned int windowSize;
 
-    /** Array of weighting coefficients b_k. Size of array =
+    /** @brief Array of weighting coefficients b_k. Size of array =
      * windowSize. Used to weight the input values to estimate the
      * output. Default: hamming window values. **/
     double *b;
 
-    /** Array of weighting coefficients a_k. Size of array =
+    /** @brief Array of weighting coefficients a_k. Size of array =
      * windowSize-1. Used in IIR mode, i.e. also output values are
      * weighted. Default: all zero -> FIR. **/
     double *a;
 
   public: 
     /**
-     * Constructor of this class.
+     * @brief Constructor of this class.
      */
     MovingAverage ();
 
     /**
-     * Destructor of this class.
+     * @brief Destructor of this class.
      */
     ~MovingAverage ();
 
@@ -80,14 +82,14 @@ namespace estimation
     // getters and setters
     // -----------------------------------------
     /** 
-     * Returns the window size.
+     * @brief Returns the window size.
      *
      * @return Window size.
      */
     unsigned int getWindowSize (void);
 
     /** 
-     * Sets the window size.
+     * @brief Sets the window size.
      *
      * @param windowSize Number of input values used for estimation,
      * i.e. length of moving window over the data stream (input
@@ -96,7 +98,7 @@ namespace estimation
     void setWindowSize (unsigned int windowSize);
 
     /** 
-     * Sets the weighting coefficients for the input (b_k).
+     * @brief Sets the weighting coefficients for the input (b_k).
      *
      * @param b Array of weighting coefficients for input. Size of
      * array #size must equal the window size.
@@ -104,7 +106,7 @@ namespace estimation
     void setWeightingCoefficientsIn (double *b, unsigned int size);
 
     /** 
-     * Sets the weighting coefficients for the output (a_k).
+     * @brief Sets the weighting coefficients for the output (a_k).
      *
      * @param a Array of weighting coefficients for output. Size of
      * array #size must equal the window size.
@@ -115,18 +117,19 @@ namespace estimation
     // IEstimationMethod implementation
     // -----------------------------------------
     /**
-     * Returns an estimate calculated with the given new data value.
+     * @brief Returns an estimate calculated with the given new data
+     * value.
      */
     Output estimate (Input next);
 
     /**
-     * Returns the last estimated value.
+     * @brief Returns the last estimated value.
      */
     Output getLastEstimate (void);
 
   private:
     /**
-     * Returns the normalization factor for the weighting
+     * @brief Returns the normalization factor for the weighting
      * coefficients.
      *
      * @param coefficients The array of coefficients.
@@ -136,8 +139,8 @@ namespace estimation
     double getNormalizationFactor(const double *coefficients, unsigned int size);
 
     /**
-     * Creates and initializes the weighting coefficients with default
-     * values.
+     * @brief Creates and initializes the weighting coefficients with
+     * default values.
      */
     void createAndInitCoefficientsWithDefaults(void);
   };

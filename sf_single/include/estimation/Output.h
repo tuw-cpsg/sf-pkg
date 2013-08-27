@@ -26,7 +26,7 @@ namespace estimation
    */
   class Output
   { 
-    /** Stores the data of entities. */
+    /** @brief Stores the data of entities. */
     std::vector<OutputValue> data;
 
   public:
