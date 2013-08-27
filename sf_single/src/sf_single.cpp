@@ -54,7 +54,7 @@ void sampleReceived(const std_msgs::Float64::ConstPtr& msg)
     
   // Estimation
   estimation::Input in(estimation::InputValue(sample.data));
-  estimation::OutputValue out = estimator->estimate(in);
+  estimation::Output out = estimator->estimate(in);
 
   // Fill the message with data.
   sampleFused.data = out.getValue();

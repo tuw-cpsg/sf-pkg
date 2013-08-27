@@ -32,10 +32,10 @@ namespace estimation
 
   public: 
     /**
-     * Basic constructor.
+     * Basic constructor which initializes the member with defaults.
      *
-     * This constructor is only to create arrays of OutputValue without
-     * initializing.
+     * \c value and \c variance are initialized with -1. The \c
+     * jitter_ms is set to 0.
      */
     OutputValue(void);
 
@@ -98,6 +98,55 @@ namespace estimation
      * @param The jitter in ms.
      */
     void setJitter(unsigned int jitter_ms);
+
+    // -----------------------------------------
+    // overloading operators
+    // -----------------------------------------
+    /**
+     * Swaps the data of two elements.
+     */
+    void swap(OutputValue& first, OutputValue& second);
+
+    /**
+     * Overloads the assign operator.
+     */
+    OutputValue& operator=(OutputValue right);
+
+    /**
+     * Overloads the == (equal) operator (compares the value member,
+     * the variance is not taken into account!).
+     */
+    bool operator==(const OutputValue& rhs) const;
+
+    /**
+     * Overloads the != (not-equal) operator (compares the value
+     * member, the variance is not taken into account!).
+     */
+    bool operator!=(const OutputValue& rhs) const;
+
+    /**
+     * Overloads the < (less-than) operator (compares the value
+     * member, the variance is not taken into account!).
+     */
+    bool operator<(const OutputValue& rhs) const;
+
+    /**
+     * Overloads the > (greater-than) operator (compares the value
+     * member, the variance is not taken into account!).
+     */
+    bool operator>(const OutputValue& rhs) const;
+
+    /**
+     * Overloads the <= (less-or-equal) operator (compares the value
+     * member, the variance is not taken into account!).
+     */
+    bool operator<=(const OutputValue& rhs) const;
+
+    /**
+     * Overloads the >= (greater-or-equal) operator (compares the
+     * value member, the variance is not taken into account!).
+     */
+    bool operator>=(const OutputValue& rhs) const;
   };
 
 }

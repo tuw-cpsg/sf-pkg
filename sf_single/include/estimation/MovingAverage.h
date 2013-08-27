@@ -43,7 +43,7 @@ namespace estimation
     std::deque<Input> in;
 
     /** Array of output data. Corresponds to y[n-windowSize]..y[n]. */
-    std::deque<OutputValue> out;
+    std::deque<Output> out;
 
     /** True if there is an a-coefficient != 0, i.e. filter is in
      * "autoregressive mode". */
@@ -117,12 +117,12 @@ namespace estimation
     /**
      * Returns an estimate calculated with the given new data value.
      */
-    OutputValue estimate (Input next);
+    Output estimate (Input next);
 
     /**
      * Returns the last estimated value.
      */
-    OutputValue getLastEstimate (void);
+    Output getLastEstimate (void);
 
   private:
     /**

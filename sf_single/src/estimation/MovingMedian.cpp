@@ -13,6 +13,7 @@ namespace estimation
 {
 
   MovingMedian::MovingMedian ()
+    : out(estimation::OutputValue())
   {
     // set parameters to default values
     windowSize = 3;
@@ -35,7 +36,7 @@ namespace estimation
   // -----------------------------------------
   // IEstimationMethod implementation
   // -----------------------------------------
-  OutputValue MovingMedian::estimate (Input next)
+  Output MovingMedian::estimate (Input next)
   {
     // push the data into the queue
     in.push_back(next);
@@ -51,10 +52,11 @@ namespace estimation
       // sort array
       std::sort(values, values+windowSize);
 
-      // get median of array
-      out.setValue(values[windowSize/2].getValue());
-      out.setVariance(0);
-      out.setJitter(values[windowSize/2].getJitter());
+      // get median of array and create output value, the estimate
+      OutputValue estimate(values[windowSize/2].getValue(),
+			   0,
+			   values[windowSize/2].getJitter());
+      out.setOutputValue(estimate);
 
       // delete oldest element for the next estimation
       in.pop_front();
@@ -64,7 +66,7 @@ namespace estimation
     return out;
   }
 
-  OutputValue MovingMedian::getLastEstimate(void) 
+  Output MovingMedian::getLastEstimate(void) 
   {
     return out;
   }

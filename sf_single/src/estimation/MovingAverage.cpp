@@ -79,7 +79,7 @@ namespace estimation
   // -----------------------------------------
   // IEstimationMethod implementation
   // -----------------------------------------
-  OutputValue MovingAverage::estimate (Input next)
+  Output MovingAverage::estimate (Input next)
   {
     // push the data into the queue
     in.push_front(next);
@@ -99,28 +99,26 @@ namespace estimation
 	y /= 2;
 
       // prepare output value (new estimate)
-      OutputValue outY;
-      outY.setValue(y);
-      outY.setVariance(0);
-      outY.setJitter(in.front().getInputValue().getJitter());
-      out.push_front(outY);
+      OutputValue estimate(y,
+			   0,
+			   in.front().getInputValue().getJitter());
+      out.push_front(Output(estimate));
 
       // delete oldest element for the next estimation
       in.pop_back();
       out.pop_back();
     } else {
-      // set output = input for the first #window-size elements
-      OutputValue nextOut;
-      nextOut.setValue(next.getValue());
-      nextOut.setVariance(0);
-      nextOut.setJitter(next.getInputValue().getJitter());
-      out.push_front(nextOut);
+      // set output, here: = input for the first #window-size elements
+      OutputValue nextOut(next.getValue(),
+			  0,
+			  next.getInputValue().getJitter());
+      out.push_front(Output(nextOut));
     }
     
     return out.front();
   }
 
-  OutputValue MovingAverage::getLastEstimate(void) 
+  Output MovingAverage::getLastEstimate(void) 
   {
     return out.front();
   }

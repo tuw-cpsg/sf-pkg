@@ -23,7 +23,7 @@ namespace estimation
     std::deque<Input> in;
     /** Result of an estimation, i.e. representation of an
      * estimate. */
-    OutputValue out;
+    Output out;
 
     /** The number of data values to use for estimation. */
     unsigned int windowSize;
@@ -52,12 +52,12 @@ namespace estimation
     /**
      * Returns an estimate calculated with the given new data value.
      */
-    OutputValue estimate (Input next);
+    Output estimate (Input next);
 
     /**
      * Returns the last estimated value.
      */
-    OutputValue getLastEstimate (void);
+    Output getLastEstimate (void);
   };
 
 }

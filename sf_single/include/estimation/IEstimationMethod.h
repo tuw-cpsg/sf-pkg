@@ -10,7 +10,7 @@
 #define ESTIMATION_IESTIMATIONMETHOD_H
 
 #include "estimation/Input.h"
-#include "estimation/OutputValue.h"
+#include "estimation/Output.h"
 
 namespace estimation 
 {
@@ -30,7 +30,7 @@ namespace estimation
      *
      * @param next The new data.
      */
-    virtual OutputValue estimate (Input next) = 0;
+    virtual Output estimate (Input next) = 0;
   };
 
 }

@@ -8,13 +8,18 @@
  */
 
 #include "estimation/OutputValue.h"
+#include <algorithm>
 
 namespace estimation 
 {
 
   OutputValue::OutputValue(void)
   {
-    // nothing to do
+    // init with defaults
+    this->value = -1;
+    this->variance = -1;
+    this->jitter_ms = 0;
+    this->t_creation = clock();
   }
 
   OutputValue::OutputValue(double value, double variance, unsigned int jitter_ms)
@@ -64,6 +69,58 @@ namespace estimation
     // defined.
     this->t_creation = clock();
     this->jitter_ms = jitter_ms;
+  }
+
+  // -----------------------------------------
+  // overloading operators
+  // -----------------------------------------
+  void OutputValue::swap(OutputValue& first, OutputValue& second) // nothrow
+  {
+    // enable ADL (not necessary in our case, but good practice)
+    using std::swap; 
+
+    // by swapping the members of two classes,
+    // the two classes are effectively swapped
+    swap(first.value, second.value); 
+    swap(first.variance, second.variance); 
+    swap(first.jitter_ms, second.jitter_ms);
+    swap(first.t_creation, second.t_creation);
+  }
+
+  OutputValue& OutputValue::operator=(OutputValue right)
+  {
+    swap(*this, right);
+    return *this;
+  }
+
+  bool OutputValue::operator==(const OutputValue& rhs) const 
+  { 
+    return (*this).value == rhs.value; 
+  }
+
+  bool OutputValue::operator!=(const OutputValue& rhs) const 
+  { 
+    return !(*this).operator==(rhs);
+  }
+
+  bool OutputValue::operator<(const OutputValue& rhs) const 
+  { 
+    return (*this).value < rhs.value; 
+  }
+
+  bool OutputValue::operator>(const OutputValue& rhs) const 
+  { 
+    return rhs.operator<(*this); 
+  }
+
+  bool OutputValue::operator<=(const OutputValue& rhs) const 
+  { 
+    return !(*this).operator>(rhs); 
+  }
+
+  bool OutputValue::operator>=(const OutputValue& rhs) const 
+  { 
+    return !(*this).operator<(rhs); 
   }
 }
 
