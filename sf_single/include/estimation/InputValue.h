@@ -3,7 +3,7 @@
  * @author Denise Ratasich
  * @date 24.07.2013
  *
- * @brief Header file of the input value of an estimation algorithm.
+ * @brief Header file of an input value of an estimation algorithm.
  */
 
 #ifndef ESTIMATION_INPUTVALUE_H
@@ -32,10 +32,19 @@ namespace estimation
     /**
      * Basic constructor.
      *
-     * This constructor is only to create arrays of InputValue without
-     * initializing.
+     * This constructor initializes the members with default
+     * values. The default values are -1 for the value, 0 for the
+     * jitter.
      */
     InputValue(void);
+
+    /**
+     * Constructor of this class which can be used when the jitter
+     * isn't known (the jitter will be set to 0).
+     *
+     * @param value A data value of an entity.
+     */
+    InputValue(double value);
 
     /**
      * Constructor of this class which should be used to create a new

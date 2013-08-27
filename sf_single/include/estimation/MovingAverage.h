@@ -10,6 +10,7 @@
 #define __ESTIMATION_MOVING_AVERAGE_H__
 
 #include "estimation/IEstimationMethod.h"
+#include "estimation/Input.h"
 #include "estimation/InputValue.h"
 #include "estimation/OutputValue.h"
 #include <deque>
@@ -39,7 +40,7 @@ namespace estimation
   class MovingAverage : public IEstimationMethod
   { 
     /** Array of input data. Corresponds to x[n-windowSize]..x[n]. */
-    std::deque<InputValue> in;
+    std::deque<Input> in;
 
     /** Array of output data. Corresponds to y[n-windowSize]..y[n]. */
     std::deque<OutputValue> out;
@@ -116,7 +117,7 @@ namespace estimation
     /**
      * Returns an estimate calculated with the given new data value.
      */
-    OutputValue estimate (InputValue next);
+    OutputValue estimate (Input next);
 
     /**
      * Returns the last estimated value.

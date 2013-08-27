@@ -10,11 +10,13 @@ find_package(Boost REQUIRED COMPONENTS program_options system filesystem)
 ## Declare the estimation library
 add_library(estimation
   src/estimation/InputValue.cpp
+  src/estimation/Input.cpp
   src/estimation/OutputValue.cpp
   src/estimation/MovingMedian.cpp
   src/estimation/MovingAverage.cpp
 
   include/estimation/InputValue.h
+  include/estimation/Input.h
   include/estimation/OutputValue.h
   include/estimation/IEstimationMethod.h
   include/estimation/methods.h

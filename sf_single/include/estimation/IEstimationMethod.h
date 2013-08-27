@@ -9,7 +9,7 @@
 #ifndef ESTIMATION_IESTIMATIONMETHOD_H
 #define ESTIMATION_IESTIMATIONMETHOD_H
 
-#include "estimation/InputValue.h"
+#include "estimation/Input.h"
 #include "estimation/OutputValue.h"
 
 namespace estimation 
@@ -25,12 +25,12 @@ namespace estimation
     virtual ~IEstimationMethod () { };
 
     /** 
-     * Triggers an estimation cycle with the new data value and
-     * returns an estimate.
+     * Triggers an estimation cycle with new data and returns an
+     * estimate.
      *
-     * @param next The new data value.
+     * @param next The new data.
      */
-    virtual OutputValue estimate (InputValue next) = 0;
+    virtual OutputValue estimate (Input next) = 0;
   };
 
 }

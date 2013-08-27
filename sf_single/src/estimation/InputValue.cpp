@@ -3,8 +3,7 @@
  * @author Denise Ratasich
  * @date 24.07.2013
  *
- * @brief Implementation of the input value of an estimation
- * algorithm.
+ * @brief Implementation of an input value of an estimation algorithm.
  */
 
 #include "estimation/InputValue.h"
@@ -14,7 +13,17 @@ namespace estimation
 {
   InputValue::InputValue(void)
   {
-    // nothing to do
+    // set to defaults
+    this->value = -1;
+    this->jitter_ms = 0;
+    this->t_creation = clock();
+  }
+
+  InputValue::InputValue(double value)
+  {
+    this->value = value;
+    this->jitter_ms = 0;
+    this->t_creation = clock();
   }
 
   InputValue::InputValue(double value, unsigned int jitter_ms)
@@ -62,6 +71,7 @@ namespace estimation
     // the two classes are effectively swapped
     swap(first.value, second.value); 
     swap(first.jitter_ms, second.jitter_ms);
+    swap(first.t_creation, second.t_creation);
   }
 
   InputValue& InputValue::operator=(InputValue right)

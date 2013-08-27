@@ -20,7 +20,7 @@ namespace estimation
   class MovingMedian : public IEstimationMethod
   { 
     /** Input data. */
-    std::deque<InputValue> in;
+    std::deque<Input> in;
     /** Result of an estimation, i.e. representation of an
      * estimate. */
     OutputValue out;
@@ -52,7 +52,7 @@ namespace estimation
     /**
      * Returns an estimate calculated with the given new data value.
      */
-    OutputValue estimate (InputValue next);
+    OutputValue estimate (Input next);
 
     /**
      * Returns the last estimated value.

@@ -23,6 +23,7 @@ namespace po = boost::program_options;
 
 // estimation framework includes
 #include "estimation/IEstimationMethod.h"
+#include "estimation/Input.h"
 #include "estimation/InputValue.h"
 #include "estimation/OutputValue.h"
 #include "estimation/methods.h"
@@ -32,7 +33,6 @@ namespace po = boost::program_options;
 // Forward declarations.
 po::variables_map getArgumentMap(int argc, char** argv);
 estimation::IEstimationMethod* getEstimator(boost::program_options::variables_map vm);
-int createAndInitEstimator(int argc, char** argv, estimation::IEstimationMethod** estimator);
 
 // Message objects.
 std_msgs::Float64 sample;
@@ -53,7 +53,7 @@ void sampleReceived(const std_msgs::Float64::ConstPtr& msg)
   sample = *msg;
     
   // Estimation
-  estimation::InputValue in(sample.data,0);
+  estimation::Input in(estimation::InputValue(sample.data));
   estimation::OutputValue out = estimator->estimate(in);
 
   // Fill the message with data.

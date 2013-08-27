@@ -8,6 +8,7 @@
  */
 
 #include "estimation/MovingAverage.h"
+#include <stdexcept>
 
 namespace estimation 
 {
@@ -49,7 +50,7 @@ namespace estimation
   void MovingAverage::setWeightingCoefficientsIn (double *b, unsigned int size)
   {
     if (size != windowSize)
-      return;		// TODO replace with throw exception
+      throw std::length_error("Invalid array size (coefficients b).");
     
     // get normalization factor for weighting coefficients
     double norm = getNormalizationFactor((const double *) b, windowSize);
@@ -62,7 +63,7 @@ namespace estimation
   void MovingAverage::setWeightingCoefficientsOut (double *a, unsigned int size)
   {
     if (size != windowSize)
-      return;		// TODO replace with throw exception
+      throw std::length_error("Invalid array size (coefficients a).");
 
     // get normalization factor for weighting coefficients
     double norm = getNormalizationFactor((const double *) a, windowSize-1);
@@ -78,7 +79,7 @@ namespace estimation
   // -----------------------------------------
   // IEstimationMethod implementation
   // -----------------------------------------
-  OutputValue MovingAverage::estimate (InputValue next)
+  OutputValue MovingAverage::estimate (Input next)
   {
     // push the data into the queue
     in.push_front(next);
@@ -101,7 +102,7 @@ namespace estimation
       OutputValue outY;
       outY.setValue(y);
       outY.setVariance(0);
-      outY.setJitter(in.front().getJitter());
+      outY.setJitter(in.front().getInputValue().getJitter());
       out.push_front(outY);
 
       // delete oldest element for the next estimation
@@ -112,7 +113,7 @@ namespace estimation
       OutputValue nextOut;
       nextOut.setValue(next.getValue());
       nextOut.setVariance(0);
-      nextOut.setJitter(next.getJitter());
+      nextOut.setJitter(next.getInputValue().getJitter());
       out.push_front(nextOut);
     }
     

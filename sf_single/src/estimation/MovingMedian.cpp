@@ -35,7 +35,7 @@ namespace estimation
   // -----------------------------------------
   // IEstimationMethod implementation
   // -----------------------------------------
-  OutputValue MovingMedian::estimate (InputValue next)
+  OutputValue MovingMedian::estimate (Input next)
   {
     // push the data into the queue
     in.push_back(next);
@@ -46,7 +46,7 @@ namespace estimation
       // copy data into an array for sorting
       InputValue* values = new InputValue[windowSize];
       for (int i = 0; i < windowSize; i++)
-	values[i] = in[i];		
+	values[i] = in[i].getInputValue();
 
       // sort array
       std::sort(values, values+windowSize);
