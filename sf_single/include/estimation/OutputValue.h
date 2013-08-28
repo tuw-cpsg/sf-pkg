@@ -59,20 +59,20 @@ namespace estimation
      *
      * @return The data value.
      */
-    double getValue(void);
+    double getValue(void) const;
 
     /**
      * @brief Returns the variance (maximum deviation around the value).
      *
      * @return The variance.
      */
-    double getVariance(void);
+    double getVariance(void) const;
 
     /**
      * @brief Returns the jitter in ms between measuring and this function
      * call.
      */
-    unsigned int getJitter(void);
+    unsigned int getJitter(void) const;
 
     /**
      * @brief Sets the value.

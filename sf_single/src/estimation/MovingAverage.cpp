@@ -101,17 +101,18 @@ namespace estimation
       // prepare output value (new estimate)
       OutputValue estimate(y,
 			   0,
-			   in.front().getInputValue().getJitter());
+			   in.front()[0].getJitter());
       out.push_front(Output(estimate));
 
       // delete oldest element for the next estimation
       in.pop_back();
       out.pop_back();
     } else {
-      // set output, here: = input for the first #window-size elements
-      OutputValue nextOut(next.getValue(),
+      // for the first #window-size elements do: set output as output
+      // with single entity (OutputValue nextOut) = input (InputValue next)
+      OutputValue nextOut(next[0].getValue(),
 			  0,
-			  next.getInputValue().getJitter());
+			  next[0].getJitter());
       out.push_front(Output(nextOut));
     }
     

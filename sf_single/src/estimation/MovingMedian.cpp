@@ -13,10 +13,14 @@ namespace estimation
 {
 
   MovingMedian::MovingMedian ()
-    : out(estimation::OutputValue())
   {
     // set parameters to default values
     windowSize = 3;
+
+    // Add a default entity to the output interface. The members of
+    // this default output entity will be changed instead of always
+    // creating a new \c OutputValue.
+    out.add(OutputValue());
   }
 
   MovingMedian::~MovingMedian () 
@@ -44,23 +48,21 @@ namespace estimation
     // check if queue has enough elements to estimate the median with
     // the specified windowSize
     if (in.size() >= windowSize) {
-      // copy data into an array for sorting
-      InputValue* values = new InputValue[windowSize];
+      // get data for sorting 
+      std::vector<InputValue> values(windowSize);
       for (int i = 0; i < windowSize; i++)
-	values[i] = in[i].getInputValue();
+	values[i] = in[i].getValue();
 
       // sort array
-      std::sort(values, values+windowSize);
+      std::sort(values.begin(), values.end());
 
-      // get median of array and create output value, the estimate
-      OutputValue estimate(values[windowSize/2].getValue(),
-			   0,
-			   values[windowSize/2].getJitter());
-      out.setOutputValue(estimate);
+      // get median of array and set new values
+      out[0].setValue(values[windowSize/2].getValue());
+      out[0].setVariance(0);
+      out[0].setJitter(values[windowSize/2].getJitter());
 
       // delete oldest element for the next estimation
       in.pop_front();
-      delete[] values;
     }
     
     return out;

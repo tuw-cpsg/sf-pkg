@@ -65,13 +65,13 @@ namespace estimation
      *
      * @return The data value.
      */
-    double getValue(void);
+    double getValue(void) const;
 
     /**
      * @brief Returns the jitter in ms between sensing and this
      * function call.
      */
-    unsigned int getJitter(void);
+    unsigned int getJitter(void) const;
 
     /**
      * @brief Sets the value.

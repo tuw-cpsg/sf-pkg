@@ -10,13 +10,22 @@
 #define __ESTIMATION_MOVING_MEDIAN_H__
 
 #include "estimation/IEstimationMethod.h"
-#include "estimation/InputValue.h"
-#include "estimation/OutputValue.h"
+#include "estimation/Input.h"
+#include "estimation/Output.h"
 #include <deque>
 
 namespace estimation 
 {
-
+  /**
+   * @brief Moving Median Filter.
+   *
+   * Estimation is done by sorting the last N elements and take the
+   * median of it. 
+   *
+   * Use this filter for sample ...
+   * - where very large deviations (outliers) can occur.
+   * - which are Laplace distributed.
+   */
   class MovingMedian : public IEstimationMethod
   { 
     /** @brief Input data. */
@@ -25,6 +34,9 @@ namespace estimation
      * estimate. */
     Output out;
 
+    // -----------------------------------------
+    // parameters
+    // -----------------------------------------
     /** @brief The number of data values to use for estimation. */
     unsigned int windowSize;
 

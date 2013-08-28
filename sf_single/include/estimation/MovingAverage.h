@@ -11,8 +11,7 @@
 
 #include "estimation/IEstimationMethod.h"
 #include "estimation/Input.h"
-#include "estimation/InputValue.h"
-#include "estimation/OutputValue.h"
+#include "estimation/Output.h"
 #include <deque>
 
 namespace estimation 

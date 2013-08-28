@@ -33,17 +33,17 @@ namespace estimation
   // -----------------------------------------
   // getters and setters
   // -----------------------------------------
-  double OutputValue::getValue(void)
+  double OutputValue::getValue(void) const
   {
     return value;
   }
 
-  double OutputValue::getVariance(void)
+  double OutputValue::getVariance(void) const
   {
     return variance;
   }
 
-  unsigned int OutputValue::getJitter(void)
+  unsigned int OutputValue::getJitter(void) const
   {
     unsigned int curLifetime_ms;
     curLifetime_ms = float(clock() - t_creation)*1000/CLOCKS_PER_SEC;

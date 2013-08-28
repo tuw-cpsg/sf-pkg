@@ -16,6 +16,7 @@ add_library(estimation
   src/estimation/MovingMedian.cpp
   src/estimation/MovingAverage.cpp
 
+  include/estimation/EstimationMethodInterface.h
   include/estimation/InputValue.h
   include/estimation/Input.h
   include/estimation/OutputValue.h
