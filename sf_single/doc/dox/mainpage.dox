@@ -1,0 +1,19 @@
+/** 
+\mainpage Documentation
+
+\section intro_sec Introduction
+
+List of estimation methods:
+- \subpage movingaverage
+- \subpage movingmedian
+- \subpage kalmanfilter
+
+\section install_sec Installation
+
+TODO
+
+\section usage_sec Usage
+
+TODO
+	
+*/	

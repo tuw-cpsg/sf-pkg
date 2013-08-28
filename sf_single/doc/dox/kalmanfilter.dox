@@ -1,0 +1,43 @@
+/** 
+\page kalmanfilter Kalman Filter
+
+\section Introduction 
+
+For more details see \cite Wel06 and \cite Gre08.
+
+A Kalman filter uses the physical model of a system (the plant) to
+estimate the new value of a statistical variable. For this problem the
+system is described by a difference equation (state space model; this
+notation is used for estimation and control systems). The following
+formula, called state transition model or process model describes this
+system or discrete-time controlled process:
+
+\f[ x_k = Ax_{k-1} + Bu_{k-1} + w_{k-1} \f]
+
+- \f$x_k\f$ state vector on current step k (includes \f$n\f$ state
+  variables of the dynamic system)
+- A system or transition matrix which relates previous state to
+  current state
+- u control input (optional)
+- B input matrix which relates the control input u to the state x
+- w random variable whichrepresents the process noise
+
+The measurement model describes the relation of the state and
+the measurements:
+
+\f[ z_k = Hx_k + v_k \f]
+
+- z measurement vector (sometimes also called the innovation vector)
+- H output or observation matrix relates state x to measurement z
+  (also called measurement sensitivity matrix)
+- v random variable which represents the measurement noise
+
+There are several assumptions which are made in practice. The noise in
+process and measurement model are white, have normal probability
+distributions with process noise covariance Q and measurement noise
+covariance R and are independent from each other.
+
+\f[ p(w) \sim N(0,Q) \f]
+\f[ p(v) \sim N(0,R) \f]
+
+*/
