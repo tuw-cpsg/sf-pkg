@@ -6,6 +6,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp std_msgs)
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS program_options system filesystem)
+find_package(Eigen REQUIRED)
 
 ## Declare the estimation library
 add_library(estimation
@@ -15,6 +16,7 @@ add_library(estimation
   src/estimation/Output.cpp
   src/estimation/MovingMedian.cpp
   src/estimation/MovingAverage.cpp
+  src/estimation/KalmanFilter.cpp
 
   include/estimation/EstimationMethodInterface.h
   include/estimation/InputValue.h
@@ -25,6 +27,7 @@ add_library(estimation
   include/estimation/methods.h
   include/estimation/MovingMedian.h
   include/estimation/MovingAverage.h
+  include/estimation/KalmanFilter.h
   )
 # find_library(estimation 
 #   NAMES estimation libestimation #name
@@ -65,7 +68,7 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES estimation
 #  CATKIN_DEPENDS other_catkin_pkg
-  DEPENDS Boost
+  DEPENDS Boost Eigen
 )
 
 ###########
@@ -77,6 +80,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS} 
   ${Boost_INCLUDE_DIRS}
+  ${Eigen_INCLUDE_DIRS}
   )
 
 ## cpp executables and libs

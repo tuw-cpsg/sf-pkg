@@ -6,10 +6,11 @@
  * @brief Collects all estimation method header files.
  */
 
-#ifndef ESTIMATION_METHODS_H
-#define ESTIMATION_METHODS_H
+#ifndef __ESTIMATION_METHODS_H__
+#define __ESTIMATION_METHODS_H__
 
 #include "estimation/MovingMedian.h"
 #include "estimation/MovingAverage.h"
+#include "estimation/KalmanFilter.h"
 
 #endif

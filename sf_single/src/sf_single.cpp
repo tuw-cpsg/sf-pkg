@@ -13,13 +13,14 @@
 #include <sstream>
 #include <string>
 
-#include "boost/program_options.hpp"
-#include "boost/filesystem.hpp" 
+#include <boost/program_options.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/tokenizer.hpp>
 namespace po = boost::program_options; 
 
 // ROS includes
-#include "ros/ros.h"
-#include "std_msgs/Float64.h"
+#include <ros/ros.h>
+#include <std_msgs/Float64.h>
 
 // estimation framework includes
 #include "estimation/IEstimationMethod.h"
@@ -32,7 +33,7 @@ namespace po = boost::program_options;
 
 // Forward declarations.
 po::variables_map getArgumentMap(int argc, char** argv);
-estimation::IEstimationMethod* getEstimator(boost::program_options::variables_map vm);
+estimation::IEstimationMethod* getEstimator(po::variables_map vm);
 
 // Message objects.
 std_msgs::Float64 sample;
@@ -118,24 +119,6 @@ int main(int argc, char **argv)
     // Check repeatedly whether there are samples to estimate.
     ros::spin();	// blocking (until roscore sends "kill")
 
-    /*
-    // for testing: create a "noisy signal", pass it to an estimator
-    // and print the results ("x y \n" for gnuplot)
-    std::string line;
-    while (std::getline(std::cin, line))
-    {
-      double x;
-
-      std::stringstream ss(line);
-      ss >> x;
-      
-      estimation::InputValue in(x,0);
-      estimation::OutputValue out = estimator->estimate(in);
-      
-      std::cout << out.getValue() << std::endl;
-    }
-    */
-
     // --------------------------------------------
     // Clean up.
     // --------------------------------------------
@@ -160,45 +143,57 @@ int main(int argc, char **argv)
 // models and validators for multitoken options
 // ===================================================================
 
-// needed because multiple tokens cannot be parsed like arg = 1 2 3 in
+// Needed because multiple tokens cannot be parsed like arg = 1 2 3 in
 // the config file, with a custom validator arg = "1 2 3" and above
-// example should be possible
+// example should be possible. Additionally a method to distinguish
+// between vectors and matrices should be possible.
+// 
+// Vector syntax:
+// 1 2 3 4
+//
+// Matrix syntax (2x2 example):
+// 1 2, 3 4
 
 /**
- * @brief Structure for validation of double tokens of a multitoken
- * option.
+ * @brief Structure for validating options with a vector argument.
  *
  * Use as option type for boost::program_options when multiple tokens
  * should be allowed, e.g. coefficients. Needed because multitokens
  * don't work out of the box with a configuration file, although they
  * work when parsing from the console.
  */
-struct multi_double {
+struct vector_d {
   std::vector<double> vector;
 };
 
 /**
- * @brief Validates double tokens of a multitoken option.
+ * @brief Structure for validating options with a matrix argument.
+ *
+ * Use as option type for boost::program_options when a matrix should
+ * be entered as an argument, e.g. state transition model for a Kalman
+ * filter. Needed because multitokens don't work out of the box with a
+ * configuration file and we have to distinguish between vectors and
+ * matrices.
+ */
+struct matrix_d {
+  std::vector< std::vector<double> > rows;
+};
+
+/**
+ * @brief Validates a vector of doubles of a multitoken option.
  *
  * Called by boost::program_options when converting the option
  * arguments from string to specified types.
  */
 void validate(boost::any& v, const std::vector<std::string>& values,
-	      multi_double* target_type, int) 
+	      vector_d* target_type, int) 
 {
-  multi_double md;
-
-  /*
-  std::cout << "----------" << std::endl
-	    << "| values: " << std::endl;
-  for (int i = 0; i < values.size(); i++)
-    std::cout << values[i] << std::endl;
-  std::cout << "----------" << std::endl;
-  */
+  vector_d md;
+  
   if (values.size() == 0)
     throw po::validation_error(po::validation_error::invalid_option_value);
   else {
-    // Extract tokens from values (string vector) and populate multi_double.
+    // Extract tokens from values (string vector) and populate vector_d.
     for(std::vector<std::string>::const_iterator it = values.begin();
 	it != values.end();
 	it++) {
@@ -209,6 +204,55 @@ void validate(boost::any& v, const std::vector<std::string>& values,
 
       if(!ss.eof())
 	throw po::validation_error(po::validation_error::invalid_option_value);
+    }
+  }
+
+  v = md;
+}
+
+/**
+ * @brief Validates a matrix of doubles of a multitoken option.
+ *
+ * Called by boost::program_options when converting the option
+ * arguments from string to specified types.
+ */
+void validate(boost::any& v, const std::vector<std::string>& values,
+	      matrix_d* target_type, int)
+{
+  matrix_d md;
+  
+  if (values.size() == 0)
+    throw po::validation_error(po::validation_error::invalid_option_value);
+  else {
+    // Extract tokens from values (string vector) and populate matrix_d.
+    for(std::vector<std::string>::const_iterator itStr = values.begin();
+	itStr != values.end();
+	itStr++) 
+    {
+      typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+
+      // split string into tokens separated by "," (the rows of the matrix)
+      boost::char_separator<char> sep(",");
+      tokenizer tokens(*itStr, sep);
+
+      // parse the rows to a vector and fill matrix
+      for (tokenizer::iterator tok_iter = tokens.begin();
+	   tok_iter != tokens.end();
+	   ++tok_iter)
+      {
+	std::stringstream ss(*tok_iter);
+	std::vector<double> aRow;
+
+	// parse doubles into a row
+	copy(std::istream_iterator<double>(ss), std::istream_iterator<double>(),
+	     back_inserter(aRow));
+
+	// add the row with doubles to the matrix
+	md.rows.push_back(aRow);
+
+	if(!ss.eof())
+	  throw po::validation_error(po::validation_error::invalid_option_value);
+      }
     }
   }
 
@@ -237,7 +281,7 @@ estimation::IEstimationMethod* getEstimator(po::variables_map vm)
     estimation::MovingMedian* mm = new estimation::MovingMedian();
 
     // required: none
-    // optional: -w
+    // optional: window-size
     if (vm.count("window-size"))
     {
       unsigned int ws = vm["window-size"].as<unsigned int>();
@@ -262,7 +306,7 @@ estimation::IEstimationMethod* getEstimator(po::variables_map vm)
     estimation::MovingAverage* ma = new estimation::MovingAverage();
 
     // required: none
-    // optional: -w -b
+    // optional: window-size, weighting-coefficients
     unsigned int ws = ma->getWindowSize();	// default window size
     if (vm.count("window-size"))
     {
@@ -278,7 +322,7 @@ estimation::IEstimationMethod* getEstimator(po::variables_map vm)
 
     if (vm.count("weighting-coefficients"))
     {
-      std::vector<double> wc = vm["weighting-coefficients"].as< multi_double >().vector;
+      std::vector<double> wc = vm["weighting-coefficients"].as< vector_d >().vector;
 
       // debug
       std::stringstream ss;
@@ -305,6 +349,64 @@ estimation::IEstimationMethod* getEstimator(po::variables_map vm)
     }
 
     return ma;
+  }
+
+  // --------------------------------------------------------------------------------
+  // Kalman Filter
+  // --------------------------------------------------------------------------------
+  if (method.compare("KalmanFilter") == 0)
+  {
+    ROS_INFO("KalmanFilter.");
+    estimation::KalmanFilter* kf = new estimation::KalmanFilter();
+
+    // required: ??
+    // optional: initial-state, state-transition-model,
+    // control-input-model, control-input, process-noise-covariance,
+    // observation-model, measurement-noise-covariance,
+    // initial-error-covariance
+    if (vm.count("initial-state")) {
+      std::vector<double> x0 = vm["initial-state"].as< vector_d >().vector;
+      kf->setInitialState(x0);
+    }
+    
+    if (vm.count("state-transition-model")) {
+      std::vector< std::vector<double> > stm = vm["state-transition-model"].as< matrix_d >().rows;
+      kf->setStateTransitionModel(stm);
+    }
+
+    if (vm.count("control-input-model")) {
+      std::vector< std::vector<double> > cim = vm["control-input-model"].as< matrix_d >().rows;
+      kf->setControlInputModel(cim);
+    }
+
+    if (vm.count("control-input")) {
+      std::vector<double> ci = vm["control-input"].as< vector_d >().vector;
+      kf->setControlInput(ci);
+    }
+
+    if (vm.count("process-noise-covariance")) {
+      std::vector< std::vector<double> > pnc = vm["process-noise-covariance"].as< matrix_d >().rows;
+      kf->setProcessNoiseCovariance(pnc);
+    }
+
+    if (vm.count("observation-model")) {
+      std::vector< std::vector<double> > om = vm["observation-model"].as< matrix_d >().rows;
+      kf->setObservationModel(om);
+    }
+
+    if (vm.count("measurement-noise-covariance")) {
+      std::vector< std::vector<double> > mnc = vm["measurement-noise-covariance"].as< matrix_d >().rows;
+      kf->setMeasurementNoiseCovariance(mnc);
+    }
+
+    if (vm.count("initial-error-covariance")) {
+      std::vector< std::vector<double> > iec = vm["initial-error-covariance"].as< matrix_d >().rows;
+      kf->setInitialErrorCovariance(iec);
+    }
+    
+    kf->validate();	// throws on error
+
+    return kf;
   }
 
   throw po::error("Unknown method! "
@@ -334,7 +436,6 @@ po::variables_map getArgumentMap(int argc, char** argv)
   po::options_description desc_sf("Single Sensor Fusion Options:"); 
   desc_sf.add_options() 
     // no short options allowed!
-    //("help", "Print this help message.")
     ("method", po::value<std::string>()->required(), 
      "The estimation method.\n\nExample values are:\n"
      "MovingMedian, MovingAverage, KalmanFilter, etc.\n\n"
@@ -343,32 +444,50 @@ po::variables_map getArgumentMap(int argc, char** argv)
      "for a particular method are listed:\n"
      "  MovingMedian: window-size\n"
      "  MovingAverage: window-size, weighting-coefficients\n"
-     "\nParameters which are specified but not required for a"
+     "\nParameters which are specified but not required for a "
      "method will be ignored.")
     ("window-size", po::value<unsigned int>(),
      "The number of data values to use for estimation. "
      "arg must be a positive integer. Default value is 3.") 
     ("weighting-coefficients", 
-     po::value<multi_double>()->multitoken(), 
+     po::value<vector_d>()->multitoken(), 
      "The weighting coefficients for a moving filter. "
      "The number of coefficients must equal the 1x window size or 2x "
      "window size - 1, e.g. window-size=3, weighting-coefficients=\"1 3 1\" "
-     "corresponds to an FIR filter, i.e. the only the input is weighted. "
+     "corresponds to an FIR filter, i.e. only the input is weighted. "
      "Default values will be set to apply an FIR filter with hamming "
      "window. 2x window-size - 1 causes the moving average "
      "filter to be in autoregressive mode, i.e. also (old) output "
      "values are weighted and added to a new one (e.g. window-size=3, "
      "weighting-coefficients=\"1 0 3 2 1\" where the first two "
      "coefficients are used for the old output values and the last "
-     "three coefficients for the input values).")
+     "three coefficients for the input values). Specify as vector.")
+    ("state-transition-model", po::value<matrix_d>()->multitoken(),
+     "The state transition model, relates the previous state to the current "
+     "state. Matrix.")
+    ("control-input-model", po::value<matrix_d>()->multitoken(),
+     "The control input model, relates the control input to the current "
+     "state. Matrix.")
+    ("control-input", po::value<vector_d>()->multitoken(),
+     "The control input. Vector.")
+    ("process-noise-covariance", po::value<matrix_d>()->multitoken(),
+     "The process noise covariance. Matrix.")
+    ("observation-model", po::value<matrix_d>()->multitoken(),
+     "The observation model, relates the measurement to the state. Matrix.")
+    ("measurement-noise-covariance", po::value<matrix_d>()->multitoken(),
+     "The measurement noise covariance. Matrix.")
+    ("initial-state", po::value<vector_d>()->multitoken(),
+     "The initial state. Vector.")
+    ("initial-error-covariance", po::value<matrix_d>()->multitoken(),
+     "The initial error covariance. Matrix.")
     ;
  
   po::variables_map vm; 
   
   // Parse and store arguments into variable map.
-  // Parse general options.
+  // Parse general options (allow unknown options - desc_sf).
   po::store(po::command_line_parser(argc, argv)
-	    .options(desc_general).run(), 
+	    .options(desc_general).allow_unregistered().run(), 
 	    vm); // throws on error
 
   // Help option.
@@ -381,6 +500,9 @@ po::variables_map getArgumentMap(int argc, char** argv)
 	      << "which fuses the subscribed input value. With every "
 	      << "new input value the estimate is updated and published." 
 	      << std::endl << std::endl 
+	      << "Vectors should be specified as a list of (double) values separated by "
+	      << "spaces. Matrices are specified by vectors separated by a comma, e.g. a"
+	      << "2x2 matrix '1 2, 3 4'."
 	      << desc_general << std::endl
 	      << desc_sf << std::endl; 
     vm.clear();
@@ -401,8 +523,7 @@ po::variables_map getArgumentMap(int argc, char** argv)
     po::store(po::parse_config_file(configFile, desc_sf), 
 	      vm);
 
-    po::notify(vm);	// throws on error, so do after help in case there
-			// are any problems
+    po::notify(vm);	// throws on error
   } else {
     // Parse sensor fusion options from argument list.
     po::store(po::command_line_parser(argc, argv)
@@ -413,8 +534,7 @@ po::variables_map getArgumentMap(int argc, char** argv)
 	      .run(), 
 	      vm);
 
-    po::notify(vm);	// throws on error, so do after help in case there
-			// are any problems
+    po::notify(vm);	// throws on error
   }
 
   return vm;
