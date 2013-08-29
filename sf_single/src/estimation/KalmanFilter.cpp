@@ -15,7 +15,7 @@ namespace estimation
   KalmanFilter::KalmanFilter ()
   {
     // set parameters to default values
-    //init(); 
+    init(); 
 
     // create output state
     for (int i = 0; i < 1; i++) {
@@ -45,8 +45,8 @@ namespace estimation
     setMeasurementNoiseCovariance(R);	// m x m
 
     // intern
-    P = MatrixXd::Identity(x.size(), x.size());	// n x n
-    K = MatrixXd::Ones(x.size(), x.size());	// n x m
+    P = MatrixXd::Zero(x.size(), x.size());	// n x n
+    K = MatrixXd::Zero(x.size(), x.size());	// n x m
   }
 
   KalmanFilter::~KalmanFilter () 
@@ -136,21 +136,28 @@ namespace estimation
     if (!validated)
       return out;
 
-    // extract next (the measurements) into a vector
-    //Vector<double, H.cols(), 1> z;
-    // VectorXd z(H.cols());
-    //for (int i = 0; i < next.size(); i++)
+    // extract the values of next (the measurements) into a vector
+    VectorXd z(next.size());
+    for (int i = 0; i < next.size(); i++)
+      z[i] = next[i].getValue();
+    // TODO: save memory and time:
+    //VectorXd z = Map<VectorXd>(&next.getValues()[0]);
     
-    // TODO: Kalman Filtering
-    // predict
-
+    // Kalman Filtering ------------------------------------------
+    // predict (time-update)
+    VectorXd x_apriori = A*x + B*u;
+    MatrixXd P_apriori = A*P*A.transpose() + Q;
     
-    // update
+    // update (measurement-update)
+    K = (P_apriori*H.transpose()) * (H*P_apriori*H.transpose() + R).inverse();  
+    x = x_apriori + K*(z - H*x_apriori);
+    P = P_apriori - K*H*P_apriori;
+    // -----------------------------------------------------------
 
+    std::cout << "x = " << x[0] << std::endl;
 
     // insert new state and variance into the Output object
     updateOutput();
-
     return out;
   }
 
@@ -165,6 +172,7 @@ namespace estimation
 
   void KalmanFilter::init(void)
   {
+    // TODO
     /*
     // new state = old state
     x << 0;
@@ -223,7 +231,11 @@ namespace estimation
 
   void KalmanFilter::updateOutput(void)
   {
-    // TODO: fill with state and covariance
-    // TODO: fill jitter_ms
+    // fill output with state and covariance
+    for (int i = 0; i < x.size(); i++) {
+      out[i].setValue(x[i]);
+      out[i].setVariance(P(i,i));
+      // TODO: fill jitter_ms
+    }
   }
 }
