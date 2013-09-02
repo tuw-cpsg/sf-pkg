@@ -53,12 +53,16 @@ void sampleReceived(const std_msgs::Float64::ConstPtr& msg)
 {
   sample = *msg;
     
-  // Estimation
-  estimation::Input in(estimation::InputValue(sample.data));
-  estimation::Output out = estimator->estimate(in);
+  try {
+    // Estimation
+    estimation::Input in(estimation::InputValue(sample.data));
+    estimation::Output out = estimator->estimate(in);
 
-  // Fill the message with data.
-  sampleFused.data = out.getValue();
+    // Fill the message with data.
+    sampleFused.data = out.getValue();
+  } catch (std::exception& e) {
+    ROS_ERROR_STREAM(e.what());
+  }
 
   // Send message.
   pub_signalFused.publish(sampleFused);
@@ -101,6 +105,9 @@ int main(int argc, char **argv)
 		       << "Use --help or -h to print a help message."
 		       << std::endl); 
       return 1; 
+    } catch(std::exception& e) {
+      ROS_ERROR_STREAM(e.what());
+      return 1;
     }
  
     // Create main access point to communicate with the ROS system.
@@ -502,7 +509,7 @@ po::variables_map getArgumentMap(int argc, char** argv)
 	      << std::endl << std::endl 
 	      << "Vectors should be specified as a list of (double) values separated by "
 	      << "spaces. Matrices are specified by vectors separated by a comma, e.g. a"
-	      << "2x2 matrix '1 2, 3 4'."
+	      << "2x2 matrix '1 2, 3 4'." << std::endl << std::endl
 	      << desc_general << std::endl
 	      << desc_sf << std::endl; 
     vm.clear();

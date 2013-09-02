@@ -14,46 +14,29 @@ namespace estimation
 {
   KalmanFilter::KalmanFilter ()
   {
-    // set parameters to default values
-    init(); 
-
-    // create output state
-    for (int i = 0; i < 1; i++) {
-      OutputValue val;
-      out.add(val);
-    }
+    // nothing to do
+    // further initialization is done in validate()
   }
 
-  KalmanFilter::KalmanFilter (std::vector<double> x0,
-			      std::vector< std::vector<double> > A,
+  KalmanFilter::KalmanFilter (std::vector< std::vector<double> > A,
 			      std::vector< std::vector<double> > Q,
 			      std::vector< std::vector<double> > H,
 			      std::vector< std::vector<double> > R)
   {
     // process
-    int n = x0.size();
-    setInitialState(x0);		// n
-    setStateTransitionModel(A);		// n x n
-    setProcessNoiseCovariance(Q);	// r x r
-    int r = 1;				// r = 1 (because B, u not specified)
-    B = MatrixXd::Zero(n, r);		// n x r
-    u = VectorXd::Zero(r);		// r
+    setStateTransitionModel(A);
+    setProcessNoiseCovariance(Q);
 
     // observation
-    int m = H.size();
-    setObservationModel(H);		// m x n (the measurements z have size m)
-    setMeasurementNoiseCovariance(R);	// m x m
-
-    // intern
-    P = MatrixXd::Zero(x.size(), x.size());	// n x n
-    K = MatrixXd::Zero(x.size(), x.size());	// n x m
+    setObservationModel(H);
+    setMeasurementNoiseCovariance(R);
   }
 
   KalmanFilter::~KalmanFilter () 
   {
     // no space to free
   }
-	
+
   // -----------------------------------------
   // getters and setters
   // -----------------------------------------
@@ -110,22 +93,77 @@ namespace estimation
 
   void KalmanFilter::validate (void)
   {
+    // check for minimal initialization, i.e. matrices must not be
+    // empty: state transition model, process noise covariance,
+    // observation or measurement model, measurement noise covariance
+    if (A.rows() == 0) 	// empty matrix
+      throw std::runtime_error("State estimation model missing.");
+    if (H.rows() == 0) 	// empty matrix
+      throw std::runtime_error("Observation model missing.");
+    if (Q.rows() == 0) 	// empty matrix
+      throw std::runtime_error("Process noise covariance missing.");
+    if (R.rows() == 0) 	// empty matrix
+      throw std::runtime_error("Measurement noise covariance missing.");
+    
+    // take sizes from required parameters
+    int n = A.rows();
+    int r = Q.rows();
+    int m = R.rows();	// or H.rows() -> check below
+
+    // create other parameters if missing ---------------------
+    if (u.size() == 0)	// empty vector (control input missing)
+      u = VectorXd::Zero(r);
+    if (B.rows() == 0)	// empty matrix (control input model missing)
+      B = MatrixXd::Zero(n, r);
+    if (x.size() == 0)	// empty vector (initial state missing)
+      x = VectorXd::Zero(n);
+    if (P.rows() == 0)	// empty matrix (initial error covariance missing)
+      P = MatrixXd::Zero(n, n);
+
+    // check appropriate sizes of matrices and vectors --------
+    if (x.rows() != n  ||  x.cols() != 1)
+      throw std::runtime_error("Initial state has invalid size.");
+    if (A.rows() != A.cols())
+      throw std::runtime_error("State transition model must be a square matrix.");
+    if (u.rows() != r  ||  u.cols() != 1)
+      throw std::runtime_error("Control input has invalid size.");
+    if (B.rows() != n  ||  B.cols() != r)
+      throw std::runtime_error("Control input model has invalid size.");
+    if (Q.rows() != Q.cols())
+      throw std::runtime_error("Process noise covariance must be a square matrix.");
+    if (H.rows() != m  ||  H.cols() != n)
+      throw std::runtime_error("Observation model has invalid size.");
+    if (R.rows() != R.cols())
+      throw std::runtime_error("Measurement noise covariance must be a square matrix.");
+    if (P.rows() != n  ||  P.cols() != n)
+      throw std::runtime_error("Initial error covariance has invalid size.");
+
+    // validation finished successfully -----------------------
+    validated = true;
+
+    // further things to initialize ---------------------------
+    if (K.rows() == 0)		// not initialized till now
+      K = MatrixXd::Zero(n, m);
+
+    // create output state
+    if (out.size() == 0)	// not initialized till now
+      for (int i = 0; i < n; i++) {
+	OutputValue val;
+	out.add(val);
+      }
+
     // debug
     std::stringstream ss;
     ss << "A: " << std::endl << A << std::endl << "---" << std::endl;
-    ss << "x: " << std::endl << x << std::endl << "---" << std::endl;
     ss << "B: " << std::endl << B << std::endl << "---" << std::endl;
     ss << "u: " << std::endl << u << std::endl << "---" << std::endl;
     ss << "Q: " << std::endl << Q << std::endl << "---" << std::endl;
     ss << "H: " << std::endl << H << std::endl << "---" << std::endl;
     ss << "R: " << std::endl << R << std::endl << "---" << std::endl;
+    ss << "x: " << std::endl << x << std::endl << "---" << std::endl;
+    ss << "P: " << std::endl << P << std::endl << "---" << std::endl;
+    ss << "K: " << std::endl << K << std::endl << "---" << std::endl;
     std::cout << ss.str() << std::endl;
-
-    // TODO: validate
-    // matrices and vectors empty
-    // appropriate sizes of matrices and vectors
-
-    validated = true;
   }
 
   // -----------------------------------------
@@ -137,11 +175,9 @@ namespace estimation
       return out;
 
     // extract the values of next (the measurements) into a vector
-    VectorXd z(next.size());
-    for (int i = 0; i < next.size(); i++)
+    VectorXd z(H.rows());	// must have size m
+    for (int i = 0; i < H.rows(); i++)
       z[i] = next[i].getValue();
-    // TODO: save memory and time:
-    //VectorXd z = Map<VectorXd>(&next.getValues()[0]);
     
     // Kalman Filtering ------------------------------------------
     // predict (time-update)
@@ -153,8 +189,6 @@ namespace estimation
     x = x_apriori + K*(z - H*x_apriori);
     P = P_apriori - K*H*P_apriori;
     // -----------------------------------------------------------
-
-    std::cout << "x = " << x[0] << std::endl;
 
     // insert new state and variance into the Output object
     updateOutput();
@@ -169,31 +203,6 @@ namespace estimation
   // -----------------------------------------
   // private functions
   // -----------------------------------------
-
-  void KalmanFilter::init(void)
-  {
-    // TODO
-    /*
-    // new state = old state
-    x << 0;
-    A << 1;
-
-    // no control input
-    u << 0;
-    B << 0;
-
-    // measurement = state
-    H << 1;
-
-    // noise covariance
-    Q << 0.2;	// low covariance, means we are sure of our process
-		// model
-    R << 1;	// variance of the sensor
-
-    // initial error covariance
-    P << 1;
-    */
-  }
 
   void KalmanFilter::copy(std::vector<double>& src, VectorXd& dest)
   {

@@ -42,10 +42,6 @@ namespace estimation
    */
   class KalmanFilter : public IEstimationMethod
   {
-    /** @brief Estimated state vector. Size: n. */
-    VectorXd x;
-    /** @brief Error covariance. Size: n x n. */
-    MatrixXd P;
     /** @brief Kalman gain. Size: n x m. */
     MatrixXd K;
 
@@ -79,25 +75,30 @@ namespace estimation
     /** @brief Measurement noise covariance. Size: m x m. */
     MatrixXd R;
 
+    // initial values x and P can be set
+    /** @brief Estimated state vector. Size: n. */
+    VectorXd x;
+    /** @brief Error covariance. Size: n x n. */
+    MatrixXd P;
+
   public: 
     /**
-     * @brief Constructor of this class.
+     * @brief Base constructor, the required parameters must be passed
+     * with the setters.
      */
     KalmanFilter ();
 
     /**
-     * @brief Constructor of this class.
+     * @brief Constructor setting the required parameters.
      *
      * Minimal initialization of the Kalman filter.
      *
-     * @param x0 Initial state.
      * @param A State transition model.
      * @param Q Process noise covariance.
      * @param H Observation model.
      * @param R Measurement noise covariance.
      */
-    KalmanFilter (std::vector<double> x0,
-		  std::vector< std::vector<double> > A,
+    KalmanFilter (std::vector< std::vector<double> > A,
 		  std::vector< std::vector<double> > Q,
 		  std::vector< std::vector<double> > H,
 		  std::vector< std::vector<double> > R);
@@ -225,16 +226,6 @@ namespace estimation
     Output getLastEstimate (void);
 
   private:
-    /**
-     * @brief Initializes the Kalman filter with default values where
-     * possible.
-     *
-     * It is assumed that a single measurement is used to estimate a
-     * single state. The measurement directly describes the entity to
-     * estimate (H = 1).
-     */
-    void init(void);
-
     /**
      * @brief Copies a standard vector into the vector representation
      * of Eigen.
