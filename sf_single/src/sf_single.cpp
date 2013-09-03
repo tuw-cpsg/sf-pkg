@@ -22,7 +22,8 @@
 
 // configuration
 #include "Configurator.h"
-//#include "config.h"
+#include "config.h"
+void initConfigurator(Configurator& configurator);
 
 #define MSG_BUFFER_SIZE			1000
 
@@ -81,7 +82,9 @@ int main(int argc, char **argv)
 
     // Create an estimator according to the configuration header file.
     try {
-      estimator = Configurator::getInitializedEstimator();
+      Configurator configurator;
+      initConfigurator(configurator);
+      estimator = configurator.getInitializedEstimator();
       ROS_DEBUG("Estimator initialized.");
     } catch(std::exception& e) {
       ROS_ERROR_STREAM(e.what());
@@ -122,4 +125,51 @@ int main(int argc, char **argv)
   }
 
   return 0;
+}
+
+// Configuration
+void initConfigurator(Configurator& configurator)
+{
+#ifdef METHOD
+  configurator.addParam("method", std::string(METHOD));
+#endif
+#ifdef WINDOW_SIZE
+  configurator.addParam("window-size", WINDOW_SIZE);
+#endif
+#ifdef WEIGHTING_COEFFICIENTS
+  Configurator::vector wc = { WEIGHTING_COEFFICIENTS };
+  configurator.addParam("weighting-coefficients", wc);
+#endif
+#ifdef STATE_TRANSITION_MODEL
+  Configurator::matrix stm = { STATE_TRANSITION_MODEL };
+  configurator.addParam("state-transition-model", stm);
+#endif
+#ifdef PROCESS_NOISE_COVARIANCE
+  Configurator::vector pnc = { PROCESS_NOISE_COVARIANCE };
+  configurator.addParam("process-noise-covariance", pnc);
+#endif
+#ifdef OBSERVATION_MODEL
+  Configurator::matrix om = { OBSERVATION_MODEL };
+  configurator.addParam("observation-model", om);
+#endif
+#ifdef MEASUREMENT_NOISE_COVARIANCE
+  Configurator::matrix mnc = { MEASUREMENT_NOISE_COVARIANCE };
+  configurator.addParam("measurement-noise-covariance", mnc);
+#endif
+#ifdef CONTROL_INPUT_MODEL 
+  Configurator::matrix cim = { CONTROL_INPUT_MODEL };
+  configurator.addParam("control-input-model", cim);
+#endif
+#ifdef CONTROL_INPUT
+  Configurator::vector ci = { CONTROL_INPUT };
+  configurator.addParam("control-input", ci);
+#endif
+#ifdef INITIAL_STATE
+  Configurator::vector is = { INITIAL_STATE };
+  configurator.addParam("initial-state", is);
+#endif
+#ifdef INITIAL_ERROR_COVARIANCE
+  Configurator::matrix iec = { INITIAL_ERROR_COVARIANCE };
+  configurator.addParam("initial-error-covariance", iec);
+#endif
 }

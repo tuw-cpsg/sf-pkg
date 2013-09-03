@@ -8,6 +8,7 @@ add_definitions("-std=c++0x")
 find_package(catkin REQUIRED COMPONENTS roscpp std_msgs)
 
 ## System dependencies are found with CMake's conventions
+find_package(Boost REQUIRED COMPONENTS )
 find_package(Eigen REQUIRED)
 
 ## Declare the estimation library
@@ -37,6 +38,7 @@ add_library(misc STATIC
   src/Configurator.cpp
   include/Configurator.h
   )
+
 # find_library(estimation 
 #   NAMES estimation libestimation #name
 #   lib/estimation #path
@@ -74,9 +76,9 @@ add_library(misc STATIC
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES estimation
+  LIBRARIES estimation misc
 #  CATKIN_DEPENDS other_catkin_pkg
-  DEPENDS Eigen
+  DEPENDS Boost Eigen
 )
 
 ###########
@@ -88,6 +90,7 @@ include_directories(
   include
   cfg
   ${catkin_INCLUDE_DIRS} 
+  ${Boost_INCLUDE_DIRS} 
   ${Eigen_INCLUDE_DIRS}
   )
 
@@ -97,6 +100,7 @@ target_link_libraries(sf_single
   estimation 
   misc
   ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
   )
 
 ## Add cmake target dependencies of the executable/library
@@ -107,3 +111,17 @@ target_link_libraries(sf_single
 # target_link_libraries(sf_estimation_node
 #   ${catkin_LIBRARIES}
 # )
+
+##########
+## Test ##
+##########
+## Specify tests to build
+if (CATKIN_ENABLE_TESTING)
+  catkin_add_gtest(utest tests/utest_configuration.cpp)
+  target_link_libraries(utest
+    misc
+    estimation
+    ${catkin_LIBRARIES}
+    ${Boost_LIBRARIES}
+    )
+endif()

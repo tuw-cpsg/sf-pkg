@@ -8,38 +8,65 @@
 
 #include "Configurator.h"
 
+void Configurator::addParam(std::string key, boost::any value)
+{
+  params[key] = value;
+}
+
+void Configurator::reset(void)
+{
+  params.clear();
+}
+
 estimation::IEstimationMethod* Configurator::getInitializedEstimator (void)
 {
-#ifdef METHOD
-  std::string method = METHOD;
-#else
-  throw std::runtime_error("Method not specified!");
-#endif
+  if (params.count("method") == 0)
+    throw config_error("Method not specified.");
 
-  if (method.compare("MovingMedian") == 0)
-  {
-    estimation::MovingMedian* mm = new estimation::MovingMedian();
-    initMovingMedian(*mm);
-    return mm;
+  try {
+    std::string method = boost::any_cast<std::string>(params["method"]);
+
+    if (method.compare("MovingMedian") == 0)
+    {
+      estimation::MovingMedian* mm = new estimation::MovingMedian();
+      initMovingMedian(*mm);
+      return mm;
+    }
+
+    if (method.compare("MovingAverage") == 0)
+    {
+      estimation::MovingAverage* ma = new estimation::MovingAverage();
+      initMovingAverage(*ma);
+      return ma;
+    }
+
+    if (method.compare("KalmanFilter") == 0)
+    {
+      estimation::KalmanFilter* kf = new estimation::KalmanFilter();
+      initKalmanFilter(*kf);
+      return kf;
+    }
+  } catch(std::exception& e) {
+    throw config_error(std::string("Configuration failed. ") + e.what());
   }
 
-  if (method.compare("MovingAverage") == 0)
-  {
-    estimation::MovingAverage* ma = new estimation::MovingAverage();
-    initMovingAverage(*ma);
-    return ma;
-  }
-
-  if (method.compare("KalmanFilter") == 0)
-  {
-    estimation::KalmanFilter* kf = new estimation::KalmanFilter();
-    initKalmanFilter(*kf);
-    return kf;
-  }
-
-  throw std::runtime_error("Unknown method! "
-			   "See help for available methods.");
+  throw config_error("Configuration failed. Unknown method.");
 }
+
+/*
+std::ostream& Configurator::operator<<(std::ostream& lhs) const
+{
+  std::stringstream ss;
+  for(std::map<std::string, boost::any>::const_iterator it = (*this).params.begin();
+      it != (*this).params.end();
+      it++) {
+    std::string key = it->first;
+    ss << key << std::endl;
+  }
+
+  return lhs << ss.str();
+}
+*/
 
 // -----------------------------------------
 // initialization of the specific estimator
@@ -48,43 +75,54 @@ estimation::IEstimationMethod* Configurator::getInitializedEstimator (void)
 void Configurator::initMovingMedian(estimation::MovingMedian& mm)
 {
   // required: none
-  // optional: WINDOW_SIZE
+  // optional: window-size
 
-#ifdef WINDOW_SIZE
-  mm.setWindowSize(WINDOW_SIZE);
-#endif
+  try {
+    if (params.count("window-size")) {
+      int ws = boost::any_cast<int>(params["window-size"]);
+      mm.setWindowSize(ws);
+    }
+  } catch(std::exception& e) {
+    std::string additionalInfo = "Initializing MovingMedian failed. ";
+    throw config_error(additionalInfo + e.what());
+  }
 }
 
 void Configurator::initMovingAverage(estimation::MovingAverage& ma)
 {
   // required: none
-  // optional: WINDOW_SIZE, WEIGHTING_COEFFICIENTS
+  // optional: window-size, weighting-coefficients
 
-  unsigned int ws = ma.getWindowSize();	// default window size
-#ifdef WINDOW_SIZE
-  ws = WINDOW_SIZE;
-  ma.setWindowSize(ws);
-#endif
+  try {
+    int ws = ma.getWindowSize();	// default window size
+    if (params.count("window-size")) {
+      ws = boost::any_cast<int>(params["window-size"]);
+      ma.setWindowSize(ws);
+    }
 
-#ifdef WEIGHTING_COEFFICIENTS
-  double wc[] = { WEIGHTING_COEFFICIENTS };
-  int wcSize = sizeof(wc)/sizeof(double);
+    if (params.count("weighting-coefficients")) {
+      vector wc = boost::any_cast<vector>(params["weighting-coefficients"]);
   
-  if (wcSize == ws) {
-    // only b_k coefficients are passed
-    ma.setWeightingCoefficientsIn(&wc[0], ws);
-  } else if (wcSize == 2*ws-1) {
-    // a_k coefficients also passed through arguments
-    // first (ws-1) numbers
-    ma.setWeightingCoefficientsOut(&wc[0], ws-1);
-    ma.setWeightingCoefficientsIn(&wc[ws-1], ws);
-  } else {
-    throw std::length_error("Invalid number of"
-		    "weighting-coefficients "
-		    "(must equal "
-		    "1x or 2x-1 window size).");
+      if (wc.size() == ws) {
+	// only b_k coefficients are passed
+	ma.setWeightingCoefficientsIn(&wc[0], ws);
+      } else if (wc.size() == 2*ws-1) {
+	// a_k coefficients also passed through arguments
+	// first (ws-1) numbers
+	ma.setWeightingCoefficientsOut(&wc[0], ws-1);
+	ma.setWeightingCoefficientsIn(&wc[ws-1], ws);
+      } else {
+	throw std::length_error("Configuration failed. "
+				"Invalid number of "
+				"weighting-coefficients "
+				"(must equal "
+				"1x or 2x-1 window size).");
+      }
+    }
+  } catch(std::exception& e) {
+    std::string additionalInfo = "Initializing MovingAverage failed. ";
+    throw config_error(additionalInfo + e.what());
   }
-#endif
 }
 
 void Configurator::initKalmanFilter(estimation::KalmanFilter& kf)
@@ -95,56 +133,56 @@ void Configurator::initKalmanFilter(estimation::KalmanFilter& kf)
   //   initial-error-covariance
 
   // required -----
+  try {
+    if (params.count("state-transition-model")) {
+      matrix stm = boost::any_cast<matrix>(params["state-transition-model"]);
+      kf.setStateTransitionModel(stm);
+    } else
+      throw config_error("State transition model missing.");
 
-#ifdef STATE_TRANSITION_MODEL
-  std::vector< std::vector<double> > stm = { STATE_TRANSITION_MODEL };
-  kf.setStateTransitionModel(stm);
-#else
-  throw std::runtime_error("State transition model missing.");
-#endif
+    if (params.count("process-noise-covariance")) {
+      matrix pnc = boost::any_cast<matrix>(params["process-noise-covariance"]);
+      kf.setProcessNoiseCovariance(pnc);
+    } else
+      throw config_error("Process noise covariance missing.");
 
-#ifdef PROCESS_NOISE_COVARIANCE
-  std::vector< std::vector<double> > pnc = { PROCESS_NOISE_COVARIANCE };
-  kf.setProcessNoiseCovariance(pnc);
-#else
-  throw std::runtime_error("Process noise covariance missing.");
-#endif
+    if (params.count("observation-model")) {
+      matrix om = boost::any_cast<matrix>(params["observation-model"]);
+      kf.setObservationModel(om);
+    } else
+      throw config_error("Observation model missing.");
 
-#ifdef OBSERVATION_MODEL
-  std::vector< std::vector<double> > om = { OBSERVATION_MODEL };
-  kf.setObservationModel(om);
-#else
-  throw std::runtime_error("Observation model missing.");
-#endif
+    if (params.count("measurement-noise-covariance")) {
+      matrix mnc =  boost::any_cast<matrix>(params["measurement-noise-covariance"]);
+      kf.setMeasurementNoiseCovariance(mnc);
+    } else
+      throw config_error("Measurement noise covariance missing.");
 
-#ifdef MEASUREMENT_NOISE_COVARIANCE
-  std::vector< std::vector<double> > mnc = { MEASUREMENT_NOISE_COVARIANCE };
-  kf.setMeasurementNoiseCovariance(mnc);
-#else
-  throw std::runtime_error("Measurement noise covariance missing.");
-#endif
+    // optional -----
 
-  // optional -----
+    if (params.count("control-input-model")) {
+      matrix cim = boost::any_cast<matrix>(params["control-input-model"]);
+      kf.setControlInputModel(cim);
+    }
 
-#ifdef CONTROL_INPUT_MODEL
-  std::vector< std::vector<double> > cim = { CONTROL_INPUT_MODEL };
-  kf.setControlInputModel(cim);
-#endif
+    if (params.count("control-input")) {
+      std::vector<double> ci = boost::any_cast<vector>(params["control-input"]);
+      kf.setControlInput(ci);
+    }
 
-#ifdef CONTROL_INPUT
-  std::vector<double> ci = { CONTROL_INPUT };
-  kf.setControlInput(ci);
-#endif
+    if (params.count("initial-state")) {
+      std::vector<double> is = boost::any_cast<vector>(params["initial-state"]);
+      kf.setInitialState(is);
+    }
 
-#ifdef INITIAL_STATE
-  std::vector<double> is = { INITIAL_STATE };
-  kf.setInitialState(is);
-#endif
+    if (params.count("initial-error-covariance")) {
+      matrix iec = boost::any_cast<matrix>(params["initial-error-covariance"]);
+      kf.setInitialErrorCovariance(iec);
+    }
 
-#ifdef INITIAL_ERROR_COVARIANCE
-  std::vector< std::vector<double> > iec = { INITIAL_ERROR_COVARIANCE };
-  kf.setInitialErrorCovariance(iec);
-#endif
-
-  kf.validate();	// throws on error
+    kf.validate();	// throws on error
+  } catch(std::exception& e) {
+    std::string additionalInfo = "Initializing KalmanFilter failed. ";
+    throw config_error(additionalInfo + e.what());
+  }
 }
