@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(sf_single)
 
+# for simple list initialization (e.g. std::vector x = {..};)
+add_definitions("-std=c++0x")
+
 ## Find catkin and any catkin packages
 find_package(catkin REQUIRED COMPONENTS roscpp std_msgs)
 
 ## System dependencies are found with CMake's conventions
-find_package(Boost REQUIRED COMPONENTS program_options system filesystem)
 find_package(Eigen REQUIRED)
 
 ## Declare the estimation library
@@ -29,6 +31,11 @@ add_library(estimation
   include/estimation/MovingMedian.h
   include/estimation/MovingAverage.h
   include/estimation/KalmanFilter.h
+  )
+
+add_library(misc STATIC
+  src/Configurator.cpp
+  include/Configurator.h
   )
 # find_library(estimation 
 #   NAMES estimation libestimation #name
@@ -69,7 +76,7 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES estimation
 #  CATKIN_DEPENDS other_catkin_pkg
-  DEPENDS Boost Eigen
+  DEPENDS Eigen
 )
 
 ###########
@@ -79,8 +86,8 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
   include
+  cfg
   ${catkin_INCLUDE_DIRS} 
-  ${Boost_INCLUDE_DIRS}
   ${Eigen_INCLUDE_DIRS}
   )
 
@@ -88,8 +95,8 @@ include_directories(
 add_executable(sf_single src/sf_single.cpp)
 target_link_libraries(sf_single 
   estimation 
+  misc
   ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES}
   )
 
 ## Add cmake target dependencies of the executable/library

@@ -5,6 +5,5 @@
   <node name="sf_single" 
 	pkg="sf_single" 
 	type="sf_single"
-	output="screen"
-	args="-c $(arg configuration-file)" />
+	output="screen" />
 </launch>

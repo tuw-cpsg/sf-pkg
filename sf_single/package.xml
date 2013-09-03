@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>sf_single</name>
-  <version>0.0.2</version>
+  <version>0.1.0</version>
   <description>The single sensor fusion package</description>
 
   <maintainer email="denise.ratasich@gmx.at">Denise Ratasich</maintainer>
