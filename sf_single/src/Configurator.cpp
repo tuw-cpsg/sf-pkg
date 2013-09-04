@@ -166,12 +166,12 @@ void Configurator::initKalmanFilter(estimation::KalmanFilter& kf)
     }
 
     if (params.count("control-input")) {
-      std::vector<double> ci = boost::any_cast<vector>(params["control-input"]);
+      vector ci = boost::any_cast<vector>(params["control-input"]);
       kf.setControlInput(ci);
     }
 
     if (params.count("initial-state")) {
-      std::vector<double> is = boost::any_cast<vector>(params["initial-state"]);
+      vector is = boost::any_cast<vector>(params["initial-state"]);
       kf.setInitialState(is);
     }
 

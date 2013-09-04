@@ -26,6 +26,7 @@
 
 #define TOPIC_NAME	"signal"
 #define TOPIC_TYPE	std_msgs::Float64
+#define TOPIC_INCLUDE	<std_msgs/Float64.h>
 #define TOPIC_FIELD	data
 
 // -----------------------------------------

@@ -7,25 +7,24 @@
  * particular estimation.
  */
 
+// configuration
+#include "Configurator.h"
+#include "config.h"
+void initConfigurator(Configurator& configurator);
+
+
 // cpp includes
 #include <iostream>
 
 // ROS includes
 #include <ros/ros.h>
-#include <std_msgs/Float64.h>
+#include TOPIC_INCLUDE
 
 // estimation framework includes
 #include "estimation/IEstimationMethod.h"
 #include "estimation/Input.h"
 #include "estimation/OutputValue.h"
 #include "estimation/methods.h"
-
-// configuration
-#include "Configurator.h"
-#include "config.h"
-void initConfigurator(Configurator& configurator);
-
-#define MSG_BUFFER_SIZE			1000
 
 /** @brief Sample publisher (global because publishing is done in
     callback function); */
@@ -37,15 +36,15 @@ estimation::IEstimationMethod* estimator;
 /**
  * @brief Called when a sample is received.
  */
-void sampleReceived(const std_msgs::Float64::ConstPtr& msg)
+void sampleReceived(const TOPIC_TYPE::ConstPtr& msg)
 {
   // Message objects.
-  std_msgs::Float64 sample = *msg;
+  TOPIC_TYPE sample = *msg;
   std_msgs::Float64 sampleFused;
     
   try {
     // Estimation
-    estimation::Input in(estimation::InputValue(sample.data));
+    estimation::Input in(estimation::InputValue(sample.TOPIC_FIELD));
     estimation::Output out = estimator->estimate(in);
 
     // Fill the message with data.
@@ -97,9 +96,10 @@ int main(int argc, char **argv)
     // Tell ROS that we want to subscribe to the sensor fusion input
     // (the entity to estimate) and publish a fused version of it (the
     // estimate).
-    ros::Subscriber sub_signal = n.subscribe<std_msgs::Float64>("signal", 20, sampleReceived);
-    //ros::Subscriber entity_sub = n.subscribe<estimation_msgs::InputValue>("input", 10, dataReceived);
-    pub_signalFused = n.advertise<std_msgs::Float64>("signal_fused", MSG_BUFFER_SIZE);
+    ros::Subscriber sub_signal = n.subscribe<TOPIC_TYPE>(TOPIC_NAME, 20, sampleReceived);
+    ROS_INFO("Subscribing to '%s'.", TOPIC_NAME);
+    pub_signalFused = n.advertise<std_msgs::Float64>("signal_fused", 100);
+    ROS_INFO("Publishing result to 'signal_fused'.");
 
     // --------------------------------------------
     // Running application.
@@ -115,7 +115,7 @@ int main(int argc, char **argv)
     // Close connections.
     sub_signal.shutdown();
     pub_signalFused.shutdown();
-    ROS_DEBUG("Closed connections.");
+    ROS_INFO("Closed connections. Exit.");
   }
   catch (std::exception& e)
   {
@@ -145,7 +145,7 @@ void initConfigurator(Configurator& configurator)
   configurator.addParam("state-transition-model", stm);
 #endif
 #ifdef PROCESS_NOISE_COVARIANCE
-  Configurator::vector pnc = { PROCESS_NOISE_COVARIANCE };
+  Configurator::matrix pnc = { PROCESS_NOISE_COVARIANCE };
   configurator.addParam("process-noise-covariance", pnc);
 #endif
 #ifdef OBSERVATION_MODEL
