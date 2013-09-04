@@ -97,7 +97,7 @@ namespace estimation
     // empty: state transition model, process noise covariance,
     // observation or measurement model, measurement noise covariance
     if (A.rows() == 0) 	// empty matrix
-      throw std::runtime_error("State estimation model missing.");
+      throw std::runtime_error("State transition model missing.");
     if (H.rows() == 0) 	// empty matrix
       throw std::runtime_error("Observation model missing.");
     if (Q.rows() == 0) 	// empty matrix
@@ -151,19 +151,6 @@ namespace estimation
 	OutputValue val;
 	out.add(val);
       }
-
-    // debug
-    std::stringstream ss;
-    ss << "A: " << std::endl << A << std::endl << "---" << std::endl;
-    ss << "B: " << std::endl << B << std::endl << "---" << std::endl;
-    ss << "u: " << std::endl << u << std::endl << "---" << std::endl;
-    ss << "Q: " << std::endl << Q << std::endl << "---" << std::endl;
-    ss << "H: " << std::endl << H << std::endl << "---" << std::endl;
-    ss << "R: " << std::endl << R << std::endl << "---" << std::endl;
-    ss << "x: " << std::endl << x << std::endl << "---" << std::endl;
-    ss << "P: " << std::endl << P << std::endl << "---" << std::endl;
-    ss << "K: " << std::endl << K << std::endl << "---" << std::endl;
-    std::cout << ss.str() << std::endl;
   }
 
   // -----------------------------------------
@@ -200,10 +187,23 @@ namespace estimation
     return out;
   }
 
+  void KalmanFilter::serialize(std::ostream& os) const
+  {
+    os << "KalmanFilter" << std::endl
+       << "state (x) = " << this-> x << std::endl
+       << "error covariance (P)" << std::endl << this->P << std::endl
+       << "Kalman gain (K)" << std::endl << this->K << std::endl
+       << "state transition model (A)" << std::endl << this->A << std::endl
+       << "process noise covariance (Q)" << std::endl << this->Q << std::endl
+       << "observation model (H)" << std::endl << this->H << std::endl
+       << "measurement noise covariance (R)" << std::endl << this->R << std::endl
+       << "control input (u) = " << this->u << std::endl
+       << "control input model (B)" << std::endl << this->B << std::endl;
+  }
+
   // -----------------------------------------
   // private functions
   // -----------------------------------------
-
   void KalmanFilter::copy(std::vector<double>& src, VectorXd& dest)
   {
     int rows = src.size();

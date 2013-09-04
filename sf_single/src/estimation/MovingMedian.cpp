@@ -72,4 +72,16 @@ namespace estimation
   {
     return out;
   }
+
+  void MovingMedian::serialize(std::ostream& os) const
+  {
+    os << "MovingMedian" << std::endl
+       << "window-size = " << this->windowSize << std::endl
+       << "input (new to old) = ";
+    for (int i = 0; i < this->in.size(); i++)
+      os << this->in[i].getValue() << ", ";
+
+    os << std::endl
+       << "output = " << out.getValue() << std::endl;
+  }
 }

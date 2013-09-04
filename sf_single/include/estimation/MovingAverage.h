@@ -9,10 +9,12 @@
 #ifndef __ESTIMATION_MOVING_AVERAGE_H__
 #define __ESTIMATION_MOVING_AVERAGE_H__
 
+#include <deque>
+#include <ostream>
+
 #include "estimation/IEstimationMethod.h"
 #include "estimation/Input.h"
 #include "estimation/Output.h"
-#include <deque>
 
 namespace estimation 
 {
@@ -125,6 +127,12 @@ namespace estimation
      * @brief Returns the last estimated value.
      */
     Output getLastEstimate (void);
+
+    /**
+     * @brief Overloads << operator to print (debug) information of
+     * this filter (current state and parameters).
+     */
+    void serialize(std::ostream& os) const;
 
   private:
     /**

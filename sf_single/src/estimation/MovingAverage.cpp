@@ -62,7 +62,7 @@ namespace estimation
 
   void MovingAverage::setWeightingCoefficientsOut (double *a, unsigned int size)
   {
-    if (size != windowSize)
+    if (size != windowSize-1)
       throw std::length_error("Invalid array size (coefficients a).");
 
     // get normalization factor for weighting coefficients
@@ -122,6 +122,33 @@ namespace estimation
   Output MovingAverage::getLastEstimate(void) 
   {
     return out.front();
+  }
+
+  void MovingAverage::serialize(std::ostream& os) const
+  {
+    os << "MovingAverage" << std::endl
+       << "window-size = " << this->windowSize << std::endl
+       << "input (new to old) = ";
+    for (int i = 0; i < this->in.size(); i++)
+      os << this->in[i].getValue() << ", ";
+
+    os << std::endl
+       << "output (new to old) = ";
+    for (int i = 0; i < this->out.size(); i++)
+      os << this->out[i].getValue() << ", ";
+
+    os << std::endl
+       << "b (new to old) = ";
+    for (int i = 0; i < this->windowSize; i++)
+      os << this->b[i] << ", ";
+
+    os << std::endl
+       << "a (new to old) = ";
+    for (int i = 0; i < this->windowSize-1; i++)
+      os << this->a[i] << ", ";
+    
+    os << std::endl
+       << "IIR = " << isIIR << std::endl;
   }
 
   // -----------------------------------------

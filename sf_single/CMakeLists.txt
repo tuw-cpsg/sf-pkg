@@ -14,6 +14,7 @@ add_library(estimation
   src/estimation/Input.cpp
   src/estimation/OutputValue.cpp
   src/estimation/Output.cpp
+  src/estimation/IEstimationMethod.cpp
   src/estimation/MovingMedian.cpp
   src/estimation/MovingAverage.cpp
   src/estimation/KalmanFilter.cpp

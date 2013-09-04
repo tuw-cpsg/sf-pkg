@@ -9,10 +9,12 @@
 #ifndef __ESTIMATION_MOVING_MEDIAN_H__
 #define __ESTIMATION_MOVING_MEDIAN_H__
 
+#include <deque>
+#include <ostream>
+
 #include "estimation/IEstimationMethod.h"
 #include "estimation/Input.h"
 #include "estimation/Output.h"
-#include <deque>
 
 namespace estimation 
 {
@@ -51,6 +53,9 @@ namespace estimation
      */
     ~MovingMedian ();
 
+    // -----------------------------------------
+    // getters and setters
+    // -----------------------------------------
     /** 
      * @brief Sets the window size.
      *
@@ -60,6 +65,9 @@ namespace estimation
      */
     void setWindowSize (unsigned int windowSize);
 
+    // -----------------------------------------
+    // IEstimationMethod implementation
+    // -----------------------------------------
     /**
      * @brief Returns an estimate calculated with the given new data
      * value.
@@ -70,6 +78,12 @@ namespace estimation
      * @brief Returns the last estimated value.
      */
     Output getLastEstimate (void);
+
+    /**
+     * @brief Prints (debug) information of this filter (current state
+     * and parameters).
+     */
+    void serialize(std::ostream& os) const;
   };
 
 }

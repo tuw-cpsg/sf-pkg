@@ -9,6 +9,8 @@
 #ifndef __ESTIMATION_KALMAN_FILTER_H__
 #define __ESTIMATION_KALMAN_FILTER_H__
 
+#include <ostream>
+
 #include "estimation/IEstimationMethod.h"
 #include "estimation/Input.h"
 #include "estimation/Output.h"
@@ -224,6 +226,12 @@ namespace estimation
      * @brief Returns the last estimated value.
      */
     Output getLastEstimate (void);
+
+    /**
+     * @brief Prints (debug) information of this Kalman filter
+     * (current states of vectors and matrices).
+     */
+    void serialize(std::ostream& os) const;
 
   private:
     /**
