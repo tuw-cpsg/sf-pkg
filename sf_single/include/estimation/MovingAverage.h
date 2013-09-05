@@ -12,7 +12,7 @@
 #include <deque>
 #include <ostream>
 
-#include "estimation/IEstimationMethod.h"
+#include "estimation/IEstimator.h"
 #include "estimation/Input.h"
 #include "estimation/Output.h"
 
@@ -38,7 +38,7 @@ namespace estimation
    * - IIR filters: \f$\exists k : a_k \ne 0\f$ (also called
    * autoregressive moving average filter);
    */
-  class MovingAverage : public IEstimationMethod
+  class MovingAverage : public IEstimator
   { 
     /** @brief Array of input data. Corresponds to
      * x[n-windowSize]..x[n]. */
@@ -115,7 +115,7 @@ namespace estimation
     void setWeightingCoefficientsOut (double *a, unsigned int size);
 
     // -----------------------------------------
-    // IEstimationMethod implementation
+    // IEstimator implementation
     // -----------------------------------------
     /**
      * @brief Returns an estimate calculated with the given new data

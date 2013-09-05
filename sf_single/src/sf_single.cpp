@@ -7,10 +7,9 @@
  * particular estimation.
  */
 
+
 // configuration
-#include "Configurator.h"
-#include "config.h"
-void initConfigurator(Configurator& configurator);
+#include "configuration/configuration.h"
 
 
 // cpp includes
@@ -18,10 +17,10 @@ void initConfigurator(Configurator& configurator);
 
 // ROS includes
 #include <ros/ros.h>
-#include TOPIC_INCLUDE
 
 // estimation framework includes
-#include "estimation/IEstimationMethod.h"
+#include "estimation/EstimatorFactory.h"
+#include "estimation/IEstimator.h"
 #include "estimation/Input.h"
 #include "estimation/OutputValue.h"
 #include "estimation/methods.h"
@@ -31,31 +30,32 @@ void initConfigurator(Configurator& configurator);
 ros::Publisher pub_signalFused;
 
 /** @brief Estimator, which does the filtering of a signal. */
-estimation::IEstimationMethod* estimator;
+estimation::IEstimator* estimator;
 
 /**
- * @brief Called when a sample is received.
+ * @brief Called when a message is received.
  */
-void sampleReceived(const TOPIC_TYPE::ConstPtr& msg)
-{
-  // Message objects.
-  TOPIC_TYPE sample = *msg;
-  std_msgs::Float64 sampleFused;
-    
-  try {
+template <class T>
+void received(const T& msg)	// msg is a boost::shared_ptr<T const>!
+{ 
+  try 
+  { 
     // Estimation
-    estimation::Input in(estimation::InputValue(sample.TOPIC_FIELD));
+    estimation::Input in(estimation::InputValue(msg->TOPIC_FIELD));
     estimation::Output out = estimator->estimate(in);
 
-    // Fill the message with data.
+    // Create fused message.
+    std_msgs::Float64 sampleFused;
     sampleFused.data = out.getValue();
-  } catch (std::exception& e) {
+
+    // Send fused message.
+    pub_signalFused.publish(sampleFused);
+    ROS_DEBUG("sample | sample-fused: %.2f | %.2f", msg->TOPIC_FIELD, sampleFused.data);
+  } 
+  catch (std::exception& e) 
+  {
     ROS_ERROR_STREAM(e.what());
   }
-
-  // Send message.
-  pub_signalFused.publish(sampleFused);
-  ROS_DEBUG("sample | sample-fused: %.2f | %.2f", sample.data, sampleFused.data);
 }
 
 /**
@@ -81,9 +81,9 @@ int main(int argc, char **argv)
 
     // Create an estimator according to the configuration header file.
     try {
-      Configurator configurator;
-      initConfigurator(configurator);
-      estimator = configurator.getInitializedEstimator();
+      estimation::EstimatorFactory eFactory;
+      initEstimatorFactory(eFactory);
+      estimator = eFactory.create();
       ROS_DEBUG("Estimator initialized.");
     } catch(std::exception& e) {
       ROS_ERROR_STREAM(e.what());
@@ -96,7 +96,7 @@ int main(int argc, char **argv)
     // Tell ROS that we want to subscribe to the sensor fusion input
     // (the entity to estimate) and publish a fused version of it (the
     // estimate).
-    ros::Subscriber sub_signal = n.subscribe<TOPIC_TYPE>(TOPIC_NAME, 20, sampleReceived);
+    ros::Subscriber sub_signal = n.subscribe<TOPIC_TYPE>(TOPIC_NAME, 20, received);
     ROS_INFO("Subscribing to '%s'.", TOPIC_NAME);
     pub_signalFused = n.advertise<std_msgs::Float64>("signal_fused", 100);
     ROS_INFO("Publishing result to 'signal_fused'.");
@@ -125,51 +125,4 @@ int main(int argc, char **argv)
   }
 
   return 0;
-}
-
-// Configuration
-void initConfigurator(Configurator& configurator)
-{
-#ifdef METHOD
-  configurator.addParam("method", std::string(METHOD));
-#endif
-#ifdef WINDOW_SIZE
-  configurator.addParam("window-size", WINDOW_SIZE);
-#endif
-#ifdef WEIGHTING_COEFFICIENTS
-  Configurator::vector wc = { WEIGHTING_COEFFICIENTS };
-  configurator.addParam("weighting-coefficients", wc);
-#endif
-#ifdef STATE_TRANSITION_MODEL
-  Configurator::matrix stm = { STATE_TRANSITION_MODEL };
-  configurator.addParam("state-transition-model", stm);
-#endif
-#ifdef PROCESS_NOISE_COVARIANCE
-  Configurator::matrix pnc = { PROCESS_NOISE_COVARIANCE };
-  configurator.addParam("process-noise-covariance", pnc);
-#endif
-#ifdef OBSERVATION_MODEL
-  Configurator::matrix om = { OBSERVATION_MODEL };
-  configurator.addParam("observation-model", om);
-#endif
-#ifdef MEASUREMENT_NOISE_COVARIANCE
-  Configurator::matrix mnc = { MEASUREMENT_NOISE_COVARIANCE };
-  configurator.addParam("measurement-noise-covariance", mnc);
-#endif
-#ifdef CONTROL_INPUT_MODEL 
-  Configurator::matrix cim = { CONTROL_INPUT_MODEL };
-  configurator.addParam("control-input-model", cim);
-#endif
-#ifdef CONTROL_INPUT
-  Configurator::vector ci = { CONTROL_INPUT };
-  configurator.addParam("control-input", ci);
-#endif
-#ifdef INITIAL_STATE
-  Configurator::vector is = { INITIAL_STATE };
-  configurator.addParam("initial-state", is);
-#endif
-#ifdef INITIAL_ERROR_COVARIANCE
-  Configurator::matrix iec = { INITIAL_ERROR_COVARIANCE };
-  configurator.addParam("initial-error-covariance", iec);
-#endif
 }

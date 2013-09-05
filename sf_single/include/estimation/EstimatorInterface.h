@@ -3,20 +3,19 @@
  * @author Denise Ratasich
  * @date 28.08.2013
  *
- * @brief Interface of an estimation method (template).
+ * @brief Interface of an estimator (template).
  */
 
-#ifndef __ESTIMATION_ESTIMATIONMETHODINTERFACE_H__
-#define __ESTIMATION_ESTIMATIONMETHODINTERFACE_H__
+#ifndef __ESTIMATION_ESTIMATORINTERFACE_H__
+#define __ESTIMATION_ESTIMATORINTERFACE_H__
 
 #include <vector>
 #include <stdexcept>
 
 namespace estimation 
 {
-
   /**
-   * @brief Interface of an estimation method.
+   * @brief Interface of an estimator.
    *
    * An estimation method has input and output entities. Entities of
    * the same type for an estimation method can be collected with this
@@ -26,7 +25,7 @@ namespace estimation
    * vector). Adding a new entity will append it to the collection.
    */
   template <class T>
-  class EstimationMethodInterface
+  class EstimatorInterface
   {
     /** @brief Stores the entities. */
     std::vector<T> entities;
@@ -37,7 +36,7 @@ namespace estimation
      *
      * Empty. No initializations. No entities.
      */
-    EstimationMethodInterface();
+    EstimatorInterface();
 
     /**
      * @brief Constructor of this interface which adds a single
@@ -48,7 +47,7 @@ namespace estimation
      *
      * @param entity An entity.
      */
-    EstimationMethodInterface(T entity);
+    EstimatorInterface(T entity);
 
     /**
      * @brief Constructor of this class which adds several entities of
@@ -59,7 +58,7 @@ namespace estimation
      *
      * @param entities Several entities for this interface.
      */
-    EstimationMethodInterface(std::vector<T> entities);
+    EstimatorInterface(std::vector<T> entities);
 
     // -----------------------------------------
     // manipulation of this interface
@@ -104,12 +103,12 @@ namespace estimation
     /**
      * @brief Swaps the data of two elements.
      */
-    void swap(EstimationMethodInterface& first, EstimationMethodInterface& second);
+    void swap(EstimatorInterface& first, EstimatorInterface& second);
 
     /**
      * @brief Overloads the assign operator.
      */
-    EstimationMethodInterface& operator=(EstimationMethodInterface right);
+    EstimatorInterface& operator=(EstimatorInterface right);
 
 
     /**
@@ -124,29 +123,29 @@ namespace estimation
     // /**
     //  * @brief Overloads the == (equal) operator (compares the values).
     //  */
-    // bool operator==(const EstimationMethodInterface& rhs) const;
+    // bool operator==(const EstimatorInterface& rhs) const;
 
     // /**
     //  * @brief Overloads the != (not-equal) operator (compares the
     //  * values).
     //  */
-    // bool operator!=(const EstimationMethodInterface& rhs) const;
+    // bool operator!=(const EstimatorInterface& rhs) const;
   };
 
   ////////////////////
   // Implementation //
   ////////////////////
   template <class T>
-  EstimationMethodInterface<T>::EstimationMethodInterface() { }
+  EstimatorInterface<T>::EstimatorInterface() { }
 
   template <class T>
-  EstimationMethodInterface<T>::EstimationMethodInterface(T entity)
+  EstimatorInterface<T>::EstimatorInterface(T entity)
   {
     entities.push_back(entity);	// append
   }
 
   template <class T>
-  EstimationMethodInterface<T>::EstimationMethodInterface(std::vector<T> entities)
+  EstimatorInterface<T>::EstimatorInterface(std::vector<T> entities)
   {
     this->entities = entities;	// copy
   }
@@ -155,7 +154,7 @@ namespace estimation
   // manipulation of this interface
   // -----------------------------------------
   template <class T>
-  void EstimationMethodInterface<T>::add(T entity)
+  void EstimatorInterface<T>::add(T entity)
   {
     entities.push_back(entity);	// append
   }
@@ -164,7 +163,7 @@ namespace estimation
   // getters and setters
   // -----------------------------------------
   template <class T>
-  std::vector<double> EstimationMethodInterface<T>::getValues(void) const
+  std::vector<double> EstimatorInterface<T>::getValues(void) const
   {
     std::vector<double> values;
 
@@ -175,13 +174,13 @@ namespace estimation
   }
 
   template <class T>
-  double EstimationMethodInterface<T>::getValue() const
+  double EstimatorInterface<T>::getValue() const
   {
     return entities[0].getValue();
   }
 
   template <class T>
-  int EstimationMethodInterface<T>::size() const
+  int EstimatorInterface<T>::size() const
   {
     return entities.size();
   }
@@ -190,7 +189,7 @@ namespace estimation
   // overloading operators
   // -----------------------------------------
   template <class T>
-  void EstimationMethodInterface<T>::swap(EstimationMethodInterface<T>& first, EstimationMethodInterface<T>& second)
+  void EstimatorInterface<T>::swap(EstimatorInterface<T>& first, EstimatorInterface<T>& second)
   {
     // enable ADL (not necessary in our case, but good practice)
     using std::swap; 
@@ -201,14 +200,14 @@ namespace estimation
   }
 
   template <class T>
-  EstimationMethodInterface<T>& EstimationMethodInterface<T>::operator=(EstimationMethodInterface<T> right)
+  EstimatorInterface<T>& EstimatorInterface<T>::operator=(EstimatorInterface<T> right)
   {
     swap(*this, right);
     return *this;
   }
 
   template <class T>
-  T& EstimationMethodInterface<T>::operator[](const int index)
+  T& EstimatorInterface<T>::operator[](const int index)
   {
     if (index < 0  ||  index >= entities.size())
       throw std::out_of_range("Index out of range (Output.data).");
@@ -217,7 +216,7 @@ namespace estimation
   }
 
   // remove if really not needed: == !=
-  // bool EstimationMethodInterface::operator==(const EstimationMethodInterface& rhs) const
+  // bool EstimatorInterface::operator==(const EstimatorInterface& rhs) const
   // {
   //   bool equal = true;
 
@@ -231,7 +230,7 @@ namespace estimation
   //   return equal;
   // }
 
-  // bool EstimationMethodInterface::operator!=(const EstimationMethodInterface& rhs) const
+  // bool EstimatorInterface::operator!=(const EstimatorInterface& rhs) const
   // {
   //   return !(*this).operator==(rhs);
   // }

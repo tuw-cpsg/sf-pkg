@@ -20,6 +20,8 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
+#include "configuration/methods.h"
+
 // -----------------------------------------
 // input
 // -----------------------------------------
@@ -33,7 +35,7 @@
 // method and its parameters
 // -----------------------------------------
 
-#define METHOD			"MovingMedian"
+#define METHOD			MOVING_MEDIAN
 #define WINDOW_SIZE		5
 
 #endif

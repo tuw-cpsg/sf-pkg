@@ -9,7 +9,7 @@
 #ifndef __ESTIMATION_INPUT_H__
 #define __ESTIMATION_INPUT_H__
 
-#include "estimation/EstimationMethodInterface.h"
+#include "estimation/EstimatorInterface.h"
 #include "estimation/InputValue.h"
 
 namespace estimation 
@@ -29,7 +29,7 @@ namespace estimation
    * This class provides only specific constructors, the whole work is
    * done in \c EstimationMethodInterface.
    */
-  class Input : public EstimationMethodInterface<InputValue>
+  class Input : public EstimatorInterface<InputValue>
   { 
   public: 
     /*

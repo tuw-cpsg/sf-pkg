@@ -12,7 +12,7 @@
 #include <deque>
 #include <ostream>
 
-#include "estimation/IEstimationMethod.h"
+#include "estimation/IEstimator.h"
 #include "estimation/Input.h"
 #include "estimation/Output.h"
 
@@ -28,7 +28,7 @@ namespace estimation
    * - where very large deviations (outliers) can occur.
    * - which are Laplace distributed.
    */
-  class MovingMedian : public IEstimationMethod
+  class MovingMedian : public IEstimator
   { 
     /** @brief Input data. */
     std::deque<Input> in;
@@ -66,7 +66,7 @@ namespace estimation
     void setWindowSize (unsigned int windowSize);
 
     // -----------------------------------------
-    // IEstimationMethod implementation
+    // IEstimator implementation
     // -----------------------------------------
     /**
      * @brief Returns an estimate calculated with the given new data

@@ -6,8 +6,8 @@
  * @brief Interface for classes implementing an estimation method.
  */
 
-#ifndef __ESTIMATION_IESTIMATIONMETHOD_H__
-#define __ESTIMATION_IESTIMATIONMETHOD_H__
+#ifndef __ESTIMATION_IESTIMATOR_H__
+#define __ESTIMATION_IESTIMATOR_H__
 
 #include <ostream>
 
@@ -19,11 +19,11 @@ namespace estimation
   /** 
    * @brief Interface for all estimation algorithms.
    */
-  class IEstimationMethod {
+  class IEstimator {
 
   public:
     /** @brief Destructor. */
-    virtual ~IEstimationMethod () { };
+    virtual ~IEstimator () { };
 
     /** 
      * @brief Triggers an estimation cycle with new data and returns
@@ -39,7 +39,7 @@ namespace estimation
     virtual void serialize(std::ostream& os) const = 0;
   };
 
-  std::ostream& operator<<(std::ostream& os, const IEstimationMethod& estimator);
+  std::ostream& operator<<(std::ostream& os, const IEstimator& estimator);
 }
 
 #endif

@@ -6,7 +6,7 @@
  * @brief Implementation of the input of an estimation algorithm.
  *
  * Basically there is nothing to implement. This class inherits from
- * \c EstimationMethodInterface which does all the manipulation of
+ * \c EstimatorInterface which does all the manipulation of
  * this input interface.
  */
 
@@ -20,13 +20,13 @@ namespace estimation
   }
 
   Input::Input(InputValue inputValue)
-    : EstimationMethodInterface<InputValue>(inputValue)
+    : EstimatorInterface<InputValue>(inputValue)
   {
     // nothing to do (everything is done by the superclass)
   }
 
   Input::Input(std::vector<InputValue> inputValues)
-    : EstimationMethodInterface<InputValue>(inputValues)
+    : EstimatorInterface<InputValue>(inputValues)
   {
     // nothing to do (everything is done by the superclass)
   }

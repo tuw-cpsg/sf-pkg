@@ -20,6 +20,8 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
+#include "configuration/methods.h"
+
 // -----------------------------------------
 // input
 // -----------------------------------------
@@ -33,7 +35,7 @@
 // method and its parameters
 // -----------------------------------------
 
-#define METHOD				"KalmanFilter"
+#define METHOD				KALMAN_FILTER
 
 // required
 #define STATE_TRANSITION_MODEL		{1}

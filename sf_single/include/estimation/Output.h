@@ -9,7 +9,7 @@
 #ifndef __ESTIMATION_OUTPUT_H__
 #define __ESTIMATION_OUTPUT_H__
 
-#include "estimation/EstimationMethodInterface.h"
+#include "estimation/EstimatorInterface.h"
 #include "estimation/OutputValue.h"
 
 namespace estimation 
@@ -27,9 +27,9 @@ namespace estimation
    * MovingMedian, the size of the vector is 1.
    *
    * This class provides only specific constructors, the whole work is
-   * done in \c EstimationMethodInterface.
+   * done in \c EstimatorInterface.
    */
-  class Output : public EstimationMethodInterface<OutputValue>
+  class Output : public EstimatorInterface<OutputValue>
   { 
   public:
     /**

@@ -38,7 +38,7 @@ namespace estimation
   }
 
   // -----------------------------------------
-  // IEstimationMethod implementation
+  // IEstimator implementation
   // -----------------------------------------
   Output MovingMedian::estimate (Input next)
   {

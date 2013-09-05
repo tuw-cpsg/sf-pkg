@@ -154,7 +154,7 @@ namespace estimation
   }
 
   // -----------------------------------------
-  // IEstimationMethod implementation
+  // IEstimator implementation
   // -----------------------------------------
   Output KalmanFilter::estimate (Input next)
   {

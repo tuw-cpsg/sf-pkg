@@ -17,26 +17,28 @@ add_library(estimation
   src/estimation/Input.cpp
   src/estimation/OutputValue.cpp
   src/estimation/Output.cpp
-  src/estimation/IEstimationMethod.cpp
+  src/estimation/EstimatorFactory.cpp
+  src/estimation/IEstimator.cpp
   src/estimation/MovingMedian.cpp
   src/estimation/MovingAverage.cpp
   src/estimation/KalmanFilter.cpp
 
-  include/estimation/EstimationMethodInterface.h
+  include/estimation/EstimatorInterface.h
   include/estimation/InputValue.h
   include/estimation/Input.h
   include/estimation/OutputValue.h
   include/estimation/Output.h
-  include/estimation/IEstimationMethod.h
+  include/estimation/EstimatorFactory.h
+  include/estimation/IEstimator.h
   include/estimation/methods.h
   include/estimation/MovingMedian.h
   include/estimation/MovingAverage.h
   include/estimation/KalmanFilter.h
   )
 
-add_library(misc STATIC
-  src/Configurator.cpp
-  include/Configurator.h
+add_library(configuration STATIC
+  src/configuration/configuration.cpp
+  include/configuration/configuration.h
   )
 
 # find_library(estimation 
@@ -98,7 +100,7 @@ include_directories(
 add_executable(sf_single src/sf_single.cpp)
 target_link_libraries(sf_single 
   estimation 
-  misc
+  configuration
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
   )
@@ -117,9 +119,8 @@ target_link_libraries(sf_single
 ##########
 ## Specify tests to build
 if (CATKIN_ENABLE_TESTING)
-  catkin_add_gtest(utest tests/utest_configuration.cpp)
+  catkin_add_gtest(utest tests/utest_EstimatorFactory.cpp)
   target_link_libraries(utest
-    misc
     estimation
     ${catkin_LIBRARIES}
     ${Boost_LIBRARIES}

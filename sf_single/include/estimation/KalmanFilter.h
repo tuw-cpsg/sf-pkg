@@ -11,7 +11,7 @@
 
 #include <ostream>
 
-#include "estimation/IEstimationMethod.h"
+#include "estimation/IEstimator.h"
 #include "estimation/Input.h"
 #include "estimation/Output.h"
 
@@ -42,7 +42,7 @@ namespace estimation
    * \note The Kalman filter needs to be validated, i.e. the method
    * \ref validate must be called to release the operation.
    */
-  class KalmanFilter : public IEstimationMethod
+  class KalmanFilter : public IEstimator
   {
     /** @brief Kalman gain. Size: n x m. */
     MatrixXd K;
@@ -210,7 +210,7 @@ namespace estimation
     void validate (void);
 
     // -----------------------------------------
-    // IEstimationMethod implementation
+    // IEstimator implementation
     // -----------------------------------------
     /**
      * @brief Returns an estimate calculated with the given new data
@@ -260,7 +260,7 @@ namespace estimation
 
     /**
      * @brief Puts the estimated state and its variance into an \c
-     * Output object to match the interface \c IEstimationMethod.
+     * Output object to match the interface \c IEstimator.
      *
      * TODO: fill jitter_ms
      */

@@ -77,7 +77,7 @@ namespace estimation
   }
 
   // -----------------------------------------
-  // IEstimationMethod implementation
+  // IEstimator implementation
   // -----------------------------------------
   Output MovingAverage::estimate (Input next)
   {
