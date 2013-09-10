@@ -119,7 +119,10 @@ target_link_libraries(sf_single
 ##########
 ## Specify tests to build
 if (CATKIN_ENABLE_TESTING)
-  catkin_add_gtest(utest tests/utest_EstimatorFactory.cpp)
+  catkin_add_gtest(utest 
+    tests/utest_main.cpp
+    tests/utest_EstimatorFactory.cpp
+    )
   target_link_libraries(utest
     estimation
     ${catkin_LIBRARIES}

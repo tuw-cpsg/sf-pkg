@@ -81,12 +81,3 @@ TEST(EstimatorFactoryTest, methodToEstimatorCheck)
   classname = typeid(*estimator).name();
   EXPECT_NE(string::npos, classname.find("KalmanFilter",0));
 }
-
-// -----------------------------------------
-// Run all tests
-// -----------------------------------------
-int main(int argc, char **argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
