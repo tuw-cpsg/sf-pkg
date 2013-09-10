@@ -8,7 +8,7 @@ add_definitions("-std=c++0x")
 find_package(catkin REQUIRED COMPONENTS roscpp std_msgs)
 
 ## System dependencies are found with CMake's conventions
-find_package(Boost REQUIRED COMPONENTS )
+find_package(Boost REQUIRED COMPONENTS)
 find_package(Eigen REQUIRED)
 
 ## Declare the estimation library
@@ -22,6 +22,7 @@ add_library(estimation
   src/estimation/MovingMedian.cpp
   src/estimation/MovingAverage.cpp
   src/estimation/KalmanFilter.cpp
+  src/estimation/ExtendedKalmanFilter.cpp
 
   include/estimation/EstimatorInterface.h
   include/estimation/InputValue.h
@@ -34,6 +35,7 @@ add_library(estimation
   include/estimation/MovingMedian.h
   include/estimation/MovingAverage.h
   include/estimation/KalmanFilter.h
+  include/estimation/ExtendedKalmanFilter.h
   )
 
 add_library(configuration STATIC
@@ -125,6 +127,7 @@ if (CATKIN_ENABLE_TESTING)
   catkin_add_gtest(utest 
     tests/utest_main.cpp
     tests/utest_EstimatorFactory.cpp
+    tests/utest_ExtendedKalmanFilter.cpp
     )
   target_link_libraries(utest
     estimation
