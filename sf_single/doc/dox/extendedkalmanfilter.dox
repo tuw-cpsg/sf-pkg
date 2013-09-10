@@ -1,0 +1,99 @@
+/** 
+\page extendedkalmanfilter Extended Kalman Filter
+
+\section Introduction 
+
+For more details see \cite Wel06 and \cite Gre08.
+
+A Kalman filter uses the physical model of a system (the plant) to
+estimate the new value of a statistical variable. The extended Kalman
+filter (EKF) can estimate states of nonlinear systems (= systems which
+cannot be described by a matrix multiplication). This is done by
+modeling the system as /locally/ linear. \cite Rus10
+
+Description of a nonlinear system:
+
+\f[ x_k = f(x_{k-1}, u_{k-1}, w_{k-1}) \f]
+\f[ z_k = h(x_{k-1}, v_{k-1}) \f]
+
+The transition models are no matrices, they are (nonlinear)
+functions. The state and measurement vector can be approximated with
+its previous a posteriori estimated state \f$\tilde x_{k-1}\f$
+(without noise):
+
+\f[ \tilde x_k = f(\hat x_{k-1}, u_{k-1}, 0) \f]
+\f[ \tilde z_k = h(\tilde x_{k}, 0) \f]
+
+These functions (f and h) are linearized ("locally") on the previous
+estimated with the first part of its Tailor serie to get the actual
+state \f$x_k\f$ and measurement vectors \f$z_k\f$:
+
+\f[ x_k \approx \tilde x_k + A (x_{k-1} - \hat x_{k-1}) + W w_{k-1} \f]
+\f[ z_k \approx \tilde z_k + H (x_k - \hat x_k) + V v_{k} \f]
+
+A represents the first derivative of f, which is the Jacobian matrix
+of the partial derivatives of f with respect to x. W is the Jacobian
+matrix of the partial derivatives of f with respect to w.
+
+\f[ A_{[i,j]} = \frac{\delta f_{[i]}}{\delta x_{[j]}}(\hat x_{k-1},u_{k-1}, 0) \f]
+\f[ W_{[i,j]} = \frac{\delta f_{[i]}}{\delta w_{[j]}}(\hat x_{k-1},u_{k-1}, 0) \f]
+
+Similar is valid for the observation model.
+
+\f[ H_{[i,j]} = \frac{\delta h_{[i]}}{\delta x_{[j]}}(\tilde x_{k}, 0) \f]
+\f[ V_{[i,j]} = \frac{\delta h_{[i]}}{\delta v_{[j]}}(\tilde x_{k}, 0) \f]
+
+When comparing the extended Kalman filter with the linear \ref
+kalmanfilter the a priori state \f$\hat x_k^-\f$ (the "prediction") is
+now calculated with the function f (\f$\hat x_k^-\f$ corresponds to
+\f$\tilde x_k\f$ in above formulas).
+
+\section Parameters
+
+required:
+- \b METHOD : "ExtendedKalmanFilter"
+- \b N : Dimension of state (needed because the models are functions
+  and not matrices like in the linear Kalman filter).
+- \b STATE_TRANSITION_MODEL : The state transition model f, relates
+  the previous state to the current state. f(x,u,0): a function f of x
+  and u which represents the system ignoring the noise.
+- \b STATE_TRANSITION_MODEL_JACOBIAN : The Jacobian of the state
+  transition model, i.e. partial derivatives of f with respect to x.
+- \b PROCESS_NOISE_COVARIANCE : The process noise covariance Q. r x r
+  Matrix.
+- \b OBSERVATION_MODEL : The observation model h, relates the
+  measurement to the state. h(x,0): a function h of x which represents
+  the observation ignoring measurement noise.
+- \b OBSERVATION_MODEL_JACOBIAN : The Jacobian of the observation
+  model, i.e. partial derivatives of h with respect to x.
+- \b MEASUREMENT_NOISE_COVARIANCE : The measurement noise covariance
+  R. m x m Matrix.
+
+optional:
+- \b CONTROL_INPUT : The control input u. r-dim Vector.
+- \b INITIAL_STATE : The initial state x0. n-dim Vector.
+- \b INITIAL_ERROR_COVARIANCE : The initial error covariance P0. n x n
+  Matrix.
+
+\note
+- The models and its Jacobians have to be defined as functions. These
+  functions are evaluated by the linear algebra library <a
+  href="http://eigen.tuxfamily.org">Eigen</a> and the syntax is used
+  right away. So check the <a
+  href="http://eigen.tuxfamily.org/dox/group__QuickRefPage.html">quick-reference</a>
+  of Eigen 3 for usage and examples, e.g. \f$x^2\f$ ... \c pow(x,2) or
+  \c x.pow(2).
+- Be careful to write appropriate sizes of the matrices and
+  vectors. If the sizes don't fit an exception is thrown, which causes
+  the ROS node to terminate.
+
+Vectors must be specified as a list of floats separated by
+commas. Matrices must be specified as lists of vectors enclosed by
+curly brackets and separated by commas. Examples:
+- 3-dimensional vector: 1, 2, 3
+- 1-dimensional vector: 1
+- 2x2-dimensional matrix: {1,0} , {0,1}
+- 1x1-dimensional matrix: {1}
+- 2x1-dimensional matrix: {1} , {1}
+
+*/

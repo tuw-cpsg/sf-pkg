@@ -7,6 +7,7 @@ List of estimation methods:
 - \subpage movingaverage
 - \subpage movingmedian
 - \subpage kalmanfilter
+- \subpage extendedkalmanfilter
 
 \section install_sec Installation
 
