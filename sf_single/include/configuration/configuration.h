@@ -25,10 +25,14 @@ void initEstimatorFactory(estimation::EstimatorFactory& factory);
 // -----------------------------------------
 // includes for the ROS node
 // -----------------------------------------
+
+/** @brief Macros and includes for the configuration. */
+#include "configuration/pre_config.h"
+
 /** @brief Bring in the current configuration. */
 #include "config.h"
 
-// includes according configuration
-#include TOPIC_INCLUDE
+/** @brief Prepares configuration for the ROS node. */
+#include "configuration/post_config.h"
 
 #endif

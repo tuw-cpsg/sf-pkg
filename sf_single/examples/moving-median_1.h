@@ -26,10 +26,14 @@
 // input
 // -----------------------------------------
 
-#define TOPIC_NAME	"signal"
-#define TOPIC_TYPE	std_msgs::Float64
-#define TOPIC_INCLUDE	<std_msgs/Float64.h>
-#define TOPIC_FIELD	data
+// List input topics here, format (no commas needed between topic
+// tuples): ((name, field, type)).
+#define TOPICS					\
+  ((signal, data, std_msgs::Float64))		\
+  /**/
+
+// Define the includes needed for these topics!
+#include <std_msgs/Float64.h>
 
 // -----------------------------------------
 // method and its parameters

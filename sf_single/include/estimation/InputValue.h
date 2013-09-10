@@ -74,7 +74,12 @@ namespace estimation
     unsigned int getJitter(void) const;
 
     /**
-     * @brief Sets the value.
+     * @brief Sets the value, resets this InputValue (jitter_ms is set
+     * to 0).
+     *
+     * \note This function can be used instead of creating a new
+     * instance of this class. \c setJitter() can be called to update
+     * the jitter associated with the new value.
      *
      * @param value The data value.
      */
@@ -83,6 +88,10 @@ namespace estimation
     /**
      * @brief Sets the jitter in ms between sensing and this function
      * call.
+     *
+     * \note This function must be called after \c setValue()! The
+     * function \c setValue() resets an instance of \c InputValue,
+     * i.e. jitter_ms would be set to 0.
      *
      * @param jitter_ms The jitter in ms.
      */

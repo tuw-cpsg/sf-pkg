@@ -20,15 +20,23 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#include "configuration/methods.h"
-
 // -----------------------------------------
 // input
 // -----------------------------------------
 
-// List input topics here, format (no commas needed between topic
-// tuples): ((name, field, type)).
+/** 
+ * @brief List of input topics.
+ * 
+ * Define the inputs in a tuple: name, field to estimate, message
+ * type, include for the message type. Do not place the name or field
+ * within quotes!
+ *
+ * \note This macro represents a sequence of tuples, i.e. there is no
+ * need for a comma, but has to be put into parentheses twice (inner
+ * for the tuple, outer for the sequence).
+ */
 #define TOPICS					\
+  ((signal, data, std_msgs::Float64))		\
   ((signal, data, std_msgs::Float64))		\
   /**/
 
@@ -39,8 +47,18 @@
 // method and its parameters
 // -----------------------------------------
 
-#define METHOD			MOVING_AVERAGE
-#define WINDOW_SIZE		5
-#define WEIGHTING_COEFFICIENTS	1, 2, 5, 2, 1
+#define METHOD				KALMAN_FILTER
+
+// required
+#define STATE_TRANSITION_MODEL		{1,0} , {0,1}
+#define PROCESS_NOISE_COVARIANCE	{0.1,0} , {0,0.5}
+#define OBSERVATION_MODEL		{1,0} , {0,1}
+#define MEASUREMENT_NOISE_COVARIANCE	{10,0} , {0,10}
+
+// optional
+//#define CONTROL_INPUT_MODEL		{0}
+//#define CONTROL_INPUT			0,0
+#define INITIAL_STATE			0,0
+#define INITIAL_ERROR_COVARIANCE	{1,0} , {0,1}
 
 #endif

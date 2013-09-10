@@ -38,6 +38,9 @@ add_library(estimation
 
 add_library(configuration STATIC
   src/configuration/configuration.cpp
+
+  include/configuration/pre_config.h
+  include/configuration/post_config.h
   include/configuration/configuration.h
   )
 

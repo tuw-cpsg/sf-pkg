@@ -14,6 +14,7 @@
 
 // cpp includes
 #include <iostream>
+#include <sstream>
 
 // ROS includes
 #include <ros/ros.h>
@@ -22,41 +23,23 @@
 #include "estimation/EstimatorFactory.h"
 #include "estimation/IEstimator.h"
 #include "estimation/Input.h"
-#include "estimation/OutputValue.h"
-#include "estimation/methods.h"
+#include "estimation/InputValue.h"
+#include "estimation/Output.h"
 
-/** @brief Sample publisher (global because publishing is done in
-    callback function); */
-ros::Publisher pub_signalFused;
+/** @brief Collects the messages together. */
+struct TopicState {
+  /** @brief True when a new message has been received. */
+  bool received;
+  /** @brief The latest message received, converted into an InputValue
+   * for an estimator. **/
+  estimation::InputValue value;
+};
 
-/** @brief Estimator, which does the filtering of a signal. */
-estimation::IEstimator* estimator;
+/** @brief Collects the messages of subscribed topics. */
+struct TopicState topics[TOPICS_NUM];
 
-/**
- * @brief Called when a message is received.
- */
-template <class T>
-void received(const T& msg)	// msg is a boost::shared_ptr<T const>!
-{ 
-  try 
-  { 
-    // Estimation
-    estimation::Input in(estimation::InputValue(msg->TOPIC_FIELD));
-    estimation::Output out = estimator->estimate(in);
-
-    // Create fused message.
-    std_msgs::Float64 sampleFused;
-    sampleFused.data = out.getValue();
-
-    // Send fused message.
-    pub_signalFused.publish(sampleFused);
-    ROS_DEBUG("sample | sample-fused: %.2f | %.2f", msg->TOPIC_FIELD, sampleFused.data);
-  } 
-  catch (std::exception& e) 
-  {
-    ROS_ERROR_STREAM(e.what());
-  }
-}
+// Expands to the callback functions of the topics.
+RECEIVES(topics)
 
 /**
  * @brief This node implements a specified sensor fusion method.
@@ -80,8 +63,10 @@ int main(int argc, char **argv)
     // f.e. remapping arguments added by roslaunch.
 
     // Create an estimator according to the configuration header file.
+    estimation::IEstimator* estimator;
     try {
       estimation::EstimatorFactory eFactory;
+      // Pass definitions of the configuration header to the factory.
       initEstimatorFactory(eFactory);
       estimator = eFactory.create();
       ROS_DEBUG("Estimator initialized.");
@@ -94,18 +79,67 @@ int main(int argc, char **argv)
     ros::NodeHandle n;
     
     // Tell ROS that we want to subscribe to the sensor fusion input
-    // (the entity to estimate) and publish a fused version of it (the
-    // estimate).
-    ros::Subscriber sub_signal = n.subscribe<TOPIC_TYPE>(TOPIC_NAME, 20, received);
-    ROS_INFO("Subscribing to '%s'.", TOPIC_NAME);
-    pub_signalFused = n.advertise<std_msgs::Float64>("signal_fused", 100);
-    ROS_INFO("Publishing result to 'signal_fused'.");
+    // (given in the configuration header) and publish a fused version
+    // of it (the estimate).
+    ros::Subscriber subscribers[TOPICS_NUM];
+    SUBSCRIBE(subscribers, n);
+    ros::Publisher publishers[TOPICS_NUM];
+    for (int i = 0; i < TOPICS_NUM; i++) {
+      publishers[i] = n.advertise<std_msgs::Float64>("state_" + std::to_string(i) + "_fused", 100);
+      ROS_INFO_STREAM("Publishing result to 'state_" << i << "_fused'.");
+    }
+    // Create messages for publishing.
+    std_msgs::Float64 sampleFused[TOPICS_NUM];
 
     // --------------------------------------------
     // Running application.
     // --------------------------------------------
     // Check repeatedly whether there are samples to estimate.
-    ros::spin();	// blocking (until roscore sends "kill")
+    while (ros::ok()) 
+    {
+      // Check if all samples for an estimation cycle were received.
+      bool all_recv = true;
+      for (int i = 0; i < TOPICS_NUM; i++) 
+	all_recv &= topics[i].received;
+
+      if (all_recv)
+      {
+	try
+	{
+	  // Debug: Print jitter of each message/value in ms.
+	  std::stringstream ss;
+	  ss << "Jitter: ";
+	  for (int i = 0; i < TOPICS_NUM; i++)
+	    ss << topics[i].value.getJitter() << " ";
+	  ROS_DEBUG_STREAM(ss.str());
+
+	  // Collect inputs together.
+	  estimation::Input in;
+	  for (int i = 0; i < TOPICS_NUM; i++)
+	    in.add(topics[i].value);
+
+	  // Estimate.
+	  estimation::Output out = estimator->estimate(in);
+
+	  // Set output message(s) and publish.
+	  for (int i = 0; i < out.size(); i++) {
+	    sampleFused[i].data = out[i].getValue();
+	    publishers[i].publish(sampleFused[i]);
+	  }
+	}
+	catch (std::exception& e)
+	{
+	  ROS_ERROR_STREAM(e.what());
+	}
+
+	// Samples/messages are processed, so reset all receive flags.
+	for (int i = 0; i < TOPICS_NUM; i++) 
+	  topics[i].received = false;
+      }
+      
+      // Handle callbacks (check for next samples).
+      ros::spinOnce();
+    }
 
     // --------------------------------------------
     // Clean up.
@@ -113,9 +147,9 @@ int main(int argc, char **argv)
     delete estimator;
 
     // Close connections.
-    sub_signal.shutdown();
-    pub_signalFused.shutdown();
-    ROS_INFO("Closed connections. Exit.");
+    //sub_signal.shutdown();
+    //pub_signalFused.shutdown();
+    ROS_INFO("Exit.");
   }
   catch (std::exception& e)
   {

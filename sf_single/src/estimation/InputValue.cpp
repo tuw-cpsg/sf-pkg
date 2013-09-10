@@ -52,6 +52,8 @@ namespace estimation
   void InputValue::setValue(double value)
   {
     this->value = value;
+    this->jitter_ms = 0;
+    this->t_creation = clock();
   }
 
   void InputValue::setJitter(unsigned int jitter_ms)
