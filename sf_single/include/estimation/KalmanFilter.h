@@ -40,7 +40,8 @@ namespace estimation
    * All other optional parameters are set to 0. 
    *
    * \note The Kalman filter needs to be validated, i.e. the method
-   * \ref validate must be called to release the operation.
+   * \ref validate must be called to release the operation. Changing a
+   * parameter needs revalidation.
    */
   class KalmanFilter : public IEstimator
   {
@@ -65,11 +66,11 @@ namespace estimation
     /** @brief State transition model. Once initialized it cannot be
      * changed. Size: n x n. */
     MatrixXd A;
-    /** @brief Control input. Size: r. */
+    /** @brief Control input. Size: l. */
     VectorXd u;
-    /** @brief Control input model. Size: n x r. */
+    /** @brief Control input model. Size: n x l. */
     MatrixXd B;
-    /** @brief Process noise covariance. Size: r x r. */
+    /** @brief Process noise covariance. Size: n x n. */
     MatrixXd Q;
 
     /** @brief Observation model. Size: m x n. */

@@ -128,6 +128,7 @@ if (CATKIN_ENABLE_TESTING)
     tests/utest_main.cpp
     tests/utest_EstimatorFactory.cpp
     tests/utest_ExtendedKalmanFilter.cpp
+    tests/utest_KalmanFilter.cpp
     )
   target_link_libraries(utest
     estimation
