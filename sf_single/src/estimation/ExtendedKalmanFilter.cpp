@@ -38,118 +38,126 @@ namespace estimation
   void ExtendedKalmanFilter::setInitialState (std::vector<double>& x0)
   {
     copy(x0, this->x);
-  }
-
-  void ExtendedKalmanFilter::setSizeOfState (unsigned int n)
-  {
-    x = VectorXd::Zero(n);
+    validated = false;
   }
 
   void ExtendedKalmanFilter::setInitialErrorCovariance(std::vector< std::vector<double> >& P0)
   {
     copy(P0, this->P);
+    validated = false;
   }
 
   void ExtendedKalmanFilter::setStateTransitionModel (func_f f)
   {
     this->f = f;
+    validated = false;
   }
 
   void ExtendedKalmanFilter::setJacobianOfStateTransitionModel (func_df df)
   {
     this->df = df;
+    validated = false;
   }
 
   void ExtendedKalmanFilter::setControlInput (std::vector<double>& u) 
   {
     copy(u, this->u);
+    validated = false;
   }
 
   void ExtendedKalmanFilter::setProcessNoiseCovariance (std::vector< std::vector<double> >& Q)
   {
     copy(Q, this->Q);
+    validated = false;
   }
 
   void ExtendedKalmanFilter::setObservationModel (func_h h)
   {
     this->h = h;
+    validated = false;
   }
 
   void ExtendedKalmanFilter::setJacobianOfObservationModel (func_dh dh)
   {
     this->dh = dh;
+    validated = false;
   }
 
   void ExtendedKalmanFilter::setMeasurementNoiseCovariance (std::vector< std::vector<double> >& R)
   {
     copy(R, this->R);
+    validated = false;
   }
 
   void ExtendedKalmanFilter::validate (void)
   {
-    // check for minimal initialization, i.e. matrices must not be
-    // empty: state transition model and Jacobian, process noise
-    // covariance, observation or measurement model and its Jacobian,
-    // measurement noise covariance, initial state
-    if (!f)		// callback empty
-      throw std::runtime_error("State transition model missing.");
-    if (!df)		// callback empty
-      throw std::runtime_error("Jacobian of state transition model missing.");
-    if (!h)		// callback empty
-      throw std::runtime_error("Observation model missing.");
-    if (!dh)		// callback empty
-      throw std::runtime_error("Jacobian of observation model missing.");
-    if (Q.rows() == 0) 	// empty matrix
-      throw std::runtime_error("Process noise covariance missing.");
-    if (R.rows() == 0) 	// empty matrix
-      throw std::runtime_error("Measurement noise covariance missing.");
+    try 
+    {
+      // check for minimal initialization, i.e. must not be empty:
+      // state transition model and Jacobian, process noise
+      // covariance, observation or measurement model and its
+      // Jacobian, measurement noise covariance
+      if (!f)			// callback empty
+	throw std::runtime_error("State transition model missing.");
+      if (!df)			// callback empty
+	throw std::runtime_error("Jacobian of state transition model missing.");
+      if (!h)			// callback empty
+	throw std::runtime_error("Observation model missing.");
+      if (!dh)			// callback empty
+	throw std::runtime_error("Jacobian of observation model missing.");
+      if (Q.rows() == 0) 	// empty matrix
+	throw std::runtime_error("Process noise covariance missing.");
+      if (R.rows() == 0) 	// empty matrix
+	throw std::runtime_error("Measurement noise covariance missing.");
 
-    // size of state vector given?
-    if (x.size() == 0)
-      throw std::runtime_error("Size of state vector cannot be evaluated.");
+      // take sizes from required parameters
+      int n = Q.rows();
+      int m = R.rows();
 
-    // take sizes from required parameters
-    int n = x.size();
-    int r = Q.rows();
-    int m = R.rows();
+      // create other parameters if missing ---------------------
+      if (x.rows() != n)	// empty matrix or invalid size from reinit
+	x = VectorXd::Zero(n);
+      if (P.rows() != n)	// empty matrix or invalid size from reinit
+	P = MatrixXd::Zero(n, n);
+      // size of control input u cannot be checked in the EKF!
+      // DANGEROUS! must be correctly initialized so that no out of
+      // range error in the formulas of f/df occur!!
 
-    // create other parameters if missing ---------------------
-    if (u.size() == 0)	// empty vector (control input missing)
-      u = VectorXd::Zero(r);
-    if (P.rows() == 0)	// empty matrix (initial error covariance missing)
-      P = MatrixXd::Zero(n, n);
+      // check appropriate sizes of matrices and vectors --------
+      if (Q.rows() != Q.cols())
+	throw std::runtime_error("Process noise covariance must be a square matrix.");
+      if (R.rows() != R.cols())
+	throw std::runtime_error("Measurement noise covariance must be a square matrix.");
+      if (x.rows() != n  ||  x.cols() != 1)
+	throw std::runtime_error("Initial state has invalid size.");
+      if (P.rows() != n  ||  P.cols() != n)
+	throw std::runtime_error("Initial error covariance has invalid size.");
 
-    // check appropriate sizes of matrices and vectors --------
-    if (x.cols() != 1)
-      throw std::runtime_error("Initial state must be a vector.");
-    if (Q.rows() != Q.cols())
-      throw std::runtime_error("Process noise covariance must be a square matrix.");
-    if (R.rows() != R.cols())
-      throw std::runtime_error("Measurement noise covariance must be a square matrix.");
-    if (u.rows() != r  ||  u.cols() != 1)
-      throw std::runtime_error("Control input has invalid size.");
-    if (P.rows() != n  ||  P.cols() != n)
-      throw std::runtime_error("Initial error covariance has invalid size.");
+      // validation finished successfully -----------------------
+      validated = true;
 
-    // validation finished successfully -----------------------
-    validated = true;
+      // further things to initialize ---------------------------
+      if (K.rows() != n  ||  K.cols() != m)	// not initialized till now or invalid size from reinit
+	K = MatrixXd::Zero(n, m);
 
-    // further things to initialize ---------------------------
-    if (K.rows() == 0)		// not initialized till now
-      K = MatrixXd::Zero(n, m);
+      if (A.rows() != n  ||  A.cols() != n)	// not initialized till now or invalid size from reinit
+	A = MatrixXd::Zero(n, n);
 
-    if (A.rows() == 0)		// not initialized till now
-      A = MatrixXd::Zero(n, n);
+      if (H.rows() != m  ||  H.cols() != n)	// not initialized till now or invalid size from reinit
+	H = MatrixXd::Zero(m, n);
 
-    if (H.rows() == 0)		// not initialized till now
-      H = MatrixXd::Zero(m, n);
-
-    // create output state
-    if (out.size() == 0)	// not initialized till now
-      for (int i = 0; i < n; i++) {
-	//OutputValue val;
-	out.add(OutputValue());
+      // create output state
+      if (out.size() != n) {		// not initialized till now or invalid size from reinit
+	out.clear();
+	for (int i = 0; i < n; i++)
+	  out.add(OutputValue());
       }
+    } 
+    catch(std::exception& e) 
+    {
+      std::string additionalInfo = "ExtendedKalmanFilter: Validation failed. ";
+      throw estimator_error(additionalInfo + e.what());
+    }
   }
 
   // -----------------------------------------
@@ -157,38 +165,46 @@ namespace estimation
   // -----------------------------------------
   Output ExtendedKalmanFilter::estimate (Input next)
   {
-    if (!validated)
-      throw std::runtime_error("EKF not yet validated!");
+    try 
+    {
+      if (!validated)
+	throw std::runtime_error("Not yet validated!");
 
-    // extract the values of next (the measurements) into a vector
-    VectorXd z(H.rows());	// must have size m
-    for (int i = 0; i < H.rows(); i++)
-      z[i] = next[i].getValue();
+      // extract the values of next (the measurements) into a vector
+      VectorXd z(H.rows());	// must have size m
+      for (int i = 0; i < H.rows(); i++)
+	z[i] = next[i].getValue();
     
-    // Kalman Filtering ------------------------------------------
-    // predict (time-update)
-    // calculate A (the Jacobian of f at time step k-1)
-    df(A,x,u);	
-    // evaluate the a priori estimated state vector (x_{k-1} will be
-    // overwritten to a priori x_k!)
-    f(x,u);
-    MatrixXd P_apriori = A*P*A.transpose() + Q;
+      // Kalman Filtering ------------------------------------------
+      // predict (time-update)
+      // calculate A (the Jacobian of f at time step k-1)
+      df(A,x,u);	
+      // evaluate the a priori estimated state vector (x_{k-1} will be
+      // overwritten to a priori x_k!)
+      f(x,u);
+      MatrixXd P_apriori = A*P*A.transpose() + Q;
     
-    // update (measurement-update)
-    // calc H, the Jacobian of h
-    dh(H,x);
-    K = (P_apriori*H.transpose()) * (H*P_apriori*H.transpose() + R).inverse();  
-    VectorXd ze(H.rows());
-    // calc estimated measurement vector -> ze
-    h(ze,x);
-    // calc a posteriori state vector -> x
-    x = x + K*(z - ze);
-    P = P_apriori - K*H*P_apriori;
-    // -----------------------------------------------------------
+      // update (measurement-update)
+      // calc H, the Jacobian of h
+      dh(H,x);
+      K = (P_apriori*H.transpose()) * (H*P_apriori*H.transpose() + R).inverse();  
+      VectorXd ze(H.rows());
+      // calc estimated measurement vector -> ze
+      h(ze,x);
+      // calc a posteriori state vector -> x
+      x = x + K*(z - ze);
+      P = P_apriori - K*H*P_apriori;
+      // -----------------------------------------------------------
 
-    // insert new state and variance into the Output object
-    updateOutput();
-    return out;
+      // insert new state and variance into the Output object
+      updateOutput();
+      return out;
+    } 
+    catch(std::exception& e) 
+    {
+      std::string additionalInfo = "ExtendedKalmanFilter: Estimation failed. ";
+      throw estimator_error(additionalInfo + e.what());
+    }
   }
 
   Output ExtendedKalmanFilter::getLastEstimate(void) 
@@ -246,8 +262,11 @@ namespace estimation
 
   void ExtendedKalmanFilter::updateOutput(void)
   {
+    if (out.size() != x.size())
+      throw std::length_error("Output vector size != state vector size.");
+
     // fill output with state and covariance
-    for (int i = 0; i < x.size(); i++) {
+    for (int i = 0; i < out.size(); i++) {
       out[i].setValue(x[i]);
       out[i].setVariance(P(i,i));
       // TODO: fill jitter_ms

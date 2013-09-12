@@ -93,9 +93,9 @@ namespace estimation
     /** @brief Jacobian of f with respect to x_{k-1}, derivation of
      * the system model to x. Size: n x n.*/
     MatrixXd A;
-    /** @brief Control input. Size: r. */
+    /** @brief Control input. Size: l. */
     VectorXd u;
-    /** @brief Process noise covariance. Size: r x r. */
+    /** @brief Process noise covariance. Size: n x n. */
     MatrixXd Q;
 
     /** 

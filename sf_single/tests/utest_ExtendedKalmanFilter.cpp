@@ -6,9 +6,11 @@
 #include <Eigen/Dense>
 
 // testing following API
+#include "estimation/IEstimator.h"
 #include "estimation/ExtendedKalmanFilter.h"
 #include "estimation/Input.h"
 #include "estimation/InputValue.h"
+#include "estimation/Output.h"
 #include "estimation/OutputValue.h"
 
 using namespace std;
@@ -67,40 +69,44 @@ namespace ExtendedKalmanFilterTest
     ExtendedKalmanFilter ekf;
 
     // check setting required params
-    EXPECT_THROW(ekf.validate(), runtime_error);	// "STM missing"
+    EXPECT_THROW(ekf.validate(), IEstimator::estimator_error);	// "STM missing"
     ekf.setStateTransitionModel(f);
-    EXPECT_THROW(ekf.validate(), runtime_error);	// "Jacobian of STM missing"
+    EXPECT_THROW(ekf.validate(), IEstimator::estimator_error);	// "Jacobian of STM missing"
     ekf.setJacobianOfStateTransitionModel(df);
-    EXPECT_THROW(ekf.validate(), runtime_error);	// "OM missing"
+    EXPECT_THROW(ekf.validate(), IEstimator::estimator_error);	// "OM missing"
     ekf.setObservationModel(h);
-    EXPECT_THROW(ekf.validate(), runtime_error);	// "Jacobian of OM missing"
+    EXPECT_THROW(ekf.validate(), IEstimator::estimator_error);	// "Jacobian of OM missing"
     ekf.setJacobianOfObservationModel(dh);
-    EXPECT_THROW(ekf.validate(), runtime_error);	// "PNC missing"
+    EXPECT_THROW(ekf.validate(), IEstimator::estimator_error);	// "PNC missing"
     vector< vector<double> > Q = { {0.1} };
     ekf.setProcessNoiseCovariance(Q);
-    EXPECT_THROW(ekf.validate(), runtime_error);	// "MNC missing"
+    EXPECT_THROW(ekf.validate(), IEstimator::estimator_error);	// "MNC missing"
     vector< vector<double> > R = { {10} };
     ekf.setMeasurementNoiseCovariance(R);
-    EXPECT_THROW(ekf.validate(), runtime_error);	// "Size of state cannot be evaluated"
-    ekf.setSizeOfState(1);
-    EXPECT_NO_THROW(ekf.validate());		// all required params given
+    EXPECT_NO_THROW(ekf.validate());			// all required params given
 
     // check setting optional params
-    vector<double> u_f = { 0,1 };
-    ekf.setControlInput(u_f);
-    EXPECT_THROW(ekf.validate(), runtime_error);	// "control input has invalid size"
     vector<double> u = { 0 };
     ekf.setControlInput(u);
     EXPECT_NO_THROW(ekf.validate());
   
+    // optional params doesn't set new sizes
     vector< vector<double> > P0_f = { {1,0} , {0,1} };
     ekf.setInitialErrorCovariance(P0_f);
-    EXPECT_THROW(ekf.validate(), runtime_error);	// "EC has invalid size"
-    vector< vector<double> > P0 = { {0} };
-    ekf.setInitialErrorCovariance(P0);
-
-    // final successful validation
     EXPECT_NO_THROW(ekf.validate());
+    EXPECT_EQ(ekf.getState().size(), 1);
+
+    vector<double> x_f = { 0,1 };
+    ekf.setInitialState(x_f);
+    EXPECT_NO_THROW(ekf.validate());
+    EXPECT_NE(ekf.getState().size(), 2);
+
+    // required param Q sets new size of x and out
+    vector< vector<double> > Q2 = { {0.1,0},{0,0.1} };
+    ekf.setProcessNoiseCovariance(Q2);   
+    EXPECT_NO_THROW(ekf.validate());
+    EXPECT_EQ(ekf.getState().size(), 2);
+    EXPECT_EQ(ekf.getLastEstimate().size(), 2);
 
     // check initialization of output
     Output out = ekf.getLastEstimate();
@@ -115,53 +121,53 @@ namespace ExtendedKalmanFilterTest
 
     // check validation itself (e.g. invalid sizes of vectors/matrices,
     // empty callbacks, etc.)
+    EXPECT_THROW(ekf.validate(), IEstimator::estimator_error);	// "STM missing"
     ekf.setStateTransitionModel(0);
-    EXPECT_THROW(ekf.validate(), runtime_error);		// "STM missing"
+    EXPECT_THROW(ekf.validate(), IEstimator::estimator_error);	// "STM missing"
     ekf.setStateTransitionModel(f);
     ekf.setJacobianOfStateTransitionModel(0);	
-    EXPECT_THROW(ekf.validate(), runtime_error);		// "STMJ missing"
+    EXPECT_THROW(ekf.validate(), IEstimator::estimator_error);	// "STMJ missing"
     ekf.setJacobianOfStateTransitionModel(df);
     ekf.setObservationModel(0);
-    EXPECT_THROW(ekf.validate(), runtime_error);		// "OM missing"
+    EXPECT_THROW(ekf.validate(), IEstimator::estimator_error);	// "OM missing"
     ekf.setObservationModel(h);
     ekf.setJacobianOfObservationModel(0);
-    EXPECT_THROW(ekf.validate(), runtime_error);		// "OMJ missing"
+    EXPECT_THROW(ekf.validate(), IEstimator::estimator_error);	// "OMJ missing"
     ekf.setJacobianOfObservationModel(dh);
 
-    EXPECT_THROW(ekf.validate(), runtime_error);		// "PNC missing"
-    vector< vector<double> > Q = { {0.1} };
-    ekf.setProcessNoiseCovariance(Q);
-    EXPECT_THROW(ekf.validate(), runtime_error);		// "MNC missing"
+    EXPECT_THROW(ekf.validate(), IEstimator::estimator_error);	// "PNC missing"
+    vector< vector<double> > Q_f = { {0.1,1} };
+    ekf.setProcessNoiseCovariance(Q_f);
+    EXPECT_THROW(ekf.validate(), IEstimator::estimator_error);	// "Q not square"
+    vector< vector<double> > Q1 = { {0.1} };
+    ekf.setProcessNoiseCovariance(Q1);
+    EXPECT_THROW(ekf.validate(), IEstimator::estimator_error);	// "MNC missing"
+    vector< vector<double> > R_f = { {10},{1} };
+    ekf.setMeasurementNoiseCovariance(R_f);
+    EXPECT_THROW(ekf.validate(), IEstimator::estimator_error);	// "R not square"
     vector< vector<double> > R = { {10} };
     ekf.setMeasurementNoiseCovariance(R);
 
-    EXPECT_THROW(ekf.validate(), runtime_error);		// "state-size missing"
-    ekf.setSizeOfState(2);
-
-    vector< vector<double> > Q_f = { {0.1,1} };
-    ekf.setProcessNoiseCovariance(Q_f);
-    EXPECT_THROW(ekf.validate(), runtime_error);		// "Q: invalid size"
-    ekf.setProcessNoiseCovariance(Q);
-    vector< vector<double> > R_f = { {10} , {-1} };
-    ekf.setMeasurementNoiseCovariance(R_f);
-    EXPECT_THROW(ekf.validate(), runtime_error);		// "R: invalid size"
-    ekf.setMeasurementNoiseCovariance(R);
+    EXPECT_NO_THROW(ekf.validate());				// all required params given
 
     // optional params
-    vector<double> u_f = {0.1,1};
-    ekf.setControlInput(u_f);
-    EXPECT_THROW(ekf.validate(), runtime_error);		// "u: invalid size"
-    vector<double> u = {0};
-    ekf.setControlInput(u);
-    vector< vector<double> > P0_f = { {0.1,1} };
-    ekf.setInitialErrorCovariance(P0_f);
-    EXPECT_THROW(ekf.validate(), runtime_error);		// "P0: invalid size"
-    vector< vector<double> > P0 = { {1} };
-    ekf.setInitialErrorCovariance(P0);
-    EXPECT_THROW(ekf.validate(), runtime_error);		// "P0: invalid size"
-
-    ekf.setSizeOfState(1);
+    vector<double> x = { 0,1 };
+    ekf.setInitialState(x);
     EXPECT_NO_THROW(ekf.validate());
+    EXPECT_NE(ekf.getState().size(), 2);
+
+    vector< vector<double> > Q = { {0.1,0},{0,0.1} };
+    ekf.setProcessNoiseCovariance(Q);
+    EXPECT_NO_THROW(ekf.validate());
+    ekf.setInitialState(x);
+    EXPECT_NO_THROW(ekf.validate());
+    EXPECT_EQ(ekf.getState().size(), 2);			// sizes now ok
+
+    // size of R cannot be checked, must match number of formulas in h
+    // -> check during compile time
+
+    // size of u cannot be checked here either (u is only contained in
+    // f/df), nor during compile-time!
   }
 
   TEST(ExtendedKalmanFilterTest, validationEffect)
@@ -176,15 +182,19 @@ namespace ExtendedKalmanFilterTest
     ekf.setProcessNoiseCovariance(Q);
     vector< vector<double> > R = { {10} };
     ekf.setMeasurementNoiseCovariance(R);
-    ekf.setSizeOfState(1);
 
     // validate has an effect?
     InputValue measurement(1);
     Input in(measurement);
     Output out;
   
-    EXPECT_THROW(out = ekf.estimate(in), runtime_error);	// "not yet validated"
+    EXPECT_THROW(out = ekf.estimate(in), IEstimator::estimator_error);	// "not yet validated"
   
+    EXPECT_NO_THROW(ekf.validate());
+
+    // changing a parameter -> EKF must be re-validated
+    ekf.setProcessNoiseCovariance(Q);
+    EXPECT_THROW(out = ekf.estimate(in), IEstimator::estimator_error);	// "not yet validated"
     EXPECT_NO_THROW(ekf.validate());
   
     // EKF should now be released and return an estimate (should not be
@@ -207,7 +217,6 @@ namespace ExtendedKalmanFilterTest
     ekf.setProcessNoiseCovariance(Q);
     vector< vector<double> > R = { {10} };
     ekf.setMeasurementNoiseCovariance(R);
-    ekf.setSizeOfState(1);
 
     ekf.validate();
   
@@ -221,27 +230,32 @@ namespace ExtendedKalmanFilterTest
     EXPECT_NEAR(out[0].getVariance(), 0.0990, 0.0001);
 
     in[0].setValue(5);
-    out = ekf.estimate(in);
+    EXPECT_NO_THROW(out = ekf.estimate(in));
   
     EXPECT_NEAR(out[0].getValue(), 0.1073, 0.0001);
     EXPECT_NEAR(out[0].getVariance(), 0.1951, 0.0001);
 
+    // another example
     ExtendedKalmanFilter ekf2;
     ekf2.setStateTransitionModel(f2);
     ekf2.setJacobianOfStateTransitionModel(df2);
     ekf2.setObservationModel(h2);
     ekf2.setJacobianOfObservationModel(dh2);
-    ekf2.setProcessNoiseCovariance(Q);
-    ekf2.setMeasurementNoiseCovariance(R);
-    ekf2.setSizeOfState(2);
+    vector< vector<double> > Q2 = { {0.1,0},{0,0.1} };
+    ekf2.setProcessNoiseCovariance(Q2);
+    vector< vector<double> > R2 = { {10} };
+    ekf2.setMeasurementNoiseCovariance(R2);
 
     ekf2.validate();
 
     in[0].setValue(1);
-    out = ekf2.estimate(in);
-    EXPECT_NEAR(out[0].getValue(), 0.1073, 0.0001);
-    EXPECT_NEAR(out[1].getValue(), 0.1073, 0.0001);
+    EXPECT_NO_THROW(out = ekf2.estimate(in));
     EXPECT_EQ(out.size(), 2);
+    
+    EXPECT_NEAR(out[0].getValue(), 0.0, 0.0001);
+    EXPECT_NEAR(out[0].getVariance(), 0.1, 0.0001);
+    EXPECT_NEAR(out[1].getValue(), 0.0099, 0.0001);
+    EXPECT_NEAR(out[1].getVariance(), 0.0990, 0.0001);
   }
 
 }

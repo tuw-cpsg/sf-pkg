@@ -68,6 +68,12 @@ namespace estimation
      */
     void add(T entity);
 
+    /**
+     * @brief Clear, all entities will be removed, an empty interface
+     * remains.
+     */
+    void clear(void);
+
     // -----------------------------------------
     // getters and setters
     // -----------------------------------------
@@ -157,6 +163,12 @@ namespace estimation
   void EstimatorInterface<T>::add(T entity)
   {
     entities.push_back(entity);	// append
+  }
+
+  template <class T>
+  void EstimatorInterface<T>::clear(void)
+  {
+    entities.clear();
   }
 
   // -----------------------------------------

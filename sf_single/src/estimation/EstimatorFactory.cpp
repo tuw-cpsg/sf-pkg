@@ -236,11 +236,6 @@ namespace estimation
 	ekf.setControlInput(ci);
       }
 
-      if (params.count("state-size")) {
-	int n = boost::any_cast<int>(params["state-size"]);
-	ekf.setSizeOfState(n);
-      }
-
       if (params.count("initial-state")) {
 	vector is = boost::any_cast<vector>(params["initial-state"]);
 	ekf.setInitialState(is);

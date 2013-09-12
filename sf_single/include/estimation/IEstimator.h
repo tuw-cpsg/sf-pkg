@@ -37,6 +37,17 @@ namespace estimation
      * @brief Prints a description fo the estimator.
      */
     virtual void serialize(std::ostream& os) const = 0;
+
+    /**
+     * @brief Exception thrown by an estimator.
+     */
+    class EstimatorException : public std::runtime_error
+    {
+    public:
+    EstimatorException(const std::string& info) 
+      : std::runtime_error(info) { }
+    };
+    typedef EstimatorException estimator_error;
   };
 
   std::ostream& operator<<(std::ostream& os, const IEstimator& estimator);

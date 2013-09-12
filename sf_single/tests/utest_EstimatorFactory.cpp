@@ -213,10 +213,9 @@ TEST(EstimatorFactoryTest, extendedKalmanFilter)
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "validation failed (f=0)"
   stm = test_f;
   cfg.addParam("state-transition-model", stm);
-  EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "validation failed (state-size)"
 
-  EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "validation failed (state-size missing)"
-  cfg.addParam("state-size", 1);
+  EXPECT_NO_THROW(estimator = cfg.create());				   // all required params passed
+
 
   // optional params
   cfg.addParam("control-input", pnc);
@@ -237,7 +236,7 @@ TEST(EstimatorFactoryTest, extendedKalmanFilter)
   cfg.addParam("initial-error-covariance", iec);
   EXPECT_NO_THROW(estimator = cfg.create());
 
-  // checks for validation are done in utest_ExtendedKalmanFilter
+  // validation is done in utest_ExtendedKalmanFilter?
 
   EXPECT_NO_THROW(estimator = cfg.create());
   classname = typeid(*estimator).name();
