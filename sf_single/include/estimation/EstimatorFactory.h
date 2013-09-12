@@ -18,17 +18,6 @@
 namespace estimation
 {
   /**
-   * @brief Exception thrown by a EstimatorFactory.
-   */
-  class EstimatorFactoryException : public std::runtime_error
-  {
-  public:
-  EstimatorFactoryException(const std::string& info) 
-    : std::runtime_error(info) { }
-  };
-  typedef EstimatorFactoryException factory_error;
-
-  /**
    * @brief Initializes and returns an estimator.
    *
    * Provides methods to initialize the estimation method specified by
@@ -36,9 +25,21 @@ namespace estimation
    */
   class EstimatorFactory
   {
+    /** @brief Collects the parameters for initializing an
+     * estimator. */
     std::map<std::string, boost::any> params;
 
   public: 
+    /**
+     * @brief Exception thrown by a EstimatorFactory.
+     */
+    class EstimatorFactoryException : public std::runtime_error
+    {
+    public:
+    EstimatorFactoryException(const std::string& info) 
+      : std::runtime_error(info) { }
+    };
+    typedef EstimatorFactoryException factory_error;
 
     typedef std::vector<double> vector;
     typedef std::vector< std::vector<double> > matrix;
@@ -74,6 +75,7 @@ namespace estimation
     void initMovingMedian(estimation::MovingMedian& mm);
     void initMovingAverage(estimation::MovingAverage& ma);
     void initKalmanFilter(estimation::KalmanFilter& kf);
+    void initExtendedKalmanFilter(estimation::ExtendedKalmanFilter& ekf);
   };
 }
 

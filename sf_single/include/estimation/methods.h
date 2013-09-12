@@ -12,5 +12,6 @@
 #include "estimation/MovingMedian.h"
 #include "estimation/MovingAverage.h"
 #include "estimation/KalmanFilter.h"
+#include "estimation/ExtendedKalmanFilter.h"
 
 #endif

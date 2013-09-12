@@ -29,25 +29,32 @@ namespace estimation
       std::string method = boost::any_cast<std::string>(params["method"]);
 
       if (method.compare("MovingMedian") == 0)
-	{
-	  estimation::MovingMedian* mm = new estimation::MovingMedian();
-	  initMovingMedian(*mm);
-	  return mm;
-	}
+      {
+	estimation::MovingMedian* mm = new estimation::MovingMedian();
+	initMovingMedian(*mm);
+	return mm;
+      }
 
       if (method.compare("MovingAverage") == 0)
-	{
-	  estimation::MovingAverage* ma = new estimation::MovingAverage();
-	  initMovingAverage(*ma);
-	  return ma;
-	}
+      {
+	estimation::MovingAverage* ma = new estimation::MovingAverage();
+	initMovingAverage(*ma);
+	return ma;
+      }
 
       if (method.compare("KalmanFilter") == 0)
-	{
-	  estimation::KalmanFilter* kf = new estimation::KalmanFilter();
-	  initKalmanFilter(*kf);
-	  return kf;
-	}
+      {
+	estimation::KalmanFilter* kf = new estimation::KalmanFilter();
+	initKalmanFilter(*kf);
+	return kf;
+      }
+
+      if (method.compare("ExtendedKalmanFilter") == 0)
+      {
+	estimation::ExtendedKalmanFilter* ekf = new estimation::ExtendedKalmanFilter();
+	initExtendedKalmanFilter(*ekf);
+	return ekf;
+      }
     } catch(std::exception& e) {
       throw factory_error(std::string("Configuration failed. ") + e.what());
     }
@@ -170,6 +177,83 @@ namespace estimation
       kf.validate();	// throws on error
     } catch(std::exception& e) {
       std::string additionalInfo = "Initializing KalmanFilter failed. ";
+      throw factory_error(additionalInfo + e.what());
+    }
+  }
+
+  void EstimatorFactory::initExtendedKalmanFilter(estimation::ExtendedKalmanFilter& ekf)
+  {
+    // required: state-transition-model,
+    //   state-transition-model-jacobian, process-noise-covariance,
+    //   observation-model, observation-model-covariance,
+    //   measurement-noise-covariance
+
+    // optional: control-input, initial-state,
+    //   initial-error-covariance
+
+    // required -----
+    try {
+      if (params.count("state-transition-model")) {
+	ExtendedKalmanFilter::func_f stm = boost::any_cast<ExtendedKalmanFilter::func_f>(params["state-transition-model"]);
+	ekf.setStateTransitionModel(stm);
+      } else
+	throw factory_error("State transition model missing.");
+
+      if (params.count("state-transition-model-jacobian")) {
+	ExtendedKalmanFilter::func_df stmj = boost::any_cast<ExtendedKalmanFilter::func_df>(params["state-transition-model-jacobian"]);
+	ekf.setJacobianOfStateTransitionModel(stmj);
+      } else
+	throw factory_error("Jacobian of state transition model missing.");
+
+      if (params.count("process-noise-covariance")) {
+	matrix pnc = boost::any_cast<matrix>(params["process-noise-covariance"]);
+	ekf.setProcessNoiseCovariance(pnc);
+      } else
+	throw factory_error("Process noise covariance missing.");
+
+      if (params.count("observation-model")) {
+	ExtendedKalmanFilter::func_h om = boost::any_cast<ExtendedKalmanFilter::func_h>(params["observation-model"]);
+	ekf.setObservationModel(om);
+      } else
+	throw factory_error("Observation model missing.");
+
+      if (params.count("observation-model-jacobian")) {
+	ExtendedKalmanFilter::func_dh omj = boost::any_cast<ExtendedKalmanFilter::func_dh>(params["observation-model-jacobian"]);
+	ekf.setJacobianOfObservationModel(omj);
+      } else
+	throw factory_error("Jacobian of observation model missing.");
+
+      if (params.count("measurement-noise-covariance")) {
+	matrix mnc =  boost::any_cast<matrix>(params["measurement-noise-covariance"]);
+	ekf.setMeasurementNoiseCovariance(mnc);
+      } else
+	throw factory_error("Measurement noise covariance missing.");
+
+      // optional -----
+
+      if (params.count("control-input")) {
+	vector ci = boost::any_cast<vector>(params["control-input"]);
+	ekf.setControlInput(ci);
+      }
+
+      if (params.count("state-size")) {
+	int n = boost::any_cast<int>(params["state-size"]);
+	ekf.setSizeOfState(n);
+      }
+
+      if (params.count("initial-state")) {
+	vector is = boost::any_cast<vector>(params["initial-state"]);
+	ekf.setInitialState(is);
+      }
+
+      if (params.count("initial-error-covariance")) {
+	matrix iec = boost::any_cast<matrix>(params["initial-error-covariance"]);
+	ekf.setInitialErrorCovariance(iec);
+      }
+
+      ekf.validate();	// throws on error
+    } catch(std::exception& e) {
+      std::string additionalInfo = "Initializing ExtendedKalmanFilter failed. ";
       throw factory_error(additionalInfo + e.what());
     }
   }

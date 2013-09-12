@@ -18,11 +18,15 @@
 #include <boost/preprocessor/seq/elem.hpp>
 #include <boost/preprocessor/stringize.hpp>
 #include <boost/preprocessor/cat.hpp>
+#include <boost/preprocessor/repetition/for.hpp>
+#include <boost/preprocessor/arithmetic/inc.hpp>
+#include <boost/preprocessor/arithmetic/dec.hpp>
+#include <boost/preprocessor/comparison/not_equal.hpp>
 
 #include "estimation/InputValue.h"
 
 // ----------------------------------------------------------------
-// abbreviations for using configuration
+// abbreviations for handling INPUTS/OUTPUTS
 // ----------------------------------------------------------------
 
 /** @brief Expands to the number of topics defined in the
@@ -91,4 +95,106 @@
   BOOST_PP_SEQ_FOR_EACH_I(RECEIVE_TOPIC, curTopicState, TOPICS)	\
   /**/
 
+
+// ----------------------------------------------------------------
+// abbreviations for ASSIGNING a SEQUENCE to a VECTOR
+// ----------------------------------------------------------------
+
+#if METHOD == EXTENDED_KALMAN_FILTER
+#define STATE_SIZE	BOOST_PP_SEQ_SIZE(STATE_TRANSITION_MODEL)
 #endif
+/** @brief Assigns a formula to an item of an array. */
+#define CODE_LINE_ASSIGN_FORMULA_TO_ELEMENT(r, data, i, elem)	\
+  data[i] = elem;						\
+  /**/
+/** @brief Creates assignments of formulas given in a sequence to an
+ * array. */
+#define CODE_ASSIGN_FORMULAS_TO_VECTOR(array, formulas_seq)		\
+  BOOST_PP_SEQ_FOR_EACH_I(CODE_LINE_ASSIGN_FORMULA_TO_ELEMENT, array, formulas_seq) 
+
+// ----------------------------------------------------------------
+// abbreviations for ASSIGNING a SEQUENCE-of-SEQUENCES to a MATRIX
+// ----------------------------------------------------------------
+
+/** @brief Counts the number of sequence elements, i.e. for a
+ * sequence-of-sequences its the number of rows. */
+#define MATRIX_NUM_ROWS(matrix) \
+  BOOST_PP_SEQ_SIZE(matrix)
+/** @brief Counts the number of elements of the first sequence of a
+ * sequence, i.e. the number of columns. */
+#define MATRIX_NUM_COLS(matrix) \
+  BOOST_PP_SEQ_SIZE(BOOST_PP_SEQ_ELEM(0,matrix))
+/** @brief Expands to the element in a sequence-of-sequences (a
+ * matrix), specified by row and col. */
+#define MATRIX_FORMULA_ELEM(formulas, row, col) \
+  BOOST_PP_SEQ_ELEM(col, BOOST_PP_SEQ_ELEM(row, formulas))
+
+// macros for second (inner) loop ---------------------------------
+#define PRED_2(r, state)				\
+  BOOST_PP_NOT_EQUAL(BOOST_PP_TUPLE_ELEM(6, 2, state),	\
+		     BOOST_PP_TUPLE_ELEM(6, 3, state))	\
+  /**/
+
+#define OP_2(r, state)						\
+  (								\
+   BOOST_PP_TUPLE_ELEM(6, 0, state),				\
+   BOOST_PP_TUPLE_ELEM(6, 1, state),				\
+   BOOST_PP_INC( BOOST_PP_TUPLE_ELEM(6, 2, state) ),		\
+   BOOST_PP_TUPLE_ELEM(6, 3, state),				\
+   BOOST_PP_TUPLE_ELEM(6, 4, state),				\
+   BOOST_PP_TUPLE_ELEM(6, 5, state)				\
+  )								\
+  /**/
+
+#define MACRO_2(r, state)						\
+  BOOST_PP_TUPLE_ELEM(6, 4, state)(BOOST_PP_TUPLE_ELEM(6, 0, state),BOOST_PP_TUPLE_ELEM(6, 2, state)) \
+  = MATRIX_FORMULA_ELEM( BOOST_PP_TUPLE_ELEM(6, 5, state),		\
+			 BOOST_PP_TUPLE_ELEM(6, 0, state),		\
+			 BOOST_PP_TUPLE_ELEM(6, 2, state));		\
+  /**/
+
+// macros for first (outer) loop ----------------------------------
+#define PRED(r, state)						\
+  BOOST_PP_NOT_EQUAL( BOOST_PP_TUPLE_ELEM(6, 0, state),		\
+		      BOOST_PP_TUPLE_ELEM(6, 1, state) )	\
+  /**/
+
+#define OP(r, state)						\
+  (								\
+   BOOST_PP_INC( BOOST_PP_TUPLE_ELEM(6, 0, state) ),		\
+   BOOST_PP_TUPLE_ELEM(6, 1, state),				\
+   BOOST_PP_TUPLE_ELEM(6, 2, state),				\
+   BOOST_PP_TUPLE_ELEM(6, 3, state),				\
+   BOOST_PP_TUPLE_ELEM(6, 4, state),				\
+   BOOST_PP_TUPLE_ELEM(6, 5, state)				\
+  )								\
+  /**/
+
+#define MACRO(r, state)							\
+  BOOST_PP_FOR_ ## r( (BOOST_PP_TUPLE_ELEM(6, 0, state),		\
+		       BOOST_PP_TUPLE_ELEM(6, 1, state),		\
+		       0,						\
+		       BOOST_PP_TUPLE_ELEM(6, 3, state),		\
+		       BOOST_PP_TUPLE_ELEM(6, 4, state),		\
+		       BOOST_PP_TUPLE_ELEM(6, 5, state)),		\
+		      PRED_2, OP_2, MACRO_2 )				\
+   /**/
+
+/**
+ * @brief Expands to assignments of a defined matrix
+ * (sequence-of-sequences) to an Eigen matrix.
+ * 
+ * Initializes an Eigen matrix with values of a macro (e.g. from the
+ * configuration header).
+ */
+#define CODE_ASSIGN_FORMULAS_TO_MATRIX(matrix, formulas)	\
+  BOOST_PP_FOR( (0,						\
+		 MATRIX_NUM_ROWS(formulas),			\
+		 0,						\
+		 MATRIX_NUM_COLS(formulas),			\
+		 matrix,					\
+		 formulas),					\
+		PRED, OP, MACRO )				\
+  /**/
+
+#endif // __CONFIGURATION_POSTCONFIG_H__
