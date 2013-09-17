@@ -3,8 +3,6 @@
 
 \section Introduction 
 
-For more details see \cite Wel06 and \cite Gre08.
-
 A Kalman filter uses the physical model of a system (the plant) to
 estimate the new value of a statistical variable. For this problem the
 system is described by a difference equation (state space model; this
@@ -40,13 +38,25 @@ covariance R and are independent from each other.
 \f[ p(w) \sim N(0,Q) \f]
 \f[ p(v) \sim N(0,R) \f]
 
+For more details see \cite Wel06 and \cite Gre08.
+
+\section Estimation
+
+Predict (time update):
+\f[ x_k^- = A x_{k-1} + B u_k \f]
+\f[ P_k^- = A P_{k-1} A^T + Q \f]
+Correct (measurement update):
+\f[ K_k = \frac{P_k^- H^T}{H P_k^- H^T + R} \f]
+\f[ x_k = x_k^- + K_k ( z_k - H x_k^- ) \f]
+\f[ P_k = ( I - K_k H )P_k^- \f]
+
 \section Parameters
 
 required:
 - \b METHOD : "KalmanFilter"
 - \b STATE_TRANSITION_MODEL : The state transition model A, relates
   the previous state to the current state. n x n Matrix.
-- \b PROCESS_NOISE_COVARIANCE : The process noise covariance Q. r x r
+- \b PROCESS_NOISE_COVARIANCE : The process noise covariance Q. n x n
   Matrix.
 - \b OBSERVATION_MODEL : The observation model H, relates the
   measurement to the state. m x n Matrix.
@@ -55,8 +65,8 @@ required:
 
 optional:
 - \b CONTROL_INPUT_MODEL : The control input model B, relates the
-  control input to the current state. n x r Matrix.
-- \b CONTROL_INPUT : The control input u. r-dim Vector.
+  control input to the current state. n x l Matrix.
+- \b CONTROL_INPUT : The control input u. l-dim Vector.
 - \b INITIAL_STATE : The initial state x0. n-dim Vector.
 - \b INITIAL_ERROR_COVARIANCE : The initial error covariance P0. n x n
   Matrix.

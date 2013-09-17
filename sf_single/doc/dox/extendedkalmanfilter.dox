@@ -3,57 +3,86 @@
 
 \section Introduction 
 
-For more details see \cite Wel06 and \cite Gre08.
-
 A Kalman filter uses the physical model of a system (the plant) to
 estimate the new value of a statistical variable. The extended Kalman
 filter (EKF) can estimate states of nonlinear systems (= systems which
 cannot be described by a matrix multiplication). This is done by
-modeling the system as /locally/ linear. \cite Rus10
+modeling the system as locally linear. \cite Rus10
 
-Description of a nonlinear system:
+Description of a nonlinear system (compared to the simple Kalman
+filter functions instead of matrices are used):
 
-\f[ x_k = f(x_{k-1}, u_{k-1}, w_{k-1}) \f]
-\f[ z_k = h(x_{k-1}, v_{k-1}) \f]
+\f[ x_k = f(x_{k-1}, u_{k-1}) + w_{k-1} \f]
+\f[ z_k = h(x_{k}) + v_{k} \f]
 
-The transition models are no matrices, they are (nonlinear)
-functions. The state and measurement vector can be approximated with
-its previous a posteriori estimated state \f$\tilde x_{k-1}\f$
-(without noise):
+- \f$x_k\f$ actual state on current step k
+- \f$f\f$ state transition model
+- \f$u\f$ control input
+- \f$w\f$ process noise
+- \f$z_k\f$ measurements taken on step k
+- \f$h\f$ observation or measurement model
+- \f$v\f$ measurement noise
 
-\f[ \tilde x_k = f(\hat x_{k-1}, u_{k-1}, 0) \f]
-\f[ \tilde z_k = h(\tilde x_{k}, 0) \f]
+The EKF approximates the models (\f$f\f$ and \f$h\f$) with the first
+part of its Tailor serie (i.e. linearized locally at the previous
+estimate).
 
-These functions (f and h) are linearized ("locally") on the previous
-estimated with the first part of its Tailor serie to get the actual
-state \f$x_k\f$ and measurement vectors \f$z_k\f$:
+\f[ x_k \approx \tilde x_{k} + A (x_{k-1} - \hat x_{k-1}) + w_{k-1} \f]
+\f[ z_k \approx \tilde z_{k} + H (z_{k-1} - \hat z_{k-1}) + v_{k} \f]
 
-\f[ x_k \approx \tilde x_k + A (x_{k-1} - \hat x_{k-1}) + W w_{k-1} \f]
-\f[ z_k \approx \tilde z_k + H (x_k - \hat x_k) + V v_{k} \f]
+- \f$x_k\f$ actual state
+- \f$\tilde x_k\f$ first approximate of the (new) state, evaluated by
+  ignoring the process noise: \f$\tilde x_k = f(x_{k-1},
+  u_{k-1})\f$. This value is the a priori state vector, i.e. the
+  expected state without taking the measurements into account.
+- \f$\hat x_{k-1}\f$ estimated state of previous step (a posteriori of
+  step \f$k-1\f$)
+- \f$\tilde z_k\f$ expected measurement vector, evaluated by ignoring
+  the measurement noise: \f$\tilde z_k = h(\tilde x_{k})\f$
+- \f$A\f$ represents the first derivative of \f$f\f$, which is the
+  Jacobian matrix of the partial derivatives of \f$f\f$ with respect to \f$x\f$.
 
-A represents the first derivative of f, which is the Jacobian matrix
-of the partial derivatives of f with respect to x. W is the Jacobian
-matrix of the partial derivatives of f with respect to w.
+  \f[ A_{[i,j]} = \frac{\delta f_{[i]}}{\delta x_{[j]}}(\tilde x_{k-1}, u_{k-1}, 0) \f]
 
-\f[ A_{[i,j]} = \frac{\delta f_{[i]}}{\delta x_{[j]}}(\hat x_{k-1},u_{k-1}, 0) \f]
-\f[ W_{[i,j]} = \frac{\delta f_{[i]}}{\delta w_{[j]}}(\hat x_{k-1},u_{k-1}, 0) \f]
+- \f$H\f$ represents the first derivative of \f$h\f$, which is the
+  Jacobian matrix of the partial derivatives of \f$h\f$ with respect
+  to \f$x\f$.
 
-Similar is valid for the observation model.
+  \f[ H_{[i,j]} = \frac{\delta h_{[i]}}{\delta x_{[j]}}(\tilde x_{k}, 0) \f]
 
-\f[ H_{[i,j]} = \frac{\delta h_{[i]}}{\delta x_{[j]}}(\tilde x_{k}, 0) \f]
-\f[ V_{[i,j]} = \frac{\delta h_{[i]}}{\delta v_{[j]}}(\tilde x_{k}, 0) \f]
+One would notice that we aren't aware of the actual state \f$x_k\f$,
+it's the state we want to estimate. The underlying theory of the EKF
+substitutes \f$(x_{k-1} - \hat x_{k-1})\f$ away to get the (known)
+formula for the a posteriori state, i.e. the estimate of the EKF.
 
-When comparing the extended Kalman filter with the linear \ref
-kalmanfilter the a priori state \f$\hat x_k^-\f$ (the "prediction") is
-now calculated with the function f (\f$\hat x_k^-\f$ corresponds to
-\f$\tilde x_k\f$ in above formulas).
+For more details see \cite Wel06 and \cite Gre08. The notation is
+taken from \cite Wel06.
+
+\section Estimation
+
+The estimation of EKF is similar to that of KF in its structure. First
+the a priori state \f$\hat x_k(-)\f$ is estimated by the original
+process model. For the a posteriori state \f$\hat x_k(+)\f$ the
+approximation of the process model as a first order Tailor series is
+used.
+
+Predict (time update):
+   \f[ \hat x_k(-) = f(x_{k-1}, u_{k-1}) \f]
+   \f[ P_k(-) = A_k P_{k-1} A_k^T + Q_{k-1} \f]
+Correct (measurement update):
+   \f[ K_k = P_k(-) H_k^T (H_k P_k(-) H_k^T + R_k)^{-1} \f]
+   \f[ \hat x_k(+) = \hat x_k(-) + K_k (z_k - h(\hat x_k(-))) \f]
+   \f[ P_k(+) = P_k(-) - K_k H_k P_k(-) \f]
+
+For details about the derivation of this formulas, see \cite Wel06 and
+\cite Gre08.
 
 \section Parameters
 
 required:
 - \b METHOD : "ExtendedKalmanFilter"
 - \b STATE_TRANSITION_MODEL : The state transition model f, relates
-  the previous state to the current state. f(x,u,0): a function f of x
+  the previous state to the current state. f(x,u): a function f of x
   and u which represents the system ignoring the noise. Because the
   state consists of several variables the model is specified by a set
   of functions. One formula for each state variable is required. The
@@ -73,10 +102,10 @@ required:
   the size of this matrix must be n x n. E.g. deriving the first
   function of the state transition model to x gives the first row of
   A.
-- \b PROCESS_NOISE_COVARIANCE : The process noise covariance Q. r x r
+- \b PROCESS_NOISE_COVARIANCE : The process noise covariance Q. n x n
   Matrix.
 - \b OBSERVATION_MODEL : The observation model h, relates the
-  measurement to the state. h(x,0): a function h of x which represents
+  measurement to the state. h(x): a function h of x which represents
   the observation ignoring measurement noise.
 - \b OBSERVATION_MODEL_JACOBIAN : The Jacobian of the observation
   model, i.e. partial derivatives of h with respect to x.
@@ -84,7 +113,7 @@ required:
   R. m x m Matrix.
 
 optional:
-- \b CONTROL_INPUT : The control input u. r-dim Vector.
+- \b CONTROL_INPUT : The control input u. l-dim Vector.
 - \b INITIAL_STATE : The initial state x0. n-dim Vector.
 - \b INITIAL_ERROR_COVARIANCE : The initial error covariance P0. n x n
   Matrix.
