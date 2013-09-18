@@ -23,6 +23,8 @@ add_library(estimation
   src/estimation/MovingAverage.cpp
   src/estimation/KalmanFilter.cpp
   src/estimation/ExtendedKalmanFilter.cpp
+  src/estimation/UnscentedTransform.cpp
+  src/estimation/UnscentedKalmanFilter.cpp
 
   include/estimation/EstimatorInterface.h
   include/estimation/InputValue.h
@@ -36,6 +38,9 @@ add_library(estimation
   include/estimation/MovingAverage.h
   include/estimation/KalmanFilter.h
   include/estimation/ExtendedKalmanFilter.h
+  include/estimation/ITransformer.h
+  include/estimation/UnscentedTransform.h
+  include/estimation/UnscentedKalmanFilter.h
   )
 
 add_library(configuration STATIC
@@ -127,8 +132,10 @@ if (CATKIN_ENABLE_TESTING)
   catkin_add_gtest(utest 
     tests/utest_main.cpp
     tests/utest_EstimatorFactory.cpp
-    tests/utest_ExtendedKalmanFilter.cpp
     tests/utest_KalmanFilter.cpp
+    tests/utest_ExtendedKalmanFilter.cpp
+    tests/utest_UnscentedTransform.cpp
+    tests/utest_UnscentedKalmanFilter.cpp
     )
   target_link_libraries(utest
     estimation
