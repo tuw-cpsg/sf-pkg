@@ -1,0 +1,216 @@
+/** 
+\page unscentedkalmanfilter Unscented Kalman Filter
+
+\section Introduction 
+
+A Kalman filter uses the physical model of a system (the plant) to
+estimate the new value of a statistical variable. The unscented Kalman
+filter (UKF) can handle also nonlinear systems (= systems which cannot
+be described by a matrix multiplication). In comparison to the EKF
+this filter works with its original models, and uses \ref ut
+"Unscented Transform (UT)", a sampling technique, to approximate the
+distribution of the state vector.
+
+Description of a nonlinear system:
+
+\f[ x_k = f(x_{k-1}, u_{k-1}) + w_{k-1} \f]
+\f[ z_k = h(x_{k}) + v_{k} \f]
+
+- \f$x_k\f$ actual state on current step k
+- \f$f\f$ state transition model
+- \f$u\f$ control input
+- \f$w\f$ process noise
+- \f$z_k\f$ measurements taken on step k
+- \f$h\f$ observation or measurement model
+- \f$v\f$ measurement noise
+
+Basic approach of the UT: first samples "around" the last mean
+(\f$x_{k-1}\f$) are produced. These samples are processed through the
+system model (\f$f\f$ and \f$h\f$) and weighted to build the new
+estimates.
+
+\subsection ut Unscented Transform
+
+Abbreviation used below for the UT: 
+
+\f$ [\hat y, P_{yy}] = UT(\hat x, C_{xx}, func) \f$
+       
+Inputs:
+- \f$\hat x\f$ mean (of the input distribution)
+- \f$C_{xx}\f$ Cholesky factor of covariance \f$P_{xx}\f$
+  - lower triangular
+  - upper triangular
+  - symmetric
+  - eigenvector Cholesky factor
+- \f$func\f$ function, e.g. state transition or observation model
+
+Outputs:
+- \f$\hat y\f$ approximated mean
+- \f$P_{yy}\f$ approximated covariance
+
+Selects samples \f$\chi_i\f$ of \f$x\f$, depending on \f$\hat x\f$ and
+\f$C_{xx}\f$, and associated weights \f$W_i\f$, s.t.:
+
+\f[ \hat x = \sum_i W_i \chi_i \f]
+\f[ P_{xx} = \sum_i W_i (\chi_i - \hat x)(\chi_i - \hat x)^T \f]
+
+or
+
+\f[ \xi_i = func(\chi_i) \f]
+
+\f[ \hat y \approx \sum_i W_i \xi_i \f]
+\f[ P_{yy} \approx \sum_i W_i (\xi_i - \hat y)(\xi_i - \hat y)^T \f]
+
+In comparison to particle filters the samples are NOT chosen randomly
+(they feature a specific mean and covariance, namely that from the
+last estimate), so a smaller number of samples is mostly sufficient.
+
+
+For more details see \cite Gre08.
+
+\section Estimation
+
+Predict (time update):
+<ul>
+  <li>
+    <em>Cholesky factor:</em> Calculate the Cholesky factor
+    \f$C_{k-1}(+)\f$ out of the covariance of the last estimate
+    \f$P_{k-1}\f$.
+  </li>
+  <li>
+    <em>UT:</em> Select samples \f$\chi_i\f$ according to the a
+    posteriori \f$\hat x_{k-1}(+)\f$ or simply \f$x_{k-1}\f$ and
+    Cholesky factor \f$C_{k-1}(+)\f$ with associated weights
+    \f$W_i\f$. Each sample is transformed by the state transition
+    model \f$f\f$ and weighted to form the new a priori state estimate
+    \f$\hat x_{k}(-)\f$.
+
+    \f[ [\hat x_k(-),P_{xx}] = UT(\hat x_{k-1}(+), C_{k-1}(+), f) \f]
+
+    In detail:
+
+    \f[ \xi_i = f(\chi_i) \f]
+    \f[ \hat x_k(-) = \sum_i W_i \xi_i \f]
+    \f[ P_{xx} = \sum_i W_i (\xi_i - \hat x_k(-))(\xi_i - \hat x_k(-))^T \f]
+
+  </li>
+  <li>
+    <em>Further:</em> To get the a priori covariance the covariance of
+    the noise has to be added.
+
+    \f[ P_k(-) = P_{xx} + Q \f]
+  </li>
+</ul>
+Correct (measurement update):
+<ul>
+  <li>
+    <em>Cholesky factor:</em> Calculate the Cholesky factor
+    \f$C_{k}(-)\f$ out of the covariance of the a priori covariance
+    \f$P_{k}(-)\f$.
+  </li>
+  <li>
+    <em>UT:</em> As in the predict step new samples are created
+    according the updated parameters \f$\hat x_{k}(-)\f$,
+    \f$C_{k}(-)\f$ and are used to approximate the distribution
+    transformed by \f$h\f$.
+
+    \f[ [\hat z_k,P_{zz}] = UT(\hat x_{k}(-), C_{k}(-), h) \f]
+
+    In detail (\f$\chi_i\f$ are new samples with new associated
+    weights \f$W_i\f$):
+
+    \f[ \gamma_i = h(\chi_i) \f]
+    \f[ \hat z_k = \sum_i W_i \gamma_i \f]
+    \f[ P_{zz} = \sum_i W_i (\gamma_i - \hat z_k)(\gamma_i - \hat z_k)^T \f]
+
+  </li>
+  <li>
+    <em>Further:</em> The Kalman gain is defined by the measurement
+    covariance and the cross-covariance of state and measurement
+    (cf. KF: \f$P_{xz}\f$ is the approximation of \f$P_{xx} H^T\f$;
+    \f$P_{zz}\f$ corresponds to \f$H P_{xx} H^T\f$). New \f$\chi_i\f$
+    and \f$W_i\f$ are used!
+
+    \f[ P_{xz} = \sum W_i (\chi_i - \hat x_{k}(-))(\gamma_i - \hat z_{k})^T \f]
+    \f[ K_k = P_{xz} (P_{zz} + R_k)^{-1} \f]
+
+    Out of the Kalman gain and the new measurements represented by
+    \f$z_k\f$ the estimate for timestep \f$k\f$ is evaluated as with
+    KF and EKF:
+
+    \f[ x_k = x_k(+) = x_k(-) + K_k (z_k - \hat z_k) \f]
+    \f[ P_k = P_k(+) = P_k(-) - K_k P_{zz} K_k^T \f]
+  </li>
+</ul>
+
+\section Parameters
+
+required:
+- \b METHOD : "ExtendedKalmanFilter"
+- \b STATE_TRANSITION_MODEL : The state transition model f, relates
+  the previous state to the current state. f(x,u): a function f of x
+  and u which represents the system ignoring the noise. Because the
+  state consists of several variables the model is specified by a set
+  of functions. One formula for each state variable is required. The
+  state variables in the formulas correspond to the posteriori state
+  of the last estimation. The variables are numbered from 0 to n-1,
+  e.g. for n is 2, x[0] and x[1] are valid a posteriori state
+  variables (the state is internally an array/vector). The formulas
+  are evaluated and assigned to the a priori estimated state in the
+  order they are given, i.e. the first item in the sequence will be
+  applied to the a priori x[0], the second item to the a priori x[1],
+  and so on.
+- \b PROCESS_NOISE_COVARIANCE : The process noise covariance Q. n x n
+  Matrix.
+- \b OBSERVATION_MODEL : The observation model h, relates the
+  measurement to the state. h(x): a function h of x which represents
+  the observation ignoring measurement noise.
+- \b MEASUREMENT_NOISE_COVARIANCE : The measurement noise covariance
+  R. m x m Matrix.
+
+optional:
+- \b CONTROL_INPUT : The control input u. l-dim Vector.
+- \b INITIAL_STATE : The initial state x0. n-dim Vector.
+- \b INITIAL_ERROR_COVARIANCE : The initial error covariance P0. n x n
+  Matrix.
+
+\note
+- The number of state variables n is extracted out of the sequence of
+  formulas representing the state transition formula. This value is
+  essential for the EKF. Hence write a formula for each state
+  variable. Otherwise runtime errors can occur (invalid size of
+  vectors/matrices).
+- The models have to be defined as functions. These functions are
+  evaluated by the linear algebra library <a
+  href="http://eigen.tuxfamily.org">Eigen</a> and the syntax is used
+  right away. So check the <a
+  href="http://eigen.tuxfamily.org/dox/group__QuickRefPage.html">quick-reference</a>
+  of Eigen 3 for usage and examples, e.g. \f$x^2\f$ ... \c pow(x,2) or
+  \c x.pow(2).
+- Be careful to write appropriate sizes of the matrices and
+  vectors. If the sizes don't fit an exception is thrown, which causes
+  the ROS node to terminate.
+
+Vectors must be specified as a list of floats separated by
+commas. Matrices must be specified as lists of vectors enclosed by
+curly brackets and separated by commas. Examples:
+- 3-dimensional vector: 1, 2, 3
+- 1-dimensional vector: 1
+- 2x2-dimensional matrix: {1,0} , {0,1}
+- 1x1-dimensional matrix: {1}
+- 2x1-dimensional matrix: {1} , {1}
+
+A set of functions is represented by a vector (where "set" is not the
+correct description; "sequence" is better, because the order is
+relevant!). A vector is represented by a sequence of elements, here:
+the functions. A sequence is always enclosed by parantheses. Example
+vector or sequence of functions: 
+
+\code
+#define STATE_TRANSITION_MODEL \
+  ( x[0] + 0.1*x[1] )          \
+  ( x[1] + 0.1*x[2] )          \
+  ( x[2] )
+\endcode
+
+*/
