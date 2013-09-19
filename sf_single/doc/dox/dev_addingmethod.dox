@@ -1,0 +1,198 @@
+/** 
+\page dev_addingmethod Adding a new Estimator
+
+\section Tutorial 
+
+-# Implement a class deriving from IEstimator. There are lots of
+   examples you can use (folders \c src/estimation/ and \c
+   include/estimation/). E.g.:
+   - \c src/estimation/MyEstimator.cpp
+   - \c include/estimation/MyEstimator.h
+-# Add it to the \c CMakeLists.txt in the package to compile it. If
+   you have written additional classes needed by your estimator, add
+   them here too. Search for \c add_library(estimation and add the
+   source files like so:
+   <br><br>
+   \c CMakeLists.txt
+   \code
+add_library(estimation
+  ...
+  src/estimation/MyEstimator.cpp
+
+  ...
+  include/estimation/MyEstimator.h
+  )
+   \endcode
+-# Add your method header into \c include/estimation/methods.h (here
+   all methods are collected, e.g. the EstimatorFactory needs to know
+   all estimators because the factory is able to create each estimator
+   according to a parameter map).
+-# Add a method to EstimatorFactory which configures your class
+   according a parameter list. The parameter list is a
+   map<string,boost::any>, i.e. each parameter is accessible by its
+   name as a string (the key). The value can be casted to every type
+   (you know what type your param must have), see also <a
+   href="http://www.boost.org/doc/libs/1_54_0/doc/html/any.html">Boost.Any
+   documentation</a>.
+   <br><br>
+   \c src/estimation/EstimatorFactory.cpp
+   \code
+void EstimatorFactory::initMyEstimator(MyEstimator& me)
+{
+  // required: a-param-name
+  // optional: none
+
+  try {
+    if (params.count("a-param-name")) {
+      // get param from parameter list, using boost::any_cast<your-param-type>(..)
+      // and pass it to your estimator (e.g. a setter)
+    } else
+      throw factory_error("a-param-name missing.");
+
+    // further params come here ...
+  } catch(std::exception& e) {
+    std::string additionalInfo = "Initializing MovingMedian failed. ";
+    throw factory_error(additionalInfo + e.what());
+  }
+}
+   \endcode
+   <br>
+   \c include/estimation/EstimatorFactory.h
+   \code
+  ...
+  private:
+    // -----------------------------------------
+    // initialization of the specific estimator
+    // -----------------------------------------
+    void initMovingMedian(MovingMedian& mm);
+    void initMovingAverage(MovingAverage& ma);
+    void initKalmanFilter(KalmanFilter& kf);
+    void initExtendedKalmanFilter(ExtendedKalmanFilter& ekf);
+    void initUnscentedKalmanFilter(UnscentedKalmanFilter& ukf);
+
+    // add the prototype of your method for configuration here, e.g.:
+    void initMyEstimator(MyEstimator& me);
+
+  };
+}
+
+#endif
+    \endcode
+-# Add a call to the method implemented in the previous step when the
+   parameter \c "method" evaluates to \c "MyEstimator", i.e. your
+   estimator has been chosen.
+   <br><br>
+   \c src/estimation/EstimatorFactory.cpp
+   \code
+estimation::IEstimator* EstimatorFactory::create (void)
+{
+  ...
+
+  try {
+
+    ...
+
+    // add the creation of your estimator here
+    if (method.compare("MyEstimator") == 0)
+    {
+      estimation::MyEstimator* me = new estimation::MyEstimator();
+      initMyEstimator(*me);
+      return me;
+    }
+
+  } catch(std::exception& e) {
+    throw factory_error(std::string("Configuration failed. ") + e.what());
+  }
+
+  throw factory_error("Configuration failed. Unknown method.");
+}
+   \endcode
+-# Finally the \ref configuration has to be done: mapping the header
+   defines to the parameter list. This is all done in \c
+   src/estimation/configuration.cpp. Here you also define the
+   parameter names (the defines needed and the names of the parameters
+   in the list. I used following scheme:
+   - \c #define parameters are written in capitals solely, words are
+     separated by '_' (e.g.: WINDOW_SIZE).
+   - Parameter list: keys are written in lower case letters solely,
+     words are separated by '-' (e.g.: "window-size").
+   .
+   So a parameter from the configuration header (a define expression)
+   is only converted to lower case letters and all '_' are replaced by
+   '-'.
+   <br>
+   Things to do in \c src/estimation/configuration.cpp:
+
+   - Add your method name conversion, i.e. add these two lines (of
+     course replaced with your estimator's name): 
+     \code
+#elif METHOD == MY_ESTIMATOR
+  return "MyEstimator";
+     \endcode
+     to getMethod() like so:
+     \code
+std::string getMethod()
+{
+#if METHOD == MOVING_MEDIAN
+  return "MovingMedian";
+  ...
+#elif METHOD == MY_ESTIMATOR
+  return "MyEstimator";
+#endif
+}
+     \endcode
+   - Add conversions of other parameters your estimator needs. Do this
+     in the function initEstimatorFactory().
+     \code
+void initEstimatorFactory(EstimatorFactory& factory)
+{
+  factory.addParam("method", getMethod());
+
+  ...
+
+  // handle here the params you need from the configuration header
+#ifdef MY_SIMPLE_PARAM
+  factory.addParam("my-simple-param", MY_SIMPLE_PARAM);
+#endif
+#ifdef MY_COMPLEX_PARAM
+  // do with the param, what you need to do before passing, e.g.:
+  my_complex_param_type complexParam = your_conversion(MY_COMPLEX_PARAM);
+  factory.addParam("my-complex-param", complexParam);
+#endif
+}
+     \endcode
+
+\section Documentation
+
+should contain at least: 
+
+- \b Theory. So the user gets an impression what parameters are
+  needed.
+- \b Parameters. Required and optional parameters for the ROS node
+  which have to be defined in the configuration header. Short
+  description for each parameter (what for? how to specify?).
+- \b Pitfalls. Possible errors the user could make with the
+  parameters. Things the user must not forget.
+
+\section Testing
+
+- your estimator class (and additionally needed new classes) with
+  gtest
+  - Write a file, e.g. \c utest_MyEstimator.cpp, with tests and save
+    it in the folder \c tests. You don't have to write a main
+    function, it is implemented in \c utest_main.cpp and calls all
+    tests by default.
+  - Add the test to \c CMakeLists.txt
+    <br>
+    \code
+catkin_add_gtest(utest
+  ...
+  tests/utest_MyEstimator.cpp
+  )
+    \endcode
+
+- add a new test in utest_EstimatorFactory.cpp for your estimator to
+  test configuration
+- roslaunch file with samples / rostest
+
+*/

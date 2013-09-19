@@ -3,24 +3,8 @@
  * @author Denise Ratasich
  * @date 19.09.2013
  *
- * @brief Example configuration header.
- *
- * Contains the defines which are used to create a special estimator.
- * According to the estimation method, chosen with the macro METHOD,
- * specific additional parameters have to be set. Strings have to be
- * set in quotes.
- *
- * Possible parameters for each method can be found in the
- * documentation of each method:
- * - \ref movingaverage
- * - \ref movingmedian
- * - \ref kalmanfilter
- * - \ref extendedkalmanfilter
- * - \ref unscentedkalmanfilter
+ * @brief Example configuration UKF 1.
  */
-
-#ifndef __CONFIG_H__
-#define __CONFIG_H__
 
 // -----------------------------------------
 // input
@@ -55,5 +39,3 @@
 //#define CONTROL_INPUT
 //#define INITIAL_STATE
 //#define INITIAL_ERROR_COVARIANCE
-
-#endif

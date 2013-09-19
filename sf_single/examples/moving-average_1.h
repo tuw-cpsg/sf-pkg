@@ -3,24 +3,8 @@
  * @author Denise Ratasich
  * @date 03.09.2013
  *
- * @brief Example configuration header.
- *
- * Contains the defines which are used to create a special estimator.
- * According to the estimation method, chosen with the macro METHOD,
- * specific additional parameters have to be set. Strings have to be
- * set in quotes.
- *
- * Possible parameters for each method can be found in the
- * documentation of each method:
- * - \ref movingaverage
- * - \ref movingmedian
- * - \ref kalmanfilter
+ * @brief Example configuration MA 1.
  */
-
-#ifndef __CONFIG_H__
-#define __CONFIG_H__
-
-#include "configuration/methods.h"
 
 // -----------------------------------------
 // input
@@ -42,5 +26,3 @@
 #define METHOD			MOVING_AVERAGE
 #define WINDOW_SIZE		5
 #define WEIGHTING_COEFFICIENTS	1, 2, 5, 2, 1
-
-#endif
