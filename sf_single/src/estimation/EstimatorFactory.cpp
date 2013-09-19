@@ -55,6 +55,20 @@ namespace estimation
 	initExtendedKalmanFilter(*ekf);
 	return ekf;
       }
+
+      if (method.compare("ExtendedKalmanFilter") == 0)
+      {
+	estimation::ExtendedKalmanFilter* ekf = new estimation::ExtendedKalmanFilter();
+	initExtendedKalmanFilter(*ekf);
+	return ekf;
+      }
+
+      if (method.compare("UnscentedKalmanFilter") == 0)
+      {
+	estimation::UnscentedKalmanFilter* ukf = new estimation::UnscentedKalmanFilter();
+	initUnscentedKalmanFilter(*ukf);
+	return ukf;
+      }
     } catch(std::exception& e) {
       throw factory_error(std::string("Configuration failed. ") + e.what());
     }
@@ -185,7 +199,7 @@ namespace estimation
   {
     // required: state-transition-model,
     //   state-transition-model-jacobian, process-noise-covariance,
-    //   observation-model, observation-model-covariance,
+    //   observation-model, observation-model-jacobian,
     //   measurement-noise-covariance
 
     // optional: control-input, initial-state,
@@ -249,6 +263,66 @@ namespace estimation
       ekf.validate();	// throws on error
     } catch(std::exception& e) {
       std::string additionalInfo = "Initializing ExtendedKalmanFilter failed. ";
+      throw factory_error(additionalInfo + e.what());
+    }
+  }
+
+  void EstimatorFactory::initUnscentedKalmanFilter(UnscentedKalmanFilter& ukf)
+  {    
+    // required: state-transition-model, process-noise-covariance,
+    //   observation-model, measurement-noise-covariance
+
+    // optional: control-input, initial-state,
+    //   initial-error-covariance
+
+    try {
+
+      // required -----
+
+      if (params.count("state-transition-model")) {
+	UnscentedKalmanFilter::func_f stm = boost::any_cast<UnscentedKalmanFilter::func_f>(params["state-transition-model"]);
+	ukf.setStateTransitionModel(stm);
+      } else
+	throw factory_error("State transition model missing.");
+
+      if (params.count("process-noise-covariance")) {
+	matrix pnc = boost::any_cast<matrix>(params["process-noise-covariance"]);
+	ukf.setProcessNoiseCovariance(pnc);
+      } else
+	throw factory_error("Process noise covariance missing.");
+
+      if (params.count("observation-model")) {
+	UnscentedKalmanFilter::func_h om = boost::any_cast<UnscentedKalmanFilter::func_h>(params["observation-model"]);
+	ukf.setObservationModel(om);
+      } else
+	throw factory_error("Observation model missing.");
+
+      if (params.count("measurement-noise-covariance")) {
+	matrix mnc =  boost::any_cast<matrix>(params["measurement-noise-covariance"]);
+	ukf.setMeasurementNoiseCovariance(mnc);
+      } else
+	throw factory_error("Measurement noise covariance missing.");
+
+      // optional -----
+
+      if (params.count("control-input")) {
+	vector ci = boost::any_cast<vector>(params["control-input"]);
+	ukf.setControlInput(ci);
+      }
+
+      if (params.count("initial-state")) {
+	vector is = boost::any_cast<vector>(params["initial-state"]);
+	ukf.setInitialState(is);
+      }
+
+      if (params.count("initial-error-covariance")) {
+	matrix iec = boost::any_cast<matrix>(params["initial-error-covariance"]);
+	ukf.setInitialErrorCovariance(iec);
+      }
+
+      ukf.validate();	// throws on error
+    } catch(std::exception& e) {
+      std::string additionalInfo = "Initializing UnscentedKalmanFilter failed. ";
       throw factory_error(additionalInfo + e.what());
     }
   }

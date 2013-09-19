@@ -17,10 +17,12 @@ using namespace Eigen;
 // private functions
 std::string getMethod();
 
-#if METHOD == EXTENDED_KALMAN_FILTER
+#if METHOD == EXTENDED_KALMAN_FILTER  ||  METHOD == UNSCENTED_KALMAN_FILTER
 void f(VectorXd& x, const VectorXd& u);
-void df(MatrixXd& A, const VectorXd& x, const VectorXd& u);
 void h(VectorXd& z, const VectorXd& x);
+#endif
+#if METHOD == EXTENDED_KALMAN_FILTER
+void df(MatrixXd& A, const VectorXd& x, const VectorXd& u);
 void dh(MatrixXd& H, const VectorXd& x);
 #endif
 
@@ -39,7 +41,7 @@ void initEstimatorFactory(EstimatorFactory& factory)
 #ifdef STATE_TRANSITION_MODEL
   #if METHOD == KALMAN_FILTER
   EstimatorFactory::matrix stm = { STATE_TRANSITION_MODEL };
-  #elif METHOD == EXTENDED_KALMAN_FILTER
+  #elif METHOD == EXTENDED_KALMAN_FILTER  ||  METHOD == UNSCENTED_KALMAN_FILTER
   ExtendedKalmanFilter::func_f stm = f;
   #endif
   factory.addParam("state-transition-model", stm);
@@ -51,7 +53,7 @@ void initEstimatorFactory(EstimatorFactory& factory)
 #ifdef OBSERVATION_MODEL
   #if METHOD == KALMAN_FILTER
   EstimatorFactory::matrix om = { OBSERVATION_MODEL };
-  #elif METHOD == EXTENDED_KALMAN_FILTER
+  #elif METHOD == EXTENDED_KALMAN_FILTER  ||  METHOD == UNSCENTED_KALMAN_FILTER
   ExtendedKalmanFilter::func_h om = h;
   #endif
   factory.addParam("observation-model", om);
@@ -80,6 +82,9 @@ void initEstimatorFactory(EstimatorFactory& factory)
 #ifdef STATE_SIZE
   factory.addParam("state-size", STATE_SIZE);
 #endif
+#ifdef MEASUREMENT_SIZE
+  factory.addParam("measurement-size", MEASUREMENT_SIZE);
+#endif
 #ifdef STATE_TRANSITION_MODEL_JACOBIAN
   ExtendedKalmanFilter::func_df stmj = df;
   factory.addParam("state-transition-model-jacobian", stmj);
@@ -100,34 +105,46 @@ std::string getMethod()
   return "KalmanFilter";
 #elif METHOD == EXTENDED_KALMAN_FILTER
   return "ExtendedKalmanFilter";
+#elif METHOD == UNSCENTED_KALMAN_FILTER
+  return "UnscentedKalmanFilter";
 #endif
 }
 
-#if METHOD == EXTENDED_KALMAN_FILTER
+#if METHOD == EXTENDED_KALMAN_FILTER  ||  METHOD == UNSCENTED_KALMAN_FILTER
 void f(VectorXd& x, const VectorXd& u)
 {
   if (x.size() != STATE_SIZE)
     throw std::runtime_error("Applying state transition model failed, state vector has invalid size.");
 
-  // create state vector for result, i.e. the a priori state estimate
+  // create state vector for result, i.e. the a priori state estimate;
+  // copying must be done, because x occurs on the right-hand side,
+  // e.g.: x[0] = x[1]; x[1] = x[0]; is different to x_apriori[0] =
+  // x[1]; x_apriori[1] = x[0];!!
   VectorXd x_apriori(x.size());
 
-  // assign formulas of the state transition model to vector x,
-  // i.e. calculate a priori state estimate
+  // assign formulas of the state transition model (from the
+  // configuration header) to vector x, i.e. calculate a priori state
+  // estimate
   CODE_ASSIGN_FORMULAS_TO_VECTOR(x_apriori, STATE_TRANSITION_MODEL);
 
-  // copy back, x represents now the a priori state estimate
+  // copy back, x will then represents the a priori state estimate
   x = x_apriori;
-}
-
-void df(MatrixXd& A, const VectorXd& x, const VectorXd& u)
-{
-  CODE_ASSIGN_FORMULAS_TO_MATRIX(A, STATE_TRANSITION_MODEL_JACOBIAN);
 }
 
 void h(VectorXd& z, const VectorXd& x)
 {
+  if (z.size() != MEASUREMENT_SIZE)
+    throw std::runtime_error("Applying observation model failed, measurement vector has invalid size.");
+
+  // z doesn't occur on the right-hand side, so no copying necessary
   CODE_ASSIGN_FORMULAS_TO_VECTOR(z, OBSERVATION_MODEL);
+}
+#endif
+
+#if METHOD == EXTENDED_KALMAN_FILTER
+void df(MatrixXd& A, const VectorXd& x, const VectorXd& u)
+{
+  CODE_ASSIGN_FORMULAS_TO_MATRIX(A, STATE_TRANSITION_MODEL_JACOBIAN);
 }
 
 void dh(MatrixXd& H, const VectorXd& x)

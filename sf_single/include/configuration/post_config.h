@@ -26,6 +26,15 @@
 #include "estimation/InputValue.h"
 
 // ----------------------------------------------------------------
+// abbreviations for checking SIZES
+// ----------------------------------------------------------------
+
+#if METHOD == EXTENDED_KALMAN_FILTER  ||  METHOD == UNSCENTED_KALMAN_FILTER
+#define STATE_SIZE		BOOST_PP_SEQ_SIZE(STATE_TRANSITION_MODEL)
+#define MEASUREMENT_SIZE	BOOST_PP_SEQ_SIZE(OBSERVATION_MODEL)
+#endif
+
+// ----------------------------------------------------------------
 // abbreviations for handling INPUTS/OUTPUTS
 // ----------------------------------------------------------------
 
@@ -100,9 +109,6 @@
 // abbreviations for ASSIGNING a SEQUENCE to a VECTOR
 // ----------------------------------------------------------------
 
-#if METHOD == EXTENDED_KALMAN_FILTER
-#define STATE_SIZE	BOOST_PP_SEQ_SIZE(STATE_TRANSITION_MODEL)
-#endif
 /** @brief Assigns a formula to an item of an array. */
 #define CODE_LINE_ASSIGN_FORMULA_TO_ELEMENT(r, data, i, elem)	\
   data[i] = elem;						\

@@ -66,16 +66,17 @@ namespace estimation
      *
      * @return The estimator.
      */
-    estimation::IEstimator* create (void);
+    IEstimator* create (void);
 
   private:
     // -----------------------------------------
     // initialization of the specific estimator
     // -----------------------------------------
-    void initMovingMedian(estimation::MovingMedian& mm);
-    void initMovingAverage(estimation::MovingAverage& ma);
-    void initKalmanFilter(estimation::KalmanFilter& kf);
-    void initExtendedKalmanFilter(estimation::ExtendedKalmanFilter& ekf);
+    void initMovingMedian(MovingMedian& mm);
+    void initMovingAverage(MovingAverage& ma);
+    void initKalmanFilter(KalmanFilter& kf);
+    void initExtendedKalmanFilter(ExtendedKalmanFilter& ekf);
+    void initUnscentedKalmanFilter(UnscentedKalmanFilter& ukf);
   };
 }
 
