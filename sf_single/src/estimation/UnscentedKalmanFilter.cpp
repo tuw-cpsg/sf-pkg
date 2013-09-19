@@ -149,8 +149,8 @@ namespace estimation
 	throw std::runtime_error("Not yet validated!");
 
       // extract the values of next (the measurements) into a vector
-      VectorXd z(Q.rows());	// must have size m
-      for (int i = 0; i < Q.rows(); i++)
+      VectorXd z(R.rows());	// must have size m
+      for (int i = 0; i < R.rows(); i++)
 	z[i] = next[i].getValue();
     
       // Kalman Filtering ------------------------------------------
@@ -223,6 +223,7 @@ namespace estimation
     case OBSERVATION_MODEL:
       // evaluates the expected measurement considering the state
       // (sigmaPoint)
+      help = VectorXd::Zero(R.rows());
       h(help, x);
       return help;
       break;
