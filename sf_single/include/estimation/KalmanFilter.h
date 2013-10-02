@@ -11,7 +11,7 @@
 
 #include <ostream>
 
-#include "estimation/IEstimator.h"
+#include "estimation/AbstractKalmanFilter.h"
 #include "estimation/Input.h"
 #include "estimation/Output.h"
 
@@ -43,46 +43,20 @@ namespace estimation
    * \ref validate must be called to release the operation. Changing a
    * parameter needs revalidation.
    */
-  class KalmanFilter : public IEstimator
+  class KalmanFilter : public AbstractKalmanFilter
   {
-    /** @brief Kalman gain. Size: n x m. */
-    MatrixXd K;
-
-    /** @brief Flag indicating if the parameters were checked and are
-     * OK.  
-     *
-     * \sa function \c validate 
-     * \sa for more on parameters see \ref kalmanfilter
-     */
-    bool validated;
-
-    /** @brief Output of this estimation method (state and
-     * variance). Size: n. */
-    Output out;
-
+  private:
     // -----------------------------------------
-    // parameters
+    // parameters (additionally to AbstractKalmanFilter)
     // -----------------------------------------
     /** @brief State transition model. Once initialized it cannot be
      * changed. Size: n x n. */
     MatrixXd A;
-    /** @brief Control input. Size: l. */
-    VectorXd u;
     /** @brief Control input model. Size: n x l. */
     MatrixXd B;
-    /** @brief Process noise covariance. Size: n x n. */
-    MatrixXd Q;
 
     /** @brief Observation model. Size: m x n. */
     MatrixXd H;
-    /** @brief Measurement noise covariance. Size: m x m. */
-    MatrixXd R;
-
-    // initial values x and P can be set
-    /** @brief Estimated state vector. Size: n. */
-    VectorXd x;
-    /** @brief Error covariance. Size: n x n. */
-    MatrixXd P;
 
   public: 
     /**
@@ -114,30 +88,6 @@ namespace estimation
     // -----------------------------------------
     // getters and setters
     // -----------------------------------------
-    /**
-     * @brief Returns the current state (estimated).
-     *
-     * @return The current state (estimated).
-     */
-    std::vector<double> getState () const;
-
-    /** 
-     * @brief Sets the initial state.
-     *
-     * @param x0 Initial state (a state is represented by the relevant
-     * variables, hence a state is a vector in general).
-     */
-    void setInitialState (std::vector<double>& x0);
-
-    /** 
-     * @brief Sets the initial error covariance.
-     *
-     * Optional, the error covariance will stabilize quickly.  
-     *
-     * @param P0 Initial error covariance.
-     */
-    void setInitialErrorCovariance(std::vector< std::vector<double> >& P0);
-
     /** 
      * @brief Sets the state transition model.
      *
@@ -161,26 +111,6 @@ namespace estimation
      * @param B The control input model.
      */
     void setControlInputModel (std::vector< std::vector<double> >& B);
-    
-    /** 
-     * @brief Sets the control input.
-     *
-     * The control input is an optional vector.
-     *
-     * @param u The control input.
-     */
-    void setControlInput (std::vector<double>& u);
-
-    /** 
-     * @brief Sets the process noise covariance.
-     *
-     * Determination of process noise covariance is not that simple,
-     * so its best to put here "enough" uncertainty, i.e. rely more on
-     * the measurements.
-     *
-     * @param Q Process noise covariance.
-     */
-    void setProcessNoiseCovariance (std::vector< std::vector<double> >& Q);
 
     /** 
      * @brief Sets the observation model.
@@ -190,16 +120,6 @@ namespace estimation
      * @param H Observation model.
      */
     void setObservationModel (std::vector< std::vector<double> >& H);
-
-    /** 
-     * @brief Sets the measurement noise covariance.
-     *
-     * Can be determined by taking "offline" samples of the
-     * measurements to get the variance e.g. of a sensor.
-     *
-     * @param R Measurement noise covariance.
-     */
-    void setMeasurementNoiseCovariance (std::vector< std::vector<double> >& R);
 
     /**
      * @brief Releases the Kalman filter if the parameters are
@@ -224,48 +144,10 @@ namespace estimation
     Output estimate (Input next);
 
     /**
-     * @brief Returns the last estimated value.
-     */
-    Output getLastEstimate (void);
-
-    /**
      * @brief Prints (debug) information of this Kalman filter
      * (current states of vectors and matrices).
      */
     void serialize(std::ostream& os) const;
-
-  private:
-    /**
-     * @brief Copies a standard vector into the vector representation
-     * of Eigen.
-     *
-     * Used at initialization. This class is initialized with standard
-     * containers (vector).
-     *
-     * @param src The source vector.
-     * @param dest The destination vector.
-     */
-    void copy(std::vector<double>& src, VectorXd& dest);
-
-    /**
-     * @brief Copies a matrix represented by a vector of vectors to
-     * the matrix representation of Eigen.
-     *
-     * Used at initialization. This class is initialized with standard
-     * containers (vector).
-     *
-     * @param src The source matrix.
-     * @param dest The destination matrix.
-     */
-    void copy(std::vector< std::vector<double> >& src, MatrixXd& dest);
-
-    /**
-     * @brief Puts the estimated state and its variance into an \c
-     * Output object to match the interface \c IEstimator.
-     *
-     * TODO: fill jitter_ms
-     */
-    void updateOutput(void);
   };
 
 }

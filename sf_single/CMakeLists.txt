@@ -21,6 +21,7 @@ add_library(estimation
   src/estimation/IEstimator.cpp
   src/estimation/MovingMedian.cpp
   src/estimation/MovingAverage.cpp
+  src/estimation/AbstractKalmanFilter.cpp
   src/estimation/KalmanFilter.cpp
   src/estimation/ExtendedKalmanFilter.cpp
   src/estimation/UnscentedTransform.cpp
@@ -36,6 +37,7 @@ add_library(estimation
   include/estimation/methods.h
   include/estimation/MovingMedian.h
   include/estimation/MovingAverage.h
+  include/estimation/AbstractKalmanFilter.h
   include/estimation/KalmanFilter.h
   include/estimation/ExtendedKalmanFilter.h
   include/estimation/ITransformer.h
