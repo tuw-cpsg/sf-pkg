@@ -32,8 +32,12 @@
 #define OBSERVATION_MODEL			\
   (x[0])					\
   /**/
-#define PROCESS_NOISE_COVARIANCE	{0.1}
-#define MEASUREMENT_NOISE_COVARIANCE	{10}
+#define PROCESS_NOISE_COVARIANCE		\
+  ( (0.1) )
+  /**/
+#define MEASUREMENT_NOISE_COVARIANCE		\
+  ( (10) )
+  /**/
 
 // optional
 //#define CONTROL_INPUT

@@ -47,15 +47,15 @@ namespace UnscentedKalmanFilterTest
     EXPECT_THROW(ukf.validate(), IEstimator::estimator_error);	// "OM missing"
     ukf.setObservationModel(h);
     EXPECT_THROW(ukf.validate(), IEstimator::estimator_error);	// "PNC missing"
-    vector< vector<double> > Q = { {0.1} };
+    MatrixXd Q(1,1); Q << 0.1;
     ukf.setProcessNoiseCovariance(Q);
     EXPECT_THROW(ukf.validate(), IEstimator::estimator_error);	// "MNC missing"
-    vector< vector<double> > R = { {10} };
+    MatrixXd R(1,1); R << 10;
     ukf.setMeasurementNoiseCovariance(R);
     EXPECT_NO_THROW(ukf.validate());			// all required params given
 
     // check setting optional params
-    vector<double> u = { 0 };
+    VectorXd u(1); u << 0;
     ukf.setControlInput(u);
     EXPECT_NO_THROW(ukf.validate());
 
@@ -86,9 +86,9 @@ namespace UnscentedKalmanFilterTest
     
     ukf.setStateTransitionModel(f);
     ukf.setObservationModel(h);
-    vector< vector<double> > Q = { {0.1} };
+    MatrixXd Q(1,1); Q << 0.1;
     ukf.setProcessNoiseCovariance(Q);
-    vector< vector<double> > R = { {10} };
+    MatrixXd R(1,1); R << 10;
     ukf.setMeasurementNoiseCovariance(R);
 
     ukf.validate();

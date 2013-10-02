@@ -25,4 +25,5 @@
 
 #define METHOD			MOVING_AVERAGE
 #define WINDOW_SIZE		3
-#define WEIGHTING_COEFFICIENTS	0.5, 0.2, 1, 3, 1
+#define WEIGHTING_COEFFICIENTS			\
+  (0.5) (0.2) (1) (3) (1)

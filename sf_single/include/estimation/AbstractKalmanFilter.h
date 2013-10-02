@@ -80,7 +80,7 @@ namespace estimation
      *
      * @return The current state (estimated).
      */
-    std::vector<double> getState () const;
+    VectorXd getState () const;
 
     /** 
      * @brief Sets the initial state.
@@ -88,7 +88,7 @@ namespace estimation
      * @param x0 Initial state (a state is represented by the relevant
      * variables, hence a state is a vector in general).
      */
-    void setInitialState (std::vector<double>& x0);
+    void setInitialState (VectorXd& x0);
 
     /**
      * @brief Sets the initial state a zero-vector of specified size.
@@ -108,7 +108,7 @@ namespace estimation
      *
      * @param P0 Initial error covariance.
      */
-    void setInitialErrorCovariance(std::vector< std::vector<double> >& P0);
+    void setInitialErrorCovariance(MatrixXd& P0);
     
     /** 
      * @brief Sets the control input.
@@ -117,18 +117,18 @@ namespace estimation
      *
      * @param u The control input.
      */
-    void setControlInput (std::vector<double>& u);
+    void setControlInput (VectorXd& u);
 
     /** 
      * @brief Sets the process noise covariance.
      *
      * Determination of process noise covariance is not that simple,
-     * so its best to put here "enough" uncertainty, i.e. rely more on
-     * the measurements.
+     * so its best to put here "enough" uncertainty (higher value of
+     * Q), i.e. rely more on the measurements.
      *
      * @param Q Process noise covariance.
      */
-    void setProcessNoiseCovariance (std::vector< std::vector<double> >& Q);
+    void setProcessNoiseCovariance (MatrixXd& Q);
 
     /** 
      * @brief Sets the measurement noise covariance.
@@ -138,7 +138,7 @@ namespace estimation
      *
      * @param R Measurement noise covariance.
      */
-    void setMeasurementNoiseCovariance (std::vector< std::vector<double> >& R);
+    void setMeasurementNoiseCovariance (MatrixXd& R);
 
     /**
      * @brief Releases the Kalman filter if the parameters are
@@ -174,30 +174,6 @@ namespace estimation
     virtual void serialize(std::ostream& os) const;
 
   protected:
-    /**
-     * @brief Copies a standard vector into the vector representation
-     * of Eigen.
-     *
-     * Used at initialization. This class is initialized with standard
-     * containers (vector).
-     *
-     * @param src The source vector.
-     * @param dest The destination vector.
-     */
-    void copy(std::vector<double>& src, VectorXd& dest);
-
-    /**
-     * @brief Copies a matrix represented by a vector of vectors to
-     * the matrix representation of Eigen.
-     *
-     * Used at initialization. This class is initialized with standard
-     * containers (vector).
-     *
-     * @param src The source matrix.
-     * @param dest The destination matrix.
-     */
-    void copy(std::vector< std::vector<double> >& src, MatrixXd& dest);
-
     /**
      * @brief Puts the estimated state and its variance into an \c
      * Output object to match the interface \c IEstimator.

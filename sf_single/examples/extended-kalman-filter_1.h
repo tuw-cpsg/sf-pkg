@@ -76,11 +76,17 @@
 // The process noise covariance specifies how much we trust the system
 // model, i.e. a higher value will cause the estimated state to follow
 // more the measurements.
-#define PROCESS_NOISE_COVARIANCE	{0.1,0} , {0,1}
+#define PROCESS_NOISE_COVARIANCE \
+  ( (0.1) (0) )			 \
+  ( (0)   (1) )			 \
+  /**/
 
 // The measurement noise covariance specifies the variance of the
 // sensors.
-#define MEASUREMENT_NOISE_COVARIANCE	{10,0} , {0,10}
+#define MEASUREMENT_NOISE_COVARIANCE \
+  ( (10)  (0) )			     \
+  ( (0)  (10) )			     \
+  /**/
 
 // optional
 //#define CONTROL_INPUT

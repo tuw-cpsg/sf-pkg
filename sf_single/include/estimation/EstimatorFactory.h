@@ -41,9 +41,6 @@ namespace estimation
     };
     typedef EstimatorFactoryException factory_error;
 
-    typedef std::vector<double> vector;
-    typedef std::vector< std::vector<double> > matrix;
-
     /**
      * @brief Adds a parameter to this configurator.
      *

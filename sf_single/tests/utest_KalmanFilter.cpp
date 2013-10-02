@@ -25,28 +25,28 @@ namespace KalmanFilterTest
 
     // check setting required params
     EXPECT_THROW(kf.validate(), IEstimator::estimator_error);	// "STM missing"
-    vector< vector<double> > A_f = { {1,0} };
+    MatrixXd A_f(2,1); A_f << 1, 0;
     kf.setStateTransitionModel(A_f);
     EXPECT_THROW(kf.validate(), IEstimator::estimator_error);	// "OM missing"
-    vector< vector<double> > H = { {1,0} };
+    MatrixXd H(1,2); H << 1,0;
     kf.setObservationModel(H);
     EXPECT_THROW(kf.validate(), IEstimator::estimator_error);	// "PNC missing"
-    vector< vector<double> > Q = { {0.1,0},{0,0.1} };
+    MatrixXd Q(2,2); Q << 0.1,0,0,0.1;
     kf.setProcessNoiseCovariance(Q);
     EXPECT_THROW(kf.validate(), IEstimator::estimator_error);	// "MNC missing"
-    vector< vector<double> > R = { {10} };
+    MatrixXd R(1,1); R << 10;
     kf.setMeasurementNoiseCovariance(R);
 
     EXPECT_THROW(kf.validate(), IEstimator::estimator_error);	// "STM invalid size"
-    vector< vector<double> > A = { {1,0},{0,1} };
+    MatrixXd A(2,2); A << 1,0,0,1;
     kf.setStateTransitionModel(A);
     EXPECT_NO_THROW(kf.validate());			// all required params given
 
-    vector< vector<double> > R_f = { {10,1} };
+    MatrixXd R_f(2,1); R_f << 10,1;
     kf.setMeasurementNoiseCovariance(R_f);
     EXPECT_THROW(kf.validate(), IEstimator::estimator_error);	// "MNC invalid size"
     kf.setMeasurementNoiseCovariance(R);
-    vector< vector<double> > H_f = { {1,0,2} };
+    MatrixXd H_f(3,1); H_f << 1,0,2;
     kf.setObservationModel(H_f);
     EXPECT_THROW(kf.validate(), IEstimator::estimator_error);	// "OM invalid size"
     kf.setObservationModel(H);
@@ -57,23 +57,16 @@ namespace KalmanFilterTest
     vector<double> u = { 0 };
     kf.setControlInput(u);
     EXPECT_THROW(kf.validate(), IEstimator::estimator_error);	// "CIM missing"
-    vector< vector<double> > B_f = { {0} };
+    MatrixXd B_f = { {0} };
     kf.setControlInputModel(B_f);
     EXPECT_THROW(kf.validate(), IEstimator::estimator_error);	// "CIM invalid size"
-    vector< vector<double> > B = { {0},{0} };
+    MatrixXd B = { {0},{0} };
     kf.setControlInputModel(B);
     EXPECT_NO_THROW(kf.validate());
     */
-    vector<double> x = { 0, 1 };
+    VectorXd x(2); x << 0,1;
     kf.setInitialState(x);
     EXPECT_NO_THROW(kf.validate());
-
-    vector< vector<double> > P0_f = { {1},{0} };
-    kf.setInitialErrorCovariance(P0_f);
-    EXPECT_THROW(kf.validate(), IEstimator::estimator_error);	// "P0 invalid size"
-    vector< vector<double> > P0_f1 = { {1,0} };
-    kf.setInitialErrorCovariance(P0_f1);
-    EXPECT_NO_THROW(kf.validate());				// "P0 invalid but will be set to 0"
   
     // check initialization of output
     Output out = kf.getLastEstimate();
@@ -86,13 +79,13 @@ namespace KalmanFilterTest
   {  
     KalmanFilter kf;
 
-    vector< vector<double> > A = { {1} };
+    MatrixXd A(1,1); A << 1;
     kf.setStateTransitionModel(A);
-    vector< vector<double> > H = { {1} };
+    MatrixXd H(1,1); H << 1;
     kf.setObservationModel(H);
-    vector< vector<double> > Q = { {0.1} };
+    MatrixXd Q(1,1); Q << 0.1;
     kf.setProcessNoiseCovariance(Q);
-    vector< vector<double> > R = { {10} };
+    MatrixXd R(1,1); R << 10;
     kf.setMeasurementNoiseCovariance(R);
 
     // validate has an effect?
@@ -120,13 +113,13 @@ namespace KalmanFilterTest
   {
     KalmanFilter kf;
 
-    vector< vector<double> > A = { {1} };
+    MatrixXd A(1,1); A << 1;
     kf.setStateTransitionModel(A);
-    vector< vector<double> > H = { {1} };
+    MatrixXd H(1,1); H << 1;
     kf.setObservationModel(H);
-    vector< vector<double> > Q = { {0.1} };
+    MatrixXd Q(1,1); Q << 0.1;
     kf.setProcessNoiseCovariance(Q);
-    vector< vector<double> > R = { {10} };
+    MatrixXd R(1,1); R << 10;
     kf.setMeasurementNoiseCovariance(R);
 
     kf.validate();
@@ -148,13 +141,13 @@ namespace KalmanFilterTest
 
     // another example
     KalmanFilter kf2;
-    vector< vector<double> > A2 = { {1,0.1},{0,1} };
+    MatrixXd A2(2,2); A2 << 1,0.1,0,1;
     kf2.setStateTransitionModel(A2);
-    vector< vector<double> > H2 = { {0,1} };
+    MatrixXd H2(1,2); H2 << 0,1;
     kf2.setObservationModel(H2);
-    vector< vector<double> > Q2 = { {0.1,0},{0,0.1} };
+    MatrixXd Q2(2,2); Q2 << 0.1,0,0,0.1;
     kf2.setProcessNoiseCovariance(Q2);
-    vector< vector<double> > R2 = { {10} };
+    MatrixXd R2(1,1); R2 << 10;
     kf2.setMeasurementNoiseCovariance(R2);
 
     kf2.validate();

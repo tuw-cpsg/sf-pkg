@@ -34,48 +34,63 @@ void initEstimatorFactory(EstimatorFactory& factory)
   factory.addParam("window-size", WINDOW_SIZE);
 #endif
 #ifdef WEIGHTING_COEFFICIENTS
-  EstimatorFactory::vector wc = { WEIGHTING_COEFFICIENTS };
+  VectorXd wc(VECTOR_SIZE(WEIGHTING_COEFFICIENTS));
+  CODE_ASSIGN_VALUES_TO_VECTOR(wc, WEIGHTING_COEFFICIENTS);
   factory.addParam("weighting-coefficients", wc);
 #endif
 
 #ifdef STATE_TRANSITION_MODEL
   #if METHOD == KALMAN_FILTER
-  EstimatorFactory::matrix stm = { STATE_TRANSITION_MODEL };
+  MatrixXd stm(MATRIX_ROWS(STATE_TRANSITION_MODEL),
+	       MATRIX_COLS(STATE_TRANSITION_MODEL));
+  CODE_ASSIGN_VALUES_TO_MATRIX(stm, STATE_TRANSITION_MODEL);
   #elif METHOD == EXTENDED_KALMAN_FILTER  ||  METHOD == UNSCENTED_KALMAN_FILTER
   ExtendedKalmanFilter::func_f stm = f;
   #endif
   factory.addParam("state-transition-model", stm);
 #endif
 #ifdef PROCESS_NOISE_COVARIANCE
-  EstimatorFactory::matrix pnc = { PROCESS_NOISE_COVARIANCE };
+  MatrixXd pnc(MATRIX_ROWS(PROCESS_NOISE_COVARIANCE),
+	       MATRIX_COLS(PROCESS_NOISE_COVARIANCE));
+  CODE_ASSIGN_VALUES_TO_MATRIX(pnc, PROCESS_NOISE_COVARIANCE);
   factory.addParam("process-noise-covariance", pnc);
 #endif
 #ifdef OBSERVATION_MODEL
   #if METHOD == KALMAN_FILTER
-  EstimatorFactory::matrix om = { OBSERVATION_MODEL };
+  MatrixXd om(MATRIX_ROWS(OBSERVATION_MODEL),
+	       MATRIX_COLS(OBSERVATION_MODEL));
+  CODE_ASSIGN_VALUES_TO_MATRIX(om, OBSERVATION_MODEL);
   #elif METHOD == EXTENDED_KALMAN_FILTER  ||  METHOD == UNSCENTED_KALMAN_FILTER
   ExtendedKalmanFilter::func_h om = h;
   #endif
   factory.addParam("observation-model", om);
 #endif
 #ifdef MEASUREMENT_NOISE_COVARIANCE
-  EstimatorFactory::matrix mnc = { MEASUREMENT_NOISE_COVARIANCE };
+  MatrixXd mnc(MATRIX_ROWS(MEASUREMENT_NOISE_COVARIANCE),
+	       MATRIX_COLS(MEASUREMENT_NOISE_COVARIANCE));
+  CODE_ASSIGN_VALUES_TO_MATRIX(mnc, MEASUREMENT_NOISE_COVARIANCE);
   factory.addParam("measurement-noise-covariance", mnc);
 #endif
 #ifdef CONTROL_INPUT_MODEL 
-  EstimatorFactory::matrix cim = { CONTROL_INPUT_MODEL };
+  MatrixXd cim(MATRIX_ROWS(CONTROL_INPUT_MODEL),
+	       MATRIX_COLS(CONTROL_INPUT_MODEL));
+  CODE_ASSIGN_VALUES_TO_MATRIX(cim, CONTROL_INPUT_MODEL);
   factory.addParam("control-input-model", cim);
 #endif
 #ifdef CONTROL_INPUT
-  EstimatorFactory::vector ci = { CONTROL_INPUT };
+  VectorXd ci(VECTOR_SIZE(CONTROL_INPUT));
+  CODE_ASSIGN_VALUES_TO_VECTOR(ci, CONTROL_INPUT);
   factory.addParam("control-input", ci);
 #endif
 #ifdef INITIAL_STATE
-  EstimatorFactory::vector is = { INITIAL_STATE };
+  VectorXd is(VECTOR_SIZE(INITIAL_STATE));
+  CODE_ASSIGN_VALUES_TO_VECTOR(is, INITIAL_STATE);
   factory.addParam("initial-state", is);
 #endif
 #ifdef INITIAL_ERROR_COVARIANCE
-  EstimatorFactory::matrix iec = { INITIAL_ERROR_COVARIANCE };
+  MatrixXd iec(MATRIX_ROWS(INITIAL_ERROR_COVARIANCE),
+	       MATRIX_COLS(INITIAL_ERROR_COVARIANCE));
+  CODE_ASSIGN_VALUES_TO_MATRIX(iec, INITIAL_ERROR_COVARIANCE);
   factory.addParam("initial-error-covariance", iec);
 #endif
 

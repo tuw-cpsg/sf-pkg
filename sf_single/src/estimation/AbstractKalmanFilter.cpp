@@ -24,44 +24,38 @@ namespace estimation
   // -----------------------------------------
   // getters and setters
   // -----------------------------------------
-  std::vector<double> AbstractKalmanFilter::getState () const
+  VectorXd AbstractKalmanFilter::getState () const
   {
-    std::vector<double> vx;
-    
-    // copy current state to std::vector
-    for (int i = 0; i < x.size(); i++)
-      vx.push_back(x[i]);
-
-    return vx;
+    return x;
   }
   
-  void AbstractKalmanFilter::setInitialState (std::vector<double>& x0)
+  void AbstractKalmanFilter::setInitialState (VectorXd& x0)
   {
-    copy(x0, this->x);
+    this->x = x0;
     validated = false;
   }
 
-  void AbstractKalmanFilter::setInitialErrorCovariance(std::vector< std::vector<double> >& P0)
+  void AbstractKalmanFilter::setInitialErrorCovariance(MatrixXd& P0)
   {
-    copy(P0, this->P);
+    this->P = P0;
     validated = false;
   }
 
-  void AbstractKalmanFilter::setControlInput (std::vector<double>& u) 
+  void AbstractKalmanFilter::setControlInput (VectorXd& u) 
   {
-    copy(u, this->u);
+    this->u = u;
     validated = false;
   }
 
-  void AbstractKalmanFilter::setProcessNoiseCovariance (std::vector< std::vector<double> >& Q)
+  void AbstractKalmanFilter::setProcessNoiseCovariance (MatrixXd& Q)
   {
-    copy(Q, this->Q);
+    this->Q = Q;
     validated = false;
   }
 
-  void AbstractKalmanFilter::setMeasurementNoiseCovariance (std::vector< std::vector<double> >& R)
+  void AbstractKalmanFilter::setMeasurementNoiseCovariance (MatrixXd& R)
   {
-    copy(R, this->R);
+    this->R = R;
     validated = false;
   }
 
@@ -87,40 +81,6 @@ namespace estimation
   // -----------------------------------------
   // private functions
   // -----------------------------------------
-  void AbstractKalmanFilter::copy(std::vector<double>& src, VectorXd& dest)
-  {
-    int rows = src.size();
-    
-    // specify size of destination matrix according src
-    dest.resize(rows);		// needed, if dest-vector is empty
-
-    // copy src to dest
-    for (int row = 0; row < rows; row++)
-      dest(row) = src[row];
-  }
-
-  void AbstractKalmanFilter::copy(std::vector< std::vector<double> >& src, MatrixXd& dest)
-  {
-    // src: matrix represented by a collection of rows
-    // matrix row: src[row]
-    // matrix element: src[row][col]
-    int rows = src.size();	// outer vector src = whole matrix
-    int cols = src[0].size();	// inner vector represents one row
-
-    // really a matrix? i.e. check if all rows have equal length
-    for (int row = 0; row < rows; row++)
-      if (src[row].size() != cols)
-	throw std::length_error("Parameter not a matrix (different length of rows!).");
-
-    // specify size of destination matrix according src
-    dest.resize(rows,cols);	// needed, if dest-matrix is empty
-    
-    // copy src to dest
-    for (int row = 0; row < rows; row++)
-      for (int col = 0; col < cols; col++)
-	dest(row,col) = src[row][col];
-  }
-
   void AbstractKalmanFilter::updateOutput(void)
   {
     if (out.size() != x.size())

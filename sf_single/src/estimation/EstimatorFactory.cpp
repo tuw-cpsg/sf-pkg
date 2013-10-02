@@ -109,7 +109,10 @@ namespace estimation
       }
 
       if (params.count("weighting-coefficients")) {
-	vector wc = boost::any_cast<vector>(params["weighting-coefficients"]);
+	VectorXd vectorWc = boost::any_cast<VectorXd>(params["weighting-coefficients"]);
+	std::vector<double> wc;
+	for (int i = 0; i < vectorWc.size(); i++)
+	  wc.push_back(vectorWc[i]);
   
 	if (wc.size() == ws) {
 	  // only b_k coefficients are passed
@@ -143,25 +146,25 @@ namespace estimation
     // required -----
     try {
       if (params.count("state-transition-model")) {
-	matrix stm = boost::any_cast<matrix>(params["state-transition-model"]);
+	MatrixXd stm = boost::any_cast<MatrixXd>(params["state-transition-model"]);
 	kf.setStateTransitionModel(stm);
       } else
 	throw factory_error("State transition model missing.");
 
       if (params.count("process-noise-covariance")) {
-	matrix pnc = boost::any_cast<matrix>(params["process-noise-covariance"]);
+	MatrixXd pnc = boost::any_cast<MatrixXd>(params["process-noise-covariance"]);
 	kf.setProcessNoiseCovariance(pnc);
       } else
 	throw factory_error("Process noise covariance missing.");
 
       if (params.count("observation-model")) {
-	matrix om = boost::any_cast<matrix>(params["observation-model"]);
+	MatrixXd om = boost::any_cast<MatrixXd>(params["observation-model"]);
 	kf.setObservationModel(om);
       } else
 	throw factory_error("Observation model missing.");
 
       if (params.count("measurement-noise-covariance")) {
-	matrix mnc =  boost::any_cast<matrix>(params["measurement-noise-covariance"]);
+	MatrixXd mnc =  boost::any_cast<MatrixXd>(params["measurement-noise-covariance"]);
 	kf.setMeasurementNoiseCovariance(mnc);
       } else
 	throw factory_error("Measurement noise covariance missing.");
@@ -169,22 +172,22 @@ namespace estimation
       // optional -----
 
       if (params.count("control-input-model")) {
-	matrix cim = boost::any_cast<matrix>(params["control-input-model"]);
+	MatrixXd cim = boost::any_cast<MatrixXd>(params["control-input-model"]);
 	kf.setControlInputModel(cim);
       }
 
       if (params.count("control-input")) {
-	vector ci = boost::any_cast<vector>(params["control-input"]);
+	VectorXd ci = boost::any_cast<VectorXd>(params["control-input"]);
 	kf.setControlInput(ci);
       }
 
       if (params.count("initial-state")) {
-	vector is = boost::any_cast<vector>(params["initial-state"]);
+	VectorXd is = boost::any_cast<VectorXd>(params["initial-state"]);
 	kf.setInitialState(is);
       }
 
       if (params.count("initial-error-covariance")) {
-	matrix iec = boost::any_cast<matrix>(params["initial-error-covariance"]);
+	MatrixXd iec = boost::any_cast<MatrixXd>(params["initial-error-covariance"]);
 	kf.setInitialErrorCovariance(iec);
       }
 
@@ -220,7 +223,7 @@ namespace estimation
 	throw factory_error("Jacobian of state transition model missing.");
 
       if (params.count("process-noise-covariance")) {
-	matrix pnc = boost::any_cast<matrix>(params["process-noise-covariance"]);
+	MatrixXd pnc = boost::any_cast<MatrixXd>(params["process-noise-covariance"]);
 	ekf.setProcessNoiseCovariance(pnc);
       } else
 	throw factory_error("Process noise covariance missing.");
@@ -238,7 +241,7 @@ namespace estimation
 	throw factory_error("Jacobian of observation model missing.");
 
       if (params.count("measurement-noise-covariance")) {
-	matrix mnc =  boost::any_cast<matrix>(params["measurement-noise-covariance"]);
+	MatrixXd mnc =  boost::any_cast<MatrixXd>(params["measurement-noise-covariance"]);
 	ekf.setMeasurementNoiseCovariance(mnc);
       } else
 	throw factory_error("Measurement noise covariance missing.");
@@ -246,17 +249,17 @@ namespace estimation
       // optional -----
 
       if (params.count("control-input")) {
-	vector ci = boost::any_cast<vector>(params["control-input"]);
+	VectorXd ci = boost::any_cast<VectorXd>(params["control-input"]);
 	ekf.setControlInput(ci);
       }
 
       if (params.count("initial-state")) {
-	vector is = boost::any_cast<vector>(params["initial-state"]);
+	VectorXd is = boost::any_cast<VectorXd>(params["initial-state"]);
 	ekf.setInitialState(is);
       }
 
       if (params.count("initial-error-covariance")) {
-	matrix iec = boost::any_cast<matrix>(params["initial-error-covariance"]);
+	MatrixXd iec = boost::any_cast<MatrixXd>(params["initial-error-covariance"]);
 	ekf.setInitialErrorCovariance(iec);
       }
 
@@ -286,7 +289,7 @@ namespace estimation
 	throw factory_error("State transition model missing.");
 
       if (params.count("process-noise-covariance")) {
-	matrix pnc = boost::any_cast<matrix>(params["process-noise-covariance"]);
+	MatrixXd pnc = boost::any_cast<MatrixXd>(params["process-noise-covariance"]);
 	ukf.setProcessNoiseCovariance(pnc);
       } else
 	throw factory_error("Process noise covariance missing.");
@@ -298,7 +301,7 @@ namespace estimation
 	throw factory_error("Observation model missing.");
 
       if (params.count("measurement-noise-covariance")) {
-	matrix mnc =  boost::any_cast<matrix>(params["measurement-noise-covariance"]);
+	MatrixXd mnc =  boost::any_cast<MatrixXd>(params["measurement-noise-covariance"]);
 	ukf.setMeasurementNoiseCovariance(mnc);
       } else
 	throw factory_error("Measurement noise covariance missing.");
@@ -306,17 +309,17 @@ namespace estimation
       // optional -----
 
       if (params.count("control-input")) {
-	vector ci = boost::any_cast<vector>(params["control-input"]);
+	VectorXd ci = boost::any_cast<VectorXd>(params["control-input"]);
 	ukf.setControlInput(ci);
       }
 
       if (params.count("initial-state")) {
-	vector is = boost::any_cast<vector>(params["initial-state"]);
+	VectorXd is = boost::any_cast<VectorXd>(params["initial-state"]);
 	ukf.setInitialState(is);
       }
 
       if (params.count("initial-error-covariance")) {
-	matrix iec = boost::any_cast<matrix>(params["initial-error-covariance"]);
+	MatrixXd iec = boost::any_cast<MatrixXd>(params["initial-error-covariance"]);
 	ukf.setInitialErrorCovariance(iec);
       }
 

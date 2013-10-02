@@ -75,10 +75,10 @@ namespace estimation
      * @param H Observation model.
      * @param R Measurement noise covariance.
      */
-    KalmanFilter (std::vector< std::vector<double> > A,
-		  std::vector< std::vector<double> > Q,
-		  std::vector< std::vector<double> > H,
-		  std::vector< std::vector<double> > R);
+    KalmanFilter (MatrixXd A,
+		  MatrixXd Q,
+		  MatrixXd H,
+		  MatrixXd R);
 
     /**
      * @brief Destructor of this class.
@@ -99,7 +99,7 @@ namespace estimation
      *
      * @param A The state transition model.
      */
-    void setStateTransitionModel (std::vector< std::vector<double> >& A);
+    void setStateTransitionModel (MatrixXd& A);
 
     /** 
      * @brief Sets the control input model.
@@ -110,7 +110,7 @@ namespace estimation
      *
      * @param B The control input model.
      */
-    void setControlInputModel (std::vector< std::vector<double> >& B);
+    void setControlInputModel (MatrixXd& B);
 
     /** 
      * @brief Sets the observation model.
@@ -119,7 +119,7 @@ namespace estimation
      *
      * @param H Observation model.
      */
-    void setObservationModel (std::vector< std::vector<double> >& H);
+    void setObservationModel (MatrixXd& H);
 
     /**
      * @brief Releases the Kalman filter if the parameters are

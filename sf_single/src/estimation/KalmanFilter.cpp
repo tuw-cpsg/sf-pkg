@@ -17,10 +17,10 @@ namespace estimation
     // AbstractKalmanFilter
   }
 
-  KalmanFilter::KalmanFilter (std::vector< std::vector<double> > A,
-			      std::vector< std::vector<double> > Q,
-			      std::vector< std::vector<double> > H,
-			      std::vector< std::vector<double> > R)
+  KalmanFilter::KalmanFilter (MatrixXd A,
+			      MatrixXd Q,
+			      MatrixXd H,
+			      MatrixXd R)
   {
     // process
     setStateTransitionModel(A);
@@ -39,21 +39,21 @@ namespace estimation
   // -----------------------------------------
   // getters and setters
   // -----------------------------------------
-  void KalmanFilter::setStateTransitionModel (std::vector< std::vector<double> >& A)
+  void KalmanFilter::setStateTransitionModel (MatrixXd& A)
   {
-    copy(A, this->A);
+    this->A = A;
     validated = false;
   }
 
-  void KalmanFilter::setControlInputModel (std::vector< std::vector<double> >& B)
+  void KalmanFilter::setControlInputModel (MatrixXd& B)
   {
-    copy(B, this->B);
+    this->B = B;
     validated = false;
   }
 
-  void KalmanFilter::setObservationModel (std::vector< std::vector<double> >& H)
+  void KalmanFilter::setObservationModel (MatrixXd& H)
   {
-    copy(H, this->H);
+    this->H = H;
     validated = false;
   }
 

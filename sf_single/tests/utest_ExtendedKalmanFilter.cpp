@@ -78,31 +78,31 @@ namespace ExtendedKalmanFilterTest
     EXPECT_THROW(ekf.validate(), IEstimator::estimator_error);	// "Jacobian of OM missing"
     ekf.setJacobianOfObservationModel(dh);
     EXPECT_THROW(ekf.validate(), IEstimator::estimator_error);	// "PNC missing"
-    vector< vector<double> > Q = { {0.1} };
+    MatrixXd Q(1,1); Q << 0.1;
     ekf.setProcessNoiseCovariance(Q);
     EXPECT_THROW(ekf.validate(), IEstimator::estimator_error);	// "MNC missing"
-    vector< vector<double> > R = { {10} };
+    MatrixXd R(1,1); R << 10;
     ekf.setMeasurementNoiseCovariance(R);
     EXPECT_NO_THROW(ekf.validate());			// all required params given
 
     // check setting optional params
-    vector<double> u = { 0 };
+    VectorXd u(1); u << 0;
     ekf.setControlInput(u);
     EXPECT_NO_THROW(ekf.validate());
   
     // optional params doesn't set new sizes
-    vector< vector<double> > P0_f = { {1,0} , {0,1} };
+    MatrixXd P0_f(2,2); P0_f << 1, 0, 0, 1;
     ekf.setInitialErrorCovariance(P0_f);
     EXPECT_NO_THROW(ekf.validate());
     EXPECT_EQ(ekf.getState().size(), 1);
 
-    vector<double> x_f = { 0,1 };
+    VectorXd x_f(2); x_f << 0,1;
     ekf.setInitialState(x_f);
     EXPECT_NO_THROW(ekf.validate());
     EXPECT_NE(ekf.getState().size(), 2);
 
     // required param Q sets new size of x and out
-    vector< vector<double> > Q2 = { {0.1,0},{0,0.1} };
+    MatrixXd Q2(2,2); Q2 << 0.1, 0, 0, 0.1;
     ekf.setProcessNoiseCovariance(Q2);   
     EXPECT_NO_THROW(ekf.validate());
     EXPECT_EQ(ekf.getState().size(), 2);
@@ -136,27 +136,27 @@ namespace ExtendedKalmanFilterTest
     ekf.setJacobianOfObservationModel(dh);
 
     EXPECT_THROW(ekf.validate(), IEstimator::estimator_error);	// "PNC missing"
-    vector< vector<double> > Q_f = { {0.1,1} };
+    MatrixXd Q_f(2,1); Q_f << 0.1, 1;
     ekf.setProcessNoiseCovariance(Q_f);
     EXPECT_THROW(ekf.validate(), IEstimator::estimator_error);	// "Q not square"
-    vector< vector<double> > Q1 = { {0.1} };
+    MatrixXd Q1(1,1); Q1 << 0.1;
     ekf.setProcessNoiseCovariance(Q1);
     EXPECT_THROW(ekf.validate(), IEstimator::estimator_error);	// "MNC missing"
-    vector< vector<double> > R_f = { {10},{1} };
+    MatrixXd R_f(2,1); R_f << 10, 1;
     ekf.setMeasurementNoiseCovariance(R_f);
     EXPECT_THROW(ekf.validate(), IEstimator::estimator_error);	// "R not square"
-    vector< vector<double> > R = { {10} };
+    MatrixXd R(1,1); R << 10;
     ekf.setMeasurementNoiseCovariance(R);
 
     EXPECT_NO_THROW(ekf.validate());				// all required params given
 
     // optional params
-    vector<double> x = { 0,1 };
+    VectorXd x(2); x << 0, 1;
     ekf.setInitialState(x);
     EXPECT_NO_THROW(ekf.validate());
     EXPECT_NE(ekf.getState().size(), 2);
 
-    vector< vector<double> > Q = { {0.1,0},{0,0.1} };
+    MatrixXd Q(2,2); Q << 0.1, 0, 0, 0.1;
     ekf.setProcessNoiseCovariance(Q);
     EXPECT_NO_THROW(ekf.validate());
     ekf.setInitialState(x);
@@ -178,9 +178,9 @@ namespace ExtendedKalmanFilterTest
     ekf.setJacobianOfStateTransitionModel(df);
     ekf.setObservationModel(h);
     ekf.setJacobianOfObservationModel(dh);
-    vector< vector<double> > Q = { {0.1} };
+    MatrixXd Q(1,1); Q << 0.1;
     ekf.setProcessNoiseCovariance(Q);
-    vector< vector<double> > R = { {10} };
+    MatrixXd R(1,1); R << 10;
     ekf.setMeasurementNoiseCovariance(R);
 
     // validate has an effect?
@@ -213,9 +213,9 @@ namespace ExtendedKalmanFilterTest
     ekf.setJacobianOfStateTransitionModel(df);
     ekf.setObservationModel(h);
     ekf.setJacobianOfObservationModel(dh);
-    vector< vector<double> > Q = { {0.1} };
+    MatrixXd Q(1,1); Q << 0.1;
     ekf.setProcessNoiseCovariance(Q);
-    vector< vector<double> > R = { {10} };
+    MatrixXd R(1,1); R << 10;
     ekf.setMeasurementNoiseCovariance(R);
 
     ekf.validate();
@@ -241,9 +241,9 @@ namespace ExtendedKalmanFilterTest
     ekf2.setJacobianOfStateTransitionModel(df2);
     ekf2.setObservationModel(h2);
     ekf2.setJacobianOfObservationModel(dh2);
-    vector< vector<double> > Q2 = { {0.1,0},{0,0.1} };
+    MatrixXd Q2(2,2); Q2 << 0.1, 0, 0, 0.1;
     ekf2.setProcessNoiseCovariance(Q2);
-    vector< vector<double> > R2 = { {10} };
+    MatrixXd R2(1,1); R2 << 10;
     ekf2.setMeasurementNoiseCovariance(R2);
 
     ekf2.validate();

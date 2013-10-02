@@ -85,7 +85,9 @@ int main(int argc, char **argv)
     SUBSCRIBE(subscribers, n);
     ros::Publisher publishers[TOPICS_NUM];
     for (int i = 0; i < TOPICS_NUM; i++) {
-      publishers[i] = n.advertise<std_msgs::Float64>("state_" + std::to_string(i) + "_fused", 100);
+      std::stringstream ss;
+      ss << "state_" << i << "_fused";
+      publishers[i] = n.advertise<std_msgs::Float64>(ss.str(), 100);
       ROS_INFO_STREAM("Publishing result to 'state_" << i << "_fused'.");
     }
     // Create messages for publishing.

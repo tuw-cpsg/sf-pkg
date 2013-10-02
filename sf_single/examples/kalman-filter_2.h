@@ -36,13 +36,28 @@
 #define METHOD				KALMAN_FILTER
 
 // required
-#define STATE_TRANSITION_MODEL		{1,0} , {0,1}
-#define PROCESS_NOISE_COVARIANCE	{0.1,0} , {0,0.5}
-#define OBSERVATION_MODEL		{1,0} , {0,1}
-#define MEASUREMENT_NOISE_COVARIANCE	{10,0} , {0,10}
+#define STATE_TRANSITION_MODEL			\
+  ( (1) (0) )					\
+  ( (0) (1) )					\
+  /**/
+#define PROCESS_NOISE_COVARIANCE		\
+  ( (.1)  (0) )					\
+  ( (0) (0.5) )					\
+  /**/
+#define OBSERVATION_MODEL			\
+  ( (1) (0) )					\
+  ( (0) (1) )					\
+  /**/ 
+#define MEASUREMENT_NOISE_COVARIANCE		\
+  ( (10) (0) )					\
+  ( (0) (10) )					\
+  /**/
 
 // optional
-//#define CONTROL_INPUT_MODEL		{0}
-//#define CONTROL_INPUT			0,0
-#define INITIAL_STATE			0,0
-#define INITIAL_ERROR_COVARIANCE	{1,0} , {0,1}
+//#define CONTROL_INPUT_MODEL		((0))
+//#define CONTROL_INPUT			((0)(0))
+#define INITIAL_STATE			((0)(0))
+#define INITIAL_ERROR_COVARIANCE		\
+  ( (1) (0) )					\
+  ( (0) (1) )					\
+  /**/

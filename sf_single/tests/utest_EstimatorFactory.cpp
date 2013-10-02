@@ -19,9 +19,9 @@ TEST(EstimatorFactoryTest, addParams)
 
   EXPECT_NO_THROW(cfg.addParam("string", string("xyz")));
   EXPECT_NO_THROW(cfg.addParam("int", 5));
-  std::vector< double > v = {1, 0, 1, 3, 1};
+  VectorXd v(5); v << 1, 0, 1, 3, 1;
   EXPECT_NO_THROW(cfg.addParam("vector", v));
-  std::vector< std::vector<double> > m = { {1,0}, {0,1} };
+  MatrixXd m(2,2); m << 1,0,0,1;
   EXPECT_NO_THROW(cfg.addParam("matrix", m));
   EXPECT_NO_THROW(cfg.addParam("matrix", v));
 }
@@ -78,11 +78,11 @@ TEST(EstimatorFactoryTest, movingAverage)
 
   // optional params
   cfg.addParam("window-size", 5);
-  std::vector< double > wc1 = {1, 2, 5, 2};
+  VectorXd wc1(4); wc1 << 1, 2, 5, 2;
   cfg.addParam("weighting-coefficients", wc1);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "invalid weighting coefficients"
 
-  std::vector< double > wc2 = {1, 2, 5, 2, 1};
+  VectorXd wc2(5); wc2 << 1, 2, 5, 2, 1;
   cfg.addParam("weighting-coefficients", wc2);
   EXPECT_NO_THROW(estimator = cfg.create());
   classname = typeid(*estimator).name();
@@ -99,31 +99,31 @@ TEST(EstimatorFactoryTest, kalmanFilter)
   cfg.addParam("method", string("KalmanFilter"));
 
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "STM missing"
-  std::vector<double> stm_f = {1};
+  VectorXd stm_f(1); stm_f << 1;
   cfg.addParam("state-transition-model", stm_f);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
-  std::vector< std::vector<double> > stm = { {1} };
+  MatrixXd stm(1,1); stm << 1;
   cfg.addParam("state-transition-model", stm);
 
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "PNC missing"
   int pnc_f = 1;
   cfg.addParam("process-noise-covariance", pnc_f);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
-  std::vector< std::vector<double> > pnc = { {0.2} };
+  MatrixXd pnc(1,1); pnc << 0.2;
   cfg.addParam("process-noise-covariance", pnc);
 
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "OM missing"
   std::string om_f = "xy";
   cfg.addParam("observation-model", om_f);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
-  std::vector< std::vector<double> > om = { {1} };
+  MatrixXd om(1,1); om << 1;
   cfg.addParam("observation-model", om);
 
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "MNC missing"
   double mnc_f = 0.1;
   cfg.addParam("measurement-noise-covariance", mnc_f);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
-  std::vector< std::vector<double> > mnc = { {10} };
+  MatrixXd mnc(1,1); mnc << 10;
   cfg.addParam("measurement-noise-covariance", mnc);
 
   EXPECT_NO_THROW(estimator = cfg.create());
@@ -133,25 +133,25 @@ TEST(EstimatorFactoryTest, kalmanFilter)
   // optional params
   cfg.addParam("control-input-model", stm_f);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
-  std::vector< std::vector<double> > cim = { {1} };
+  MatrixXd cim(1,1); cim << 1;
   cfg.addParam("control-input-model", cim);
   EXPECT_NO_THROW(estimator = cfg.create());
 
   cfg.addParam("control-input", pnc);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
-  std::vector<double> ci = {0};
+  VectorXd ci(1); ci << 0;
   cfg.addParam("control-input", ci);
   EXPECT_NO_THROW(estimator = cfg.create());
 
   cfg.addParam("initial-state", stm);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
-  std::vector<double> is = {-1.5};
+  VectorXd is(1); is << -1.5;
   cfg.addParam("initial-state", is);
   EXPECT_NO_THROW(estimator = cfg.create());
 
   cfg.addParam("initial-error-covariance", is);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
-  std::vector< std::vector<double> > iec = { {1} };
+  MatrixXd iec(1,1); iec << 1;
   cfg.addParam("initial-error-covariance", iec);
   EXPECT_NO_THROW(estimator = cfg.create());
 }
@@ -171,7 +171,7 @@ TEST(EstimatorFactoryTest, extendedKalmanFilter)
   cfg.addParam("method", string("ExtendedKalmanFilter"));
 
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "STM missing"
-  std::vector<double> stm_f = {1};
+  VectorXd stm_f(1); stm_f << 1;
   cfg.addParam("state-transition-model", stm_f);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
   ExtendedKalmanFilter::func_f stm = 0;
@@ -188,7 +188,7 @@ TEST(EstimatorFactoryTest, extendedKalmanFilter)
   int pnc_f = 1;
   cfg.addParam("process-noise-covariance", pnc_f);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
-  std::vector< std::vector<double> > pnc = { {0.2} };
+  MatrixXd pnc(1,1); pnc << 0.2;
   cfg.addParam("process-noise-covariance", pnc);
 
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "OM missing"
@@ -207,7 +207,7 @@ TEST(EstimatorFactoryTest, extendedKalmanFilter)
   double mnc_f = 0.1;
   cfg.addParam("measurement-noise-covariance", mnc_f);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
-  std::vector< std::vector<double> > mnc = { {10} };
+  MatrixXd mnc(1,1); mnc << 10;
   cfg.addParam("measurement-noise-covariance", mnc);
 
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "validation failed (f=0)"
@@ -220,19 +220,19 @@ TEST(EstimatorFactoryTest, extendedKalmanFilter)
   // optional params
   cfg.addParam("control-input", pnc);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
-  std::vector<double> ci = {0};
+  VectorXd ci(1); ci << 0;
   cfg.addParam("control-input", ci);
   EXPECT_NO_THROW(estimator = cfg.create());
 
   cfg.addParam("initial-state", stm);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
-  std::vector<double> is = {-1.5};
+  VectorXd is(1); is << -1.5;
   cfg.addParam("initial-state", is);
   EXPECT_NO_THROW(estimator = cfg.create());
 
   cfg.addParam("initial-error-covariance", is);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
-  std::vector< std::vector<double> > iec = { {1} };
+  MatrixXd iec(1,1); iec << 1;
   cfg.addParam("initial-error-covariance", iec);
   EXPECT_NO_THROW(estimator = cfg.create());
 
@@ -242,3 +242,4 @@ TEST(EstimatorFactoryTest, extendedKalmanFilter)
   classname = typeid(*estimator).name();
   EXPECT_NE(string::npos, classname.find("ExtendedKalmanFilter",0)); // found ExtendedKalmanFilter in classname!
 }
+

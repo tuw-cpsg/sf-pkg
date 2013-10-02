@@ -9,6 +9,7 @@
 #ifndef __ESTIMATION_UNSCENTED_TRANSFORM_H__
 #define __ESTIMATION_UNSCENTED_TRANSFORM_H__
 
+#include <vector>
 #include <Eigen/Dense>
 #include "estimation/ITransformer.h"
 

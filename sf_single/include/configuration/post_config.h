@@ -25,6 +25,7 @@
 
 #include "estimation/InputValue.h"
 
+
 // ----------------------------------------------------------------
 // abbreviations for checking SIZES
 // ----------------------------------------------------------------
@@ -33,6 +34,30 @@
 #define STATE_SIZE		BOOST_PP_SEQ_SIZE(STATE_TRANSITION_MODEL)
 #define MEASUREMENT_SIZE	BOOST_PP_SEQ_SIZE(OBSERVATION_MODEL)
 #endif
+
+/** 
+ * @brief Expands to the number of elements in a sequence.
+ */
+#define VECTOR_SIZE(vector)	\
+  BOOST_PP_SEQ_SIZE(vector)	\
+  /**/
+
+/** 
+ * @brief Expands to the number of elements in a sequence, i.e. for a
+ * sequence-of-sequences its the number of rows.
+ */
+#define MATRIX_ROWS(matrix)	\
+  BOOST_PP_SEQ_SIZE(matrix)	\
+  /**/
+
+/** 
+ * @brief Expands to the number of elements of the first sequence of a
+ * sequence, i.e. for a sequence-of-sequences its the number of
+ * columns.
+ */
+#define MATRIX_COLS(matrix)				\
+  BOOST_PP_SEQ_SIZE(BOOST_PP_SEQ_ELEM(0,matrix))	\
+  /**/
 
 // ----------------------------------------------------------------
 // abbreviations for handling INPUTS/OUTPUTS
@@ -63,12 +88,14 @@
     );								\
   ROS_INFO("Subscribing to '%s'.", TOPIC_NAME_STR(elem));	\
   /**/
+
 /** 
  * @brief Initializes the subscribers.
  *
  * The topics are defined as a sequence of tuples. Each tuple is
  * processed to create a new subscriber which is stored in the given
- * array \c subscribers. */
+ * array \c subscribers. 
+ */
 #define SUBSCRIBE(subscribers, handle)					\
   BOOST_PP_SEQ_FOR_EACH_I(SUBSCRIBE_TO_TOPIC, (subscribers)(handle), TOPICS) \
   /**/
@@ -99,7 +126,10 @@
 	      msg->TOPIC_FIELD(elem));					\
   }									\
   /**/
-/** @brief Generates the methods for receiving the defined topics. */
+
+/** 
+ * @brief Generates the methods for receiving the defined topics.
+ */
 #define RECEIVES(curTopicState)					\
   BOOST_PP_SEQ_FOR_EACH_I(RECEIVE_TOPIC, curTopicState, TOPICS)	\
   /**/
@@ -108,31 +138,51 @@
 // ----------------------------------------------------------------
 // abbreviations for ASSIGNING a SEQUENCE to a VECTOR
 // ----------------------------------------------------------------
-
-/** @brief Assigns a formula to an item of an array. */
-#define CODE_LINE_ASSIGN_FORMULA_TO_ELEMENT(r, data, i, elem)	\
+/** 
+ * @brief Expands to an assignment (e.g. x[0] = 10). 
+ *
+ * @param r Unnecessary, needed by Boost for repetitions.
+ * @param data The name of the vector which should be assigned to.
+ * @param i The counter, the position of the element in the vector
+ * \c data which should be assigned to.
+ * @param elem The value to assign, i.e. the i'th element of a
+ * sequence.
+ */
+#define CODE_LINE_ASSIGN_ELEMENT_TO_VECTOR(r, data, i, elem)	\
   data[i] = elem;						\
   /**/
-/** @brief Creates assignments of formulas given in a sequence to an
- * array. */
-#define CODE_ASSIGN_FORMULAS_TO_VECTOR(array, formulas_seq)		\
-  BOOST_PP_SEQ_FOR_EACH_I(CODE_LINE_ASSIGN_FORMULA_TO_ELEMENT, array, formulas_seq) 
+
+/**
+ * @brief Expands to assignments of a defined vector (sequence of
+ * double values) to an Eigen vector.
+ *
+ * @param vector The vector to be assigned to, i.e. the array which
+ * should be filled with the values.
+ * @param values_seq The sequence of values to assign to the vector.
+ */
+#define CODE_ASSIGN_VALUES_TO_VECTOR(vector, values_seq)		\
+  BOOST_PP_SEQ_FOR_EACH_I(CODE_LINE_ASSIGN_ELEMENT_TO_VECTOR, vector, values_seq) 
+
+/** 
+ * @brief Creates assignments of formulas given in a sequence to a
+ * vector.
+ *
+ * @param vector The vector to be assigned to, i.e. the array which
+ * should be filled with the values.
+ * @param formulas_seq The sequence of formulas to assign to the
+ * vector.
+ */
+#define CODE_ASSIGN_FORMULAS_TO_VECTOR(vector, formulas_seq)		\
+  BOOST_PP_SEQ_FOR_EACH_I(CODE_LINE_ASSIGN_ELEMENT_TO_VECTOR, vector, formulas_seq) 
+
 
 // ----------------------------------------------------------------
 // abbreviations for ASSIGNING a SEQUENCE-of-SEQUENCES to a MATRIX
 // ----------------------------------------------------------------
 
-/** @brief Counts the number of sequence elements, i.e. for a
- * sequence-of-sequences its the number of rows. */
-#define MATRIX_NUM_ROWS(matrix) \
-  BOOST_PP_SEQ_SIZE(matrix)
-/** @brief Counts the number of elements of the first sequence of a
- * sequence, i.e. the number of columns. */
-#define MATRIX_NUM_COLS(matrix) \
-  BOOST_PP_SEQ_SIZE(BOOST_PP_SEQ_ELEM(0,matrix))
 /** @brief Expands to the element in a sequence-of-sequences (a
  * matrix), specified by row and col. */
-#define MATRIX_FORMULA_ELEM(formulas, row, col) \
+#define MATRIX_ELEM(formulas, row, col) \
   BOOST_PP_SEQ_ELEM(col, BOOST_PP_SEQ_ELEM(row, formulas))
 
 // macros for second (inner) loop ---------------------------------
@@ -154,9 +204,9 @@
 
 #define MACRO_2(r, state)						\
   BOOST_PP_TUPLE_ELEM(6, 4, state)(BOOST_PP_TUPLE_ELEM(6, 0, state),BOOST_PP_TUPLE_ELEM(6, 2, state)) \
-  = MATRIX_FORMULA_ELEM( BOOST_PP_TUPLE_ELEM(6, 5, state),		\
-			 BOOST_PP_TUPLE_ELEM(6, 0, state),		\
-			 BOOST_PP_TUPLE_ELEM(6, 2, state));		\
+  = MATRIX_ELEM( BOOST_PP_TUPLE_ELEM(6, 5, state),			\
+		 BOOST_PP_TUPLE_ELEM(6, 0, state),			\
+		 BOOST_PP_TUPLE_ELEM(6, 2, state));			\
   /**/
 
 // macros for first (outer) loop ----------------------------------
@@ -195,12 +245,16 @@
  */
 #define CODE_ASSIGN_FORMULAS_TO_MATRIX(matrix, formulas)	\
   BOOST_PP_FOR( (0,						\
-		 MATRIX_NUM_ROWS(formulas),			\
+		 MATRIX_ROWS(formulas),				\
 		 0,						\
-		 MATRIX_NUM_COLS(formulas),			\
+		 MATRIX_COLS(formulas),				\
 		 matrix,					\
 		 formulas),					\
 		PRED, OP, MACRO )				\
+  /**/
+
+#define CODE_ASSIGN_VALUES_TO_MATRIX(matrix, values)	\
+  CODE_ASSIGN_FORMULAS_TO_MATRIX(matrix, values)	\
   /**/
 
 #endif // __CONFIGURATION_POSTCONFIG_H__
