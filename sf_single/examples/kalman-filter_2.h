@@ -54,9 +54,9 @@
   /**/
 
 // optional
-//#define CONTROL_INPUT_MODEL		((0))
-//#define CONTROL_INPUT			((0)(0))
-#define INITIAL_STATE			((0)(0))
+#define CONTROL_INPUT_MODEL		((0))((0))
+#define CONTROL_INPUT			(0)
+#define INITIAL_STATE			(0)(0)
 #define INITIAL_ERROR_COVARIANCE		\
   ( (1) (0) )					\
   ( (0) (1) )					\

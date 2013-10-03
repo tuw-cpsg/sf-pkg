@@ -15,12 +15,12 @@
 // boost preprocessor includes
 #include <boost/preprocessor/tuple/elem.hpp>
 #include <boost/preprocessor/seq/for_each_i.hpp>
+#include <boost/preprocessor/seq/size.hpp>
 #include <boost/preprocessor/seq/elem.hpp>
 #include <boost/preprocessor/stringize.hpp>
 #include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/repetition/for.hpp>
 #include <boost/preprocessor/arithmetic/inc.hpp>
-#include <boost/preprocessor/arithmetic/dec.hpp>
 #include <boost/preprocessor/comparison/not_equal.hpp>
 
 #include "estimation/InputValue.h"

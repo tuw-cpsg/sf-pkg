@@ -32,6 +32,10 @@ void initEstimatorFactory(estimation::EstimatorFactory& factory);
 /** @brief Bring in the current configuration. */
 #include "config.h"
 
+/** @brief Validate the configuration, i.e. checks the parameters
+ * given in the configuration header. */
+#include "validation.h"
+
 /** @brief Prepares configuration for the ROS node. */
 #include "configuration/post_config.h"
 
