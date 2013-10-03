@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 2.8.3)
 project(sf_single)
 
 ## Find catkin and any catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp std_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp std_msgs message_generation)
 
 ## System dependencies are found with CMake's conventions
-find_package(Boost REQUIRED COMPONENTS)
+find_package(Boost REQUIRED)
 find_package(Eigen REQUIRED)
 
 ## Declare the estimation library
@@ -45,6 +45,13 @@ add_library(estimation
 add_library(configuration STATIC
   src/configuration/configuration.cpp
 
+  include/configuration/validation_MovingMedian.h
+  include/configuration/validation_MovingAverage.h
+  include/configuration/validation_KalmanFilter.h
+  include/configuration/validation_ExtendedKalmanFilter.h
+  include/configuration/validation_UnscentedKalmanFilter.h
+  include/configuration/validation.h
+
   include/configuration/pre_config.h
   include/configuration/post_config.h
   include/configuration/configuration.h
@@ -65,17 +72,16 @@ add_library(configuration STATIC
 #######################################
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   InputValue.msg
-#   OutputValue.msg
-# )
+add_message_files(
+  FILES
+  OutputEntityStamped.msg
+)
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -88,7 +94,7 @@ add_library(configuration STATIC
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES estimation misc
-#  CATKIN_DEPENDS other_catkin_pkg
+  CATKIN_DEPENDS message_runtime
   DEPENDS Boost Eigen
 )
 
@@ -113,10 +119,7 @@ target_link_libraries(sf_single
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
   )
-
-## Add cmake target dependencies of the executable/library
-## as an example, message headers may need to be generated before nodes
-# add_dependencies(sf_estimation_node sf_estimation_generate_messages_cpp)
+add_dependencies(sf_single sf_single_gencpp)
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(sf_estimation_node

@@ -19,6 +19,8 @@
 // ROS includes
 #include <ros/ros.h>
 
+#include "sf_single/OutputEntityStamped.h"
+
 // estimation framework includes
 #include "estimation/EstimatorFactory.h"
 #include "estimation/IEstimator.h"
@@ -87,11 +89,11 @@ int main(int argc, char **argv)
     for (int i = 0; i < TOPICS_NUM; i++) {
       std::stringstream ss;
       ss << "state_" << i << "_fused";
-      publishers[i] = n.advertise<std_msgs::Float64>(ss.str(), 100);
-      ROS_INFO_STREAM("Publishing result to 'state_" << i << "_fused'.");
+      publishers[i] = n.advertise<sf_single::OutputEntityStamped>(ss.str(), 100);
+      ROS_INFO_STREAM("Publishing result to '" << ss.str() << "'.");
     }
     // Create messages for publishing.
-    std_msgs::Float64 sampleFused[TOPICS_NUM];
+    sf_single::OutputEntityStamped sampleFused[TOPICS_NUM];
 
     // --------------------------------------------
     // Running application.
@@ -125,7 +127,10 @@ int main(int argc, char **argv)
 
 	  // Set output message(s) and publish.
 	  for (int i = 0; i < out.size(); i++) {
-	    sampleFused[i].data = out[i].getValue();
+	    sampleFused[i].value = out[i].getValue();
+	    sampleFused[i].variance = out[i].getVariance();
+	    sampleFused[i].jitter_ms = out[i].getJitter();
+	    sampleFused[i].header.stamp = ros::Time::now();
 	    publishers[i].publish(sampleFused[i]);
 	  }
 	}
