@@ -5,13 +5,17 @@
 
 TODO
 
+\section Estimation
+
+TODO
+
 \section Parameters
 
-required:
-- \b METHOD : "MovingMedian"
+required: none
 
 optional:
-- \b WINDOW_SIZE : The number of data values to use for
-     estimation. Must be a positive integer. Default value is 3.
+- WINDOW_SIZE
+
+For details see \ref usage_movingmedian.
 
 */

@@ -1,0 +1,112 @@
+/** 
+\page usage_extendedkalmanfilter Extended Kalman Filter Parameters
+
+Choose this method with:
+\code
+#define METHOD		EXTENDED_KALMAN_FILTER
+\endcode
+
+\note The number of state variables n is extracted out of the sequence
+of formulas representing the state transition formula. This value is
+essential for the EKF. Hence write a formula for each state
+variable.
+
+\note The models and its Jacobians have to be defined as
+functions. These functions are evaluated by the linear algebra library
+<a href="http://eigen.tuxfamily.org">Eigen</a> and the syntax is used
+right away. So check the <a
+href="http://eigen.tuxfamily.org/dox/group__QuickRefPage.html">quick-reference</a>
+of Eigen 3 for usage and examples, e.g. \f$x^2\f$ ... \c pow(x,2) or
+\c x.pow(2).
+
+\note Be careful to write appropriate sizes of the matrices and
+vectors. If the sizes don't fit compile errors will occur or even
+exception can be thrown during runtime which causes the ROS node to
+terminate.
+
+
+\section Required
+
+\subsection STATE_TRANSITION_MODEL
+
+The state transition model A, relates the previous state to the
+current state.
+
+f(x,u): a function f of x and u which represents the system ignoring
+the noise. Because the state consists of several variables the model
+is specified by a set of functions. One formula for each state
+variable is required. 
+
+The state variables in the formulas correspond to the posteriori state
+of the last estimation. The variables are numbered from 0 to n-1,
+e.g. for n is 2, x[0] and x[1] are valid a posteriori state variables
+(the state is internally an array/vector). The formulas are evaluated
+and assigned to the a priori estimated state in the order they are
+given, i.e. the first item in the sequence will be applied to the a
+priori x[0], the second item to the a priori x[1], and so on.
+
+n-dim Vector of functions.
+
+\subsection STATE_TRANSITION_MODEL_JACOBIAN 
+
+The Jacobian of the state transition model, i.e. partial derivatives
+of f with respect to x. 
+
+The Jacobian of the state transition model is a matrix. An element
+A[i][j] = df[i]/dx[j], i.e. \em every formula of the state transition
+model is derived to \em every state variable. Therefore the size of
+this matrix must be n x n, e.g. deriving the first function of the
+state transition model to x gives the first row of A.
+
+n x n Matrix of functions.
+
+\subsection PROCESS_NOISE_COVARIANCE
+
+The process noise covariance Q.
+
+n x n Matrix.
+
+\subsection OBSERVATION_MODEL
+
+The observation model h, relates the measurement to the state. 
+
+h(x): a function h of x which represents the observation ignoring
+measurement noise.
+
+m-dim Vector of functions.
+
+\subsection OBSERVATION_MODEL_JACOBIAN 
+
+The Jacobian of the observation model, i.e. partial derivatives of h
+with respect to x.
+
+m x n Matrix of functions.
+
+\subsection MEASUREMENT_NOISE_COVARIANCE
+
+The measurement noise covariance R.
+
+m x m Matrix.
+
+
+\section Optional
+
+\subsection CONTROL_INPUT 
+
+The control input u. 
+
+l-dim Vector.
+
+\subsection INITIAL_STATE
+
+The initial state x0. 
+
+n-dim Vector.
+
+\subsection INITIAL_ERROR_COVARIANCE 
+
+The initial error covariance P0. 
+
+n x n Matrix.
+
+*/

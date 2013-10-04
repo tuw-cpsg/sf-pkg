@@ -1,0 +1,174 @@
+/** 
+\page usage_configuration Configuration
+
+The configuration is done in the single header file \em config.h in
+the folder \em cfg of the sensor fusion package. Here the interface of
+the ROS node and the fusion method is specified.
+
+The configuration can be divided into following parts:
+- \em Inputs. The entities (e.g. sensors) which should be fused,
+  i.e. topics to subscribe.
+- \em Outputs. The estimated entities (e.g. state variables),
+  i.e. topics to publish.
+- \em Method. The type of estimation or fusion to perform.
+- \em Parameters. The method specific parameters.
+
+Required macros are:
+- \c TOPICS_IN, see \ref sec_inputs
+- \c TOPICS_OUT, see \ref sec_outputs
+- \c METHOD, see \ref sec_method
+- required parameters of the method, see \ref sec_params
+
+
+\section sec_inputs Inputs
+
+An input topic is specified in a tuple of 3 elements:
+
+\code
+(name, field, type)
+\endcode
+
+- \em name The name of the topic to subscribe to. This name follows
+  the conventions on <a href="http://wiki.ros.org/Names">ROS
+  names</a>.
+- \em field The field in the topic which holds the value of the entity
+  to fuse. This field must be of numeric type, it is cast to \c
+  double.
+- \em type The message type as it would be used when instantiating
+  such a message in C++.
+
+The topics to subscribe are collected in a <a
+href="http://www.boost.org/doc/libs/1_46_1/libs/preprocessor/doc/data/sequences.html">sequence</a>
+called \c TOPICS_IN, e.g.:
+
+\code
+#define TOPICS_IN \
+  ((signal_A, data, std_msgs::Float64))	\
+  ((signal_B, data, std_msgs::Float64))
+\endcode
+
+The number of topics in the sequence \c TOPICS_IN is not bounded.
+
+\note Invalid \em field or \em type can raise exceptions during
+runtime.
+
+\note Macros expanding over several lines have to be marked with \c \
+to indicate that another line is following. Forgetting \c \ causes
+strange compile errors!
+
+
+\section sec_outputs Outputs
+
+An output topic is specified in a tuple of 2 elements:
+
+\code
+(name, index)
+\endcode
+
+- \em name The name of the topic to subscribe to. This name follows
+  the conventions on <a href="http://wiki.ros.org/Names">ROS
+  names</a>.
+- \em index The index of the variable in the state vector which should
+  be published. This index must be in range of 0 to \<size of state
+  vector\> - 1. The size of the state vector depends on the method and
+  the state transition model you choose.
+
+The topics to publish are collected in a <a
+href="http://www.boost.org/doc/libs/1_46_1/libs/preprocessor/doc/data/sequences.html">sequence</a>
+called \c TOPICS_OUT, e.g.:
+
+\code
+#define TOPICS_OUT \
+  ((signal_fused, 0))
+\endcode
+
+The number of topics in the sequence \c TOPICS_OUT is not bounded,
+e.g. you can publish the same state variable in different topics
+(whether it makes sense or not). However be careful when specifiying
+the index which is indeed bounded.
+
+\note An invalid \em index will cause a compile error.
+
+\note Macros expanding over several lines have to be marked with \c \
+to indicate that another line is following. Forgetting \c \ causes
+strange compile errors!
+
+
+\section sec_method Method
+
+The method is specified by defining the macro \c METHOD, e.g.:
+
+\code
+#define METHOD		MOVING_MEDIAN
+\endcode
+
+Following methods are available, for details on implementation and
+parameters see the referenced sites.
+
+- \c MOVING_MEDIAN : \ref movingmedian, \ref usage_movingmedian
+- \c MOVING_AVERAGE : \ref movingaverage, \ref usage_movingaverage
+- \c KALMAN_FILTER : \ref kalmanfilter, \ref usage_kalmanfilter
+- \c EXTENDED_KALMAN_FILTER : \ref extendedkalmanfilter, \ref
+  usage_extendedkalmanfilter
+- \c UNSCENTED_KALMAN_FILTER : \ref unscentedkalmanfilter, \ref
+  usage_unscentedkalmanfilter
+
+
+\section sec_params Parameters
+
+The parameters are very specific to the estimation or fusion
+method. See the following references for required and optional
+parameters of a method.
+
+- \subpage usage_movingmedian
+- \subpage usage_movingaverage
+- \subpage usage_kalmanfilter
+- \subpage usage_extendedkalmanfilter
+- \subpage usage_unscentedkalmanfilter
+
+Parameters are often specified as matrices and vectors. See the
+description below for how to define such parameters.
+
+\subsection Matrix
+
+A matrix is represented by a <a
+href="http://www.boost.org/doc/libs/1_46_1/libs/preprocessor/doc/data/sequences.html">sequence</a>
+of sequences. Every row of a matrix is a sequence of elements. And the
+matrix is a sequence of this rows. Hence every element in a row is
+enclosed by parantheses, and the row is enclosed by parantheses
+too. 
+
+Example matrix:
+\code
+#define STATE_TRANSITION_MODEL \
+  ( (1) (2) )                  \
+  ( (3) (4) )
+\endcode
+
+The state transition model would then be initialized as follows:
+\code
+A(0,0) = 1;
+A(0,1) = 2;
+A(1,0) = 3;
+A(1,1) = 4; 
+\endcode
+
+\subsection Vector
+
+A vector is represented by a <a
+href="http://www.boost.org/doc/libs/1_46_1/libs/preprocessor/doc/data/sequences.html">sequence</a>
+of values. In a sequence a value is enclosed by parantheses. 
+
+Example vector:
+\code
+#define INITIAL_STATE (1)(2)
+\endcode
+
+The order is of course relevant. In the above example the state vector
+(in fact an array) would be initialized as follows:
+\code
+x[0] = 1;
+x[1] = 2;
+\endcode
+
+*/

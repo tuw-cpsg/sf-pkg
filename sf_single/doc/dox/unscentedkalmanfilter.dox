@@ -146,71 +146,16 @@ Correct (measurement update):
 \section Parameters
 
 required:
-- \b METHOD : "ExtendedKalmanFilter"
-- \b STATE_TRANSITION_MODEL : The state transition model f, relates
-  the previous state to the current state. f(x,u): a function f of x
-  and u which represents the system ignoring the noise. Because the
-  state consists of several variables the model is specified by a set
-  of functions. One formula for each state variable is required. The
-  state variables in the formulas correspond to the posteriori state
-  of the last estimation. The variables are numbered from 0 to n-1,
-  e.g. for n is 2, x[0] and x[1] are valid a posteriori state
-  variables (the state is internally an array/vector). The formulas
-  are evaluated and assigned to the a priori estimated state in the
-  order they are given, i.e. the first item in the sequence will be
-  applied to the a priori x[0], the second item to the a priori x[1],
-  and so on.
-- \b PROCESS_NOISE_COVARIANCE : The process noise covariance Q. n x n
-  Matrix.
-- \b OBSERVATION_MODEL : The observation model h, relates the
-  measurement to the state. h(x): a function h of x which represents
-  the observation ignoring measurement noise.
-- \b MEASUREMENT_NOISE_COVARIANCE : The measurement noise covariance
-  R. m x m Matrix.
+- STATE_TRANSITION_MODEL
+- PROCESS_NOISE_COVARIANCE
+- OBSERVATION_MODEL
+- MEASUREMENT_NOISE_COVARIANCE
 
 optional:
-- \b CONTROL_INPUT : The control input u. l-dim Vector.
-- \b INITIAL_STATE : The initial state x0. n-dim Vector.
-- \b INITIAL_ERROR_COVARIANCE : The initial error covariance P0. n x n
-  Matrix.
+- CONTROL_INPUT
+- INITIAL_STATE
+- INITIAL_ERROR_COVARIANCE
 
-\note
-- The number of state variables n is extracted out of the sequence of
-  formulas representing the state transition formula. This value is
-  essential for the EKF. Hence write a formula for each state
-  variable. Otherwise runtime errors can occur (invalid size of
-  vectors/matrices).
-- The models have to be defined as functions. These functions are
-  evaluated by the linear algebra library <a
-  href="http://eigen.tuxfamily.org">Eigen</a> and the syntax is used
-  right away. So check the <a
-  href="http://eigen.tuxfamily.org/dox/group__QuickRefPage.html">quick-reference</a>
-  of Eigen 3 for usage and examples, e.g. \f$x^2\f$ ... \c pow(x,2) or
-  \c x.pow(2).
-- Be careful to write appropriate sizes of the matrices and
-  vectors. If the sizes don't fit an exception is thrown, which causes
-  the ROS node to terminate.
-
-Vectors must be specified as a list of floats separated by
-commas. Matrices must be specified as lists of vectors enclosed by
-curly brackets and separated by commas. Examples:
-- 3-dimensional vector: 1, 2, 3
-- 1-dimensional vector: 1
-- 2x2-dimensional matrix: {1,0} , {0,1}
-- 1x1-dimensional matrix: {1}
-- 2x1-dimensional matrix: {1} , {1}
-
-A set of functions is represented by a vector (where "set" is not the
-correct description; "sequence" is better, because the order is
-relevant!). A vector is represented by a sequence of elements, here:
-the functions. A sequence is always enclosed by parantheses. Example
-vector or sequence of functions: 
-
-\code
-#define STATE_TRANSITION_MODEL \
-  ( x[0] + 0.1*x[1] )          \
-  ( x[1] + 0.1*x[2] )          \
-  ( x[2] )
-\endcode
+For details see \ref usage_unscentedkalmanfilter.
 
 */

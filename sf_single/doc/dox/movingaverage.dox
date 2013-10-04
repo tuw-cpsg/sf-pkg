@@ -5,37 +5,18 @@
 
 TODO
 
+\section Estimation
+
+TODO
+
 \section Parameters
 
-required:
-- \b METHOD : "MovingAverage"
+required: none
 
 optional:
-- \b WINDOW_SIZE : The number of data values to use for
-  estimation. Must be a positive integer. Default value is 3.
-- \b WEIGHTING_COEFFICIENTS : The weighting coefficients for a moving
-  filter. The two types of filters (FIR and IIR are automatically
-  defined with these coefficients:
-  - FIR: The number of coefficients equals the WINDOW_SIZE,
-    e.g. WINDOW_SIZE = 3, WEIGHTING_COEFFICIENTS = 1, 3, 1
-    corresponds to an FIR filter, i.e. only the input is weighted.
-  - IIR: The number of coefficients equals 2xWINDOW_SIZE - 1. Also
-    (old) output values are weighted and added to a new output.
-    E.g. WINDOW_SIZE = 3, WEIGHTING_COEFFICIENTS = 1, 0, 3, 2, 1
-    where the first two coefficients (1, 0) are used for the old
-    output values and the last three coefficients (3, 2, 1) for the
-    input values.
-  .
-  
-  Specify the coefficients by a list of float variables separated by
-  commas. The left most coefficient is the weight for the newest input
-  or output value respectively. This macro will be used directly to
-  initialize a std::vector wc = {WEIGHTING_COEFFICIENTS}; Default
-  values will be set to apply a FIR filter with hamming window.
+- WINDOW_SIZE
+- WEIGHTING_COEFFICIENTS
 
-\note
-- Be careful to write appropriate WEIGHTING_COEFFICIENTS according to
-  the WINDOW_SIZE. If the number of coefficients doesn't fit an
-  exception is thrown, which causes the ROS node to terminate.
+For details see \ref usage_movingaverage.
 
 */

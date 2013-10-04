@@ -16,7 +16,16 @@ TODO
 
 \section usage_sec Usage
 
-TODO
+An estimator is configured by the configuration header file, located
+in the folder cfg of this package. By compiling the package a specific
+estimator node is created. So when x \em different estimators should
+be used in your ROS system you have to copy this package x times and
+adapt the configuration header for your needs.
+
+The configuration header can be divided into the definition of the
+interface (inputs and outputs) and definition of type and parameters
+of the estimator. See \subpage usage_configuration for details and
+examples.
 
 \section developement_sec Development
 

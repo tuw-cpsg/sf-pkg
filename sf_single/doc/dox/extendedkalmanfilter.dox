@@ -80,90 +80,18 @@ For details about the derivation of this formulas, see \cite Wel06 and
 \section Parameters
 
 required:
-- \b METHOD : "ExtendedKalmanFilter"
-- \b STATE_TRANSITION_MODEL : The state transition model f, relates
-  the previous state to the current state. f(x,u): a function f of x
-  and u which represents the system ignoring the noise. Because the
-  state consists of several variables the model is specified by a set
-  of functions. One formula for each state variable is required. The
-  state variables in the formulas correspond to the posteriori state
-  of the last estimation. The variables are numbered from 0 to n-1,
-  e.g. for n is 2, x[0] and x[1] are valid a posteriori state
-  variables (the state is internally an array/vector). The formulas
-  are evaluated and assigned to the a priori estimated state in the
-  order they are given, i.e. the first item in the sequence will be
-  applied to the a priori x[0], the second item to the a priori x[1],
-  and so on.
-- \b STATE_TRANSITION_MODEL_JACOBIAN : The Jacobian of the state
-  transition model, i.e. partial derivatives of f with respect to
-  x. The Jacobian of the state transition model is a matrix. An
-  element A[i][j] = df[i]/dx[j], i.e. \em every formula of the state
-  transition model is derived to \em every state variable. Therefore
-  the size of this matrix must be n x n. E.g. deriving the first
-  function of the state transition model to x gives the first row of
-  A.
-- \b PROCESS_NOISE_COVARIANCE : The process noise covariance Q. n x n
-  Matrix.
-- \b OBSERVATION_MODEL : The observation model h, relates the
-  measurement to the state. h(x): a function h of x which represents
-  the observation ignoring measurement noise.
-- \b OBSERVATION_MODEL_JACOBIAN : The Jacobian of the observation
-  model, i.e. partial derivatives of h with respect to x.
-- \b MEASUREMENT_NOISE_COVARIANCE : The measurement noise covariance
-  R. m x m Matrix.
+- STATE_TRANSITION_MODEL
+- STATE_TRANSITION_MODEL_JACOBIAN
+- PROCESS_NOISE_COVARIANCE
+- OBSERVATION_MODEL
+- OBSERVATION_MODEL_JACOBIAN
+- MEASUREMENT_NOISE_COVARIANCE
 
 optional:
-- \b CONTROL_INPUT : The control input u. l-dim Vector.
-- \b INITIAL_STATE : The initial state x0. n-dim Vector.
-- \b INITIAL_ERROR_COVARIANCE : The initial error covariance P0. n x n
-  Matrix.
+- CONTROL_INPUT
+- INITIAL_STATE
+- INITIAL_ERROR_COVARIANCE
 
-\note
-- The number of state variables n is extracted out of the sequence of
-  formulas representing the state transition formula. This value is
-  essential for the EKF. Hence write a formula for each state
-  variable. Otherwise runtime errors can occur (invalid size of
-  vectors/matrices).
-- The models and its Jacobians have to be defined as functions. These
-  functions are evaluated by the linear algebra library <a
-  href="http://eigen.tuxfamily.org">Eigen</a> and the syntax is used
-  right away. So check the <a
-  href="http://eigen.tuxfamily.org/dox/group__QuickRefPage.html">quick-reference</a>
-  of Eigen 3 for usage and examples, e.g. \f$x^2\f$ ... \c pow(x,2) or
-  \c x.pow(2).
-- Be careful to write appropriate sizes of the matrices and
-  vectors. If the sizes don't fit an exception is thrown, which causes
-  the ROS node to terminate.
-
-Vectors must be specified as a list of floats separated by
-commas. Matrices must be specified as lists of vectors enclosed by
-curly brackets and separated by commas. Examples:
-- 3-dimensional vector: 1, 2, 3
-- 1-dimensional vector: 1
-- 2x2-dimensional matrix: {1,0} , {0,1}
-- 1x1-dimensional matrix: {1}
-- 2x1-dimensional matrix: {1} , {1}
-
-A set of functions is represented by a vector (where "set" is not the
-correct description; "sequence" is better, because the order is
-relevant!). A vector is represented by a sequence of elements, here:
-the functions. A sequence is always enclosed by parantheses. Example
-vector or sequence of functions: \code
-#define STATE_TRANSITION_MODEL \
-  ( x[0] + 0.1*x[1] )          \
-  ( x[1] + 0.1*x[2] )          \
-  ( x[2] )
-\endcode
-
-A matrix is represented by a sequence of sequences. Every row of a
-matrix is a sequence of elements. And the matrix is a sequence of this
-rows. Hence every element in a row is enclosed by parantheses, and the
-row is enclosed by parantheses too. Example matrix or
-sequence-of-sequences of functions: \code
-#define STATE_TRANSITION_MODEL_JACOBIAN \
-  ( (1) (0.1)  (0)  )                   \
-  ( (0)  (1)  (0.1) )                   \
-  ( (0)  (0)   (1)  )
-\endcode
+For details see \ref usage_extendedkalmanfilter.
 
 */

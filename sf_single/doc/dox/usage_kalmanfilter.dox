@@ -1,0 +1,69 @@
+/** 
+\page usage_kalmanfilter Kalman Filter Parameters
+
+Choose this method with:
+\code
+#define METHOD		KALMAN_FILTER
+\endcode
+
+\note Be careful to write appropriate sizes of the matrices and
+vectors. If the sizes don't fit compile errors will occur or even
+exception can be thrown during runtime which causes the ROS node to
+terminate.
+
+\section Required
+
+\subsection STATE_TRANSITION_MODEL
+
+The state transition model A, relates the previous state to the
+current state.
+
+n x n Matrix.
+
+\subsection PROCESS_NOISE_COVARIANCE
+
+The process noise covariance Q.
+
+n x n Matrix.
+
+\subsection OBSERVATION_MODEL
+
+The observation model H, relates the measurement to the state.
+
+m x n Matrix.
+
+\subsection MEASUREMENT_NOISE_COVARIANCE
+
+The measurement noise covariance R.
+
+m x m Matrix.
+
+
+\section Optional
+
+\subsection CONTROL_INPUT_MODEL
+
+The control input model B, relates the control input to the current
+state. 
+
+n x l Matrix.
+
+\subsection CONTROL_INPUT 
+
+The control input u. 
+
+l-dim Vector.
+
+\subsection INITIAL_STATE
+
+The initial state x0. 
+
+n-dim Vector.
+
+\subsection INITIAL_ERROR_COVARIANCE 
+
+The initial error covariance P0. 
+
+n x n Matrix.
+
+*/

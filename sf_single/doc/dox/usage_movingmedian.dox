@@ -1,0 +1,27 @@
+/** 
+\page usage_movingmedian Moving Median Parameters
+
+Choose this method with:
+\code
+#define METHOD		MOVING_MEDIAN
+\endcode
+
+\section Required
+
+none
+
+\section Optional
+
+\subsection WINDOW_SIZE
+
+The number of data values to use for estimation. 
+
+Must be a positive integer. Default value is 3. Invalid values will
+cause a compile error.
+
+Example:
+\code
+#define WINDOW_SIZE	5
+\endcode
+
+*/
