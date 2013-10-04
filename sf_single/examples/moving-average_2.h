@@ -12,12 +12,20 @@
 
 // List input topics here, format (no commas needed between topic
 // tuples): ((name, field, type)).
-#define TOPICS					\
+#define TOPICS_IN				\
   ((signal, data, std_msgs::Float64))		\
   /**/
 
 // Define the includes needed for these topics!
 #include <std_msgs/Float64.h>
+
+// -----------------------------------------
+// output
+// -----------------------------------------
+
+#define TOPICS_OUT				\
+  ((state_0_fused, 0))				\
+  /**/
 
 // -----------------------------------------
 // method and its parameters

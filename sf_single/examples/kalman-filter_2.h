@@ -21,13 +21,21 @@
  * need for a comma, but has to be put into parentheses twice (inner
  * for the tuple, outer for the sequence).
  */
-#define TOPICS					\
+#define TOPICS_IN				\
   ((signal, data, std_msgs::Float64))		\
   ((signal, data, std_msgs::Float64))		\
   /**/
 
 // Define the includes needed for these topics!
 #include <std_msgs/Float64.h>
+
+// -----------------------------------------
+// output
+// -----------------------------------------
+
+#define TOPICS_OUT				\
+  ((state_0_fused, 1))				\
+  /**/
 
 // -----------------------------------------
 // method and its parameters

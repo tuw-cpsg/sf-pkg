@@ -24,7 +24,7 @@
 #define M VECTOR_SIZE(OBSERVATION_MODEL)
 
 // check sizes of input entities / topics
-#if !(VECTOR_SIZE(TOPICS) == M)
+#if !(VECTOR_SIZE(TOPICS_IN) == M)
   #error "Validation of configuration header failed. ExtendedKalmanFilter: Number of inputs must match the observation model."
 #endif
 

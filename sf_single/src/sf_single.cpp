@@ -38,7 +38,7 @@ struct TopicState {
 };
 
 /** @brief Collects the messages of subscribed topics. */
-struct TopicState topics[TOPICS_NUM];
+struct TopicState topics[TOPICS_IN_NUM];
 
 // Expands to the callback functions of the topics.
 RECEIVES(topics)
@@ -46,10 +46,10 @@ RECEIVES(topics)
 /**
  * @brief This node implements a specified sensor fusion method.
  *
- * The method and its parameters can be passed as arguments or in a
- * configuration file. According to these settings an estimation class
- * is instantiated which fuses the subscribed input value. With every
- * new input value the estimate is updated and published.
+ * According to the settings in the configuration header an estimation
+ * class is instantiated which fuses the subscribed input
+ * value(s). With every new (set of) input value(s) the estimate is
+ * updated and published.
  */
 int main(int argc, char **argv)
 {
@@ -82,18 +82,13 @@ int main(int argc, char **argv)
     
     // Tell ROS that we want to subscribe to the sensor fusion input
     // (given in the configuration header) and publish a fused version
-    // of it (the estimate).
-    ros::Subscriber subscribers[TOPICS_NUM];
+    // of it, i.e. the estimate(s).
+    ros::Subscriber subscribers[TOPICS_IN_NUM];
     SUBSCRIBE(subscribers, n);
-    ros::Publisher publishers[TOPICS_NUM];
-    for (int i = 0; i < TOPICS_NUM; i++) {
-      std::stringstream ss;
-      ss << "state_" << i << "_fused";
-      publishers[i] = n.advertise<sf_single::OutputEntityStamped>(ss.str(), 100);
-      ROS_INFO_STREAM("Publishing result to '" << ss.str() << "'.");
-    }
+    ros::Publisher publishers[TOPICS_OUT_NUM];
+    PUBLISH_INIT(publishers, n);
     // Create messages for publishing.
-    sf_single::OutputEntityStamped sampleFused[TOPICS_NUM];
+    sf_single::OutputEntityStamped sampleFused[TOPICS_OUT_NUM];
 
     // --------------------------------------------
     // Running application.
@@ -103,7 +98,7 @@ int main(int argc, char **argv)
     {
       // Check if all samples for an estimation cycle were received.
       bool all_recv = true;
-      for (int i = 0; i < TOPICS_NUM; i++) 
+      for (int i = 0; i < TOPICS_IN_NUM; i++) 
 	all_recv &= topics[i].received;
 
       if (all_recv)
@@ -113,26 +108,20 @@ int main(int argc, char **argv)
 	  // Debug: Print jitter of each message/value in ms.
 	  std::stringstream ss;
 	  ss << "Jitter: ";
-	  for (int i = 0; i < TOPICS_NUM; i++)
+	  for (int i = 0; i < TOPICS_IN_NUM; i++)
 	    ss << topics[i].value.getJitter() << " ";
 	  ROS_DEBUG_STREAM(ss.str());
 
 	  // Collect inputs together.
 	  estimation::Input in;
-	  for (int i = 0; i < TOPICS_NUM; i++)
+	  for (int i = 0; i < TOPICS_IN_NUM; i++)
 	    in.add(topics[i].value);
 
 	  // Estimate.
 	  estimation::Output out = estimator->estimate(in);
 
 	  // Set output message(s) and publish.
-	  for (int i = 0; i < out.size(); i++) {
-	    sampleFused[i].value = out[i].getValue();
-	    sampleFused[i].variance = out[i].getVariance();
-	    sampleFused[i].jitter_ms = out[i].getJitter();
-	    sampleFused[i].header.stamp = ros::Time::now();
-	    publishers[i].publish(sampleFused[i]);
-	  }
+	  PUBLISH(publishers, out, sampleFused);
 	}
 	catch (std::exception& e)
 	{
@@ -140,7 +129,7 @@ int main(int argc, char **argv)
 	}
 
 	// Samples/messages are processed, so reset all receive flags.
-	for (int i = 0; i < TOPICS_NUM; i++) 
+	for (int i = 0; i < TOPICS_IN_NUM; i++) 
 	  topics[i].received = false;
       }
       

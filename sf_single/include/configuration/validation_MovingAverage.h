@@ -10,8 +10,13 @@
 #define __CONFIGURATION_VALIDATION_MOVINGAVERAGE_H__
 
 // only 1 input is allowed
-#if VECTOR_SIZE(TOPICS) != 1
-  #error "Validation of configuration header failed. MovingMedian: Only 1 topic (input entity) allowed."
+#if VECTOR_SIZE(TOPICS_IN) != 1
+  #error "Validation of configuration header failed. MovingMedian: Only 1 input topic allowed."
+#endif
+
+// only 1 output is allowed
+#if VECTOR_SIZE(TOPICS_OUT) != 1
+  #error "Validation of configuration header failed. MovingAverage: Only 1 output topic allowed."
 #endif
 
 // window size

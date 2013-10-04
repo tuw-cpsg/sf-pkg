@@ -14,14 +14,8 @@
 #include <boost/preprocessor/seq/elem.hpp>
 
 // ----------------------------------------------------------------
-// abbreviations for checking SIZES
+// abbreviations for checking SIZES (needed for validation)
 // ----------------------------------------------------------------
-
-#if METHOD == EXTENDED_KALMAN_FILTER  ||  METHOD == UNSCENTED_KALMAN_FILTER
-#define STATE_SIZE		BOOST_PP_SEQ_SIZE(STATE_TRANSITION_MODEL)
-#define MEASUREMENT_SIZE	BOOST_PP_SEQ_SIZE(OBSERVATION_MODEL)
-#endif
-
 /** 
  * @brief Expands to the number of elements in a sequence.
  */
@@ -49,9 +43,14 @@
 // ----------------------------------------------------------------
 // validation general (things needed for every method)
 // ----------------------------------------------------------------
-#ifndef TOPICS
-  #error "Validation failed. Topics, i.e. inputs, missing."
+#ifndef TOPICS_IN
+  #error "Validation failed. Input topics missing."
 #endif
+
+#ifndef TOPICS_OUT
+  #error "Validation failed. Output topics missing."
+#endif
+
 
 #ifndef METHOD
   #error "Validation failed. A method must be defined."

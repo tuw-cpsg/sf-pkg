@@ -24,7 +24,7 @@
 #define L MATRIX_COLS(CONTROL_INPUT_MODEL)
 
 // check sizes of input entities / topics
-#if !(VECTOR_SIZE(TOPICS) == M)
+#if !(VECTOR_SIZE(TOPICS_IN) == M)
   #error "Validation of configuration header failed. KalmanFilter: Number of inputs must match the observation model."
 #endif
 

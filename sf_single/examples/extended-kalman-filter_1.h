@@ -13,7 +13,7 @@
 // Filter the same signal with different parameters. Define two
 // inputs, so the EKF gets two measurements (that these measurements
 // are the same the EKF doesn't know).
-#define TOPICS					\
+#define TOPICS_IN				\
   ((signal, data, std_msgs::Float64))		\
   ((signal, data, std_msgs::Float64))		\
   /**/
@@ -22,16 +22,30 @@
 #include <std_msgs/Float64.h>
 
 // -----------------------------------------
+// output
+// -----------------------------------------
+
+// Define the state variables which should be published. One tuple
+// specifies the name of the topic and the index of the state
+// variables in the state vector. With following configuration (only)
+// the first state variable will be published.
+#define TOPICS_OUT				\
+  ((state_0_fused, 0))				\
+  /**/
+
+// -----------------------------------------
 // method and its parameters
 // -----------------------------------------
 
 // The estimator should be an EKF.
 #define METHOD	EXTENDED_KALMAN_FILTER
 
-// Specify required for the EKF (see documentation which are
-// needed). The state transition model is very simple. We expect the
-// signal does not change (is a constant). Hence the old value is the
-// new value.
+// Specify required parameters for the EKF (see documentation which
+// are needed).
+
+// The state transition model is very simple. We expect the signal
+// does not change (is a constant). Hence the old value is the new
+// value.
 // 
 // x_apriori[0] = x[0];
 // x_apriori[1] = x[1];
