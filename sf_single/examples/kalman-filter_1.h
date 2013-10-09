@@ -25,6 +25,10 @@
   ((signal, data, std_msgs::Float64))		\
   /**/
 
+#define TOPICS_IN_CTRL				\
+  ((ctrl, data, std_msgs::Float64))		\
+  /**/
+
 // Define the includes needed for these topics!
 #include <std_msgs/Float64.h>
 
@@ -49,8 +53,7 @@
 #define MEASUREMENT_NOISE_COVARIANCE	( (10)  )
 
 // optional
-//#define CONTROL_INPUT_MODEL		( (0) )
-//#define CONTROL_INPUT			(0)
+#define CONTROL_INPUT_MODEL		( (1) )
 //#define INITIAL_STATE			(0)
 //#define INITIAL_ERROR_COVARIANCE	( (1) )
 

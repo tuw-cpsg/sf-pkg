@@ -13,10 +13,12 @@
 // --- valid ---
 
 // for all valid examples below
-#define TOPICS					\
+#define TOPICS_IN					\
   ((signal, data, std_msgs::Float64))
+#define TOPICS_OUT					\
+  ((signal_fused, 0))
 
-#define WINDOW_SIZE		5
+// #define WINDOW_SIZE		5
 
 // #define WINDOW_SIZE		5
 // #define WEIGHTING_COEFFICIENTS	(1) (2) (5) (2) (1)
@@ -27,12 +29,27 @@
 // --- invalid ---
 
 // // only 1 topic allowed
-// #define TOPICS					\
+// #define TOPICS_IN					\
 //   ((signal, data, std_msgs::Float64))		\
 //   ((signal, data, std_msgs::Float64))
+// #define TOPICS_OUT					\
+//   ((signal_fused, 0))
+
+// // output topic missing
+// #define TOPICS_IN					\
+//   ((signal, data, std_msgs::Float64))
+
+// // only 1 output topic allowed
+// #define TOPICS_IN					\
+//   ((signal, data, std_msgs::Float64))
+// #define TOPICS_OUT					\
+//   ((signal_fused_0, 0))				\
+//   ((signal_fused_1, 1))
 
 // // for all examples below:
-// #define TOPICS					\
+// #define TOPICS_IN					\
+//   ((signal, data, std_msgs::Float64))
+// #define TOPICS_OUT					\
 //   ((signal, data, std_msgs::Float64))
 
 // // window size must be given too

@@ -21,11 +21,19 @@
 // sizes
 #define N MATRIX_ROWS(STATE_TRANSITION_MODEL)
 #define M MATRIX_ROWS(OBSERVATION_MODEL)
-#define L MATRIX_COLS(CONTROL_INPUT_MODEL)
+#if defined TOPICS_IN_CTRL
+  #define L VECTOR_SIZE(TOPICS_IN_CTRL)
+#elif defined CONTROL_INPUT_MODEL
+  #define L MATRIX_COLS(CONTROL_INPUT_MODEL)
+#endif
 
 // check sizes of input entities / topics
 #if !(VECTOR_SIZE(TOPICS_IN) == M)
   #error "Validation of configuration header failed. KalmanFilter: Number of inputs must match the observation model."
+#endif
+
+#if defined TOPICS_IN_CTRL  &&  !(defined CONTROL_INPUT_MODEL)
+  #error "Validation of configuration header failed. KalmanFilter: Control input given, but no control input model."
 #endif
 
 // check sizes of required parameters
@@ -54,16 +62,6 @@
   #if !(MATRIX_ROWS(CONTROL_INPUT_MODEL) == N  && \
 	MATRIX_COLS(CONTROL_INPUT_MODEL) == L)
     #error "Validation of configuration header failed. KalmanFilter: Control input model has invalid size."
-  #endif
-#endif
-
-#ifdef CONTROL_INPUT
-  #ifdef CONTROL_INPUT_MODEL
-    #if !(VECTOR_SIZE(CONTROL_INPUT) == L)
-      #error "Validation of configuration header failed. KalmanFilter: Control input has invalid size."
-    #endif
-  #else
-    #error "Validation of configuration header failed. KalmanFilter: Control input given, but control input model missing."
   #endif
 #endif
 

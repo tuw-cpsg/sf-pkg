@@ -28,6 +28,12 @@
   #error "Validation of configuration header failed. ExtendedKalmanFilter: Number of inputs must match the observation model."
 #endif
 
+#ifdef TOPICS_IN_CTRL
+  // the size of this vector must correspond to the usage in the state
+  // transition model; errors with this input will cause runtime
+  // exceptions!
+#endif
+
 // check sizes of required parameters
 #if !(VECTOR_SIZE(STATE_TRANSITION_MODEL) == N)
   #error "Validation of configuration header failed. ExtendedKalmanFilter: State transition model has invalid size."
@@ -56,12 +62,6 @@
 #endif
 
 // check sizes of optional parameters
-#ifdef CONTROL_INPUT
-  // size of control input cannot be checked; the size of this vector
-  // must correspond to the usage in the state transition model;
-  // errors with this input parameter will cause runtime exceptions!
-#endif
-
 #ifdef INITIAL_STATE
   #if !(VECTOR_SIZE(INITIAL_STATE) == N)
     #error "Validation of configuration header failed. ExtendedKalmanFilter: Initial state has invalid size."

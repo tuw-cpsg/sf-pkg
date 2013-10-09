@@ -13,7 +13,7 @@
 
 // --- valid ---
 
-// #define TOPICS					\
+// #define TOPICS_IN					\
 //   ((signal, data, std_msgs::Float64))		\
 //   ((signal, data, std_msgs::Float64))
 
@@ -39,7 +39,7 @@
 //   ( (0)  (10) )
 
 
-// #define TOPICS					\
+// #define TOPICS_IN					\
 //   ((signal, data, std_msgs::Float64))
 
 // #define STATE_TRANSITION_MODEL			\
@@ -62,7 +62,7 @@
 // --- invalid ---
 
 // // required params missing
-// #define TOPICS					\
+// #define TOPICS_IN					\
 //   ((signal, data, std_msgs::Float64))		\
 //   ((signal, data, std_msgs::Float64))
 
@@ -78,7 +78,7 @@
 
 
 // // invalid sizes
-// #define TOPICS					\
+// #define TOPICS_IN					\
 //   ((signal, data, std_msgs::Float64))		\
 //   ((signal, data, std_msgs::Float64))
 
@@ -103,7 +103,7 @@
 
 
 // // invalid size of STM-jacobian
-// #define TOPICS					\
+// #define TOPICS_IN					\
 //   ((signal, data, std_msgs::Float64))		\
 //   ((signal, data, std_msgs::Float64))
 
@@ -129,7 +129,7 @@
 
 
 // // num topics invalid, invalid size of OM-jacobian and MNC
-// #define TOPICS					\
+// #define TOPICS_IN					\
 //   ((signal, data, std_msgs::Float64))		\
 //   ((signal, data, std_msgs::Float64))
 
@@ -154,7 +154,7 @@
 
 
 // // num topics invalid
-// #define TOPICS					\
+// #define TOPICS_IN					\
 //   ((signal, data, std_msgs::Float64))		\
 //   ((signal, data, std_msgs::Float64))
 
@@ -176,7 +176,7 @@
 //   ( (10) )
 
 // // invalid size of initial state
-// #define TOPICS					\
+// #define TOPICS_IN				\
 //   ((signal, data, std_msgs::Float64))
 
 // #define STATE_TRANSITION_MODEL			\
@@ -198,7 +198,7 @@
 // #define INITIAL_STATE	(1)
 
 // invalid size of initial error covariance
-#define TOPICS					\
+#define TOPICS_IN				\
   ((signal, data, std_msgs::Float64))
 
 #define STATE_TRANSITION_MODEL			\

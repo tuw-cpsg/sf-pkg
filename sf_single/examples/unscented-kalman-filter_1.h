@@ -16,6 +16,10 @@
   ((signal, data, std_msgs::Float64))		\
   /**/
 
+#define TOPICS_IN_CTRL				\
+  ((ctrl, data, std_msgs::Float64))		\
+  /**/
+
 // Define the includes needed for these topics!
 #include <std_msgs/Float64.h>
 
@@ -35,7 +39,7 @@
 
 // required
 #define STATE_TRANSITION_MODEL			\
-  (x[0])					\
+  (x[0] + u[0])					\
   /**/
 #define OBSERVATION_MODEL			\
   (x[0])					\
@@ -48,6 +52,5 @@
   /**/
 
 // optional
-//#define CONTROL_INPUT
 //#define INITIAL_STATE
 //#define INITIAL_ERROR_COVARIANCE

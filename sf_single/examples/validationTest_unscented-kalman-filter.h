@@ -13,9 +13,11 @@
 
 // --- valid ---
 
-// #define TOPICS					\
+// #define TOPICS_IN					\
 //   ((signal, data, std_msgs::Float64))		\
 //   ((signal, data, std_msgs::Float64))
+// #define TOPICS_OUT					\
+//   ((signal_fused, 0))
 // #define STATE_TRANSITION_MODEL			\
 //   (x[0])					\
 //   (x[1])
@@ -30,8 +32,10 @@
 //   ( (0)  (10) )
 
 
-// #define TOPICS					\
+// #define TOPICS_IN					\
 //   ((signal, data, std_msgs::Float64))
+// #define TOPICS_OUT					\
+//   ((signal_fused, 0))
 // #define STATE_TRANSITION_MODEL			\
 //   (x[0])					\
 //   (x[1])
@@ -46,9 +50,11 @@
 // --- invalid ---
 
 // // required params missing
-// #define TOPICS					\
+// #define TOPICS_IN					\
 //   ((signal, data, std_msgs::Float64))		\
 //   ((signal, data, std_msgs::Float64))
+// #define TOPICS_OUT					\
+//   ((signal_fused, 0))
 // #define STATE_TRANSITION_MODEL			\
 //   (x[0])					\
 //   (x[1])
@@ -58,9 +64,11 @@
 
 
 // // invalid size of PNC
-// #define TOPICS					\
+// #define TOPICS_IN					\
 //   ((signal, data, std_msgs::Float64))		\
 //   ((signal, data, std_msgs::Float64))
+// #define TOPICS_OUT					\
+//   ((signal_fused, 0))
 // #define STATE_TRANSITION_MODEL			\
 //   (x[0])
 // #define OBSERVATION_MODEL			\
@@ -75,8 +83,10 @@
 
 
 // // invalid size of PNC
-// #define TOPICS					\
+// #define TOPICS_IN					\
 //   ((signal, data, std_msgs::Float64))
+// #define TOPICS_OUT					\
+//   ((signal_fused, 0))
 // #define STATE_TRANSITION_MODEL			\
 //   (x[0])					\
 //   (x[1])
@@ -89,9 +99,11 @@
 
 
 // // invalid size of MNC
-// #define TOPICS					\
+// #define TOPICS_IN					\
 //   ((signal, data, std_msgs::Float64))		\
 //   ((signal, data, std_msgs::Float64))
+// #define TOPICS_OUT					\
+//   ((signal_fused, 0))
 // #define STATE_TRANSITION_MODEL			\
 //   (x[0])					\
 //   (x[1])
@@ -106,9 +118,11 @@
 
 
 // // num topics invalid, invalid size of MNC
-// #define TOPICS					\
+// #define TOPICS_IN					\
 //   ((signal, data, std_msgs::Float64))		\
 //   ((signal, data, std_msgs::Float64))
+// #define TOPICS_OUT					\
+//   ((signal_fused, 0))
 // #define STATE_TRANSITION_MODEL			\
 //   (x[0])					\
 //   (x[1])
@@ -123,9 +137,11 @@
 
 
 // // num topics invalid
-// #define TOPICS					\
+// #define TOPICS_IN					\
 //   ((signal, data, std_msgs::Float64))		\
 //   ((signal, data, std_msgs::Float64))
+// #define TOPICS_OUT					\
+//   ((signal_fused, 0))
 // #define STATE_TRANSITION_MODEL			\
 //   (x[0])					\
 //   (x[1])
@@ -139,8 +155,10 @@
 
 
 // // invalid size of initial state
-// #define TOPICS					\
+// #define TOPICS_IN					\
 //   ((signal, data, std_msgs::Float64))
+// #define TOPICS_OUT					\
+//   ((signal_fused, 0))
 // #define STATE_TRANSITION_MODEL			\
 //   (x[0])					\
 //   (x[1])
@@ -155,8 +173,10 @@
 
 
 // invalid size of initial error covariance
-#define TOPICS					\
+#define TOPICS_IN				\
   ((signal, data, std_msgs::Float64))
+#define TOPICS_OUT				\
+  ((signal_fused, 0))
 #define STATE_TRANSITION_MODEL			\
   (x[0])					\
   (x[1])

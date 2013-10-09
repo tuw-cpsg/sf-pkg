@@ -11,18 +11,21 @@
 
 // --- valid ---
 
-// #define METHOD	MOVING_MEDIAN
-// #define TOPICS					\
-//   ((signal, data, std_msgs::Float64))		\
-//   ((signal, data, std_msgs::Float64))
+#define METHOD	MOVING_MEDIAN
+#define TOPICS_IN				\
+  ((signal, data, std_msgs::Float64))
+#define TOPICS_OUT				\
+  ((signal_fused, 0))
 
 // --- invalid ---
 
-// method missing
-#undef METHOD
-#define TOPICS					\
-  ((signal, data, std_msgs::Float64))		\
-  ((signal, data, std_msgs::Float64))
+// // method missing
+// #undef METHOD
+// #define TOPICS_IN				\
+//   ((signal, data, std_msgs::Float64))		\
+//   ((signal, data, std_msgs::Float64))
+// #define TOPICS_OUT				\
+//   ((signal_fused, 0))
 
-// topics missing
+// // topics missing
 // #define METHOD	MOVING_MEDIAN

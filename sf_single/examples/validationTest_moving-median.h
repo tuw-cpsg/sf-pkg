@@ -12,31 +12,47 @@
 
 // --- valid ---
 
-// #define TOPICS					\
-//   ((signal, data, std_msgs::Float64))
-
-#define TOPICS					\
+// for all valid examples below
+#define TOPICS_IN					\
   ((signal, data, std_msgs::Float64))
+#define TOPICS_OUT					\
+  ((signal_fused, 0))
+
 #define WINDOW_SIZE	3
 
 // --- invalid ---
 
 // // only 1 topic allowed
-// #define TOPICS					\
+// #define TOPICS_IN				\
 //   ((signal, data, std_msgs::Float64))		\
 //   ((signal, data, std_msgs::Float64))
+// #define TOPICS_OUT				\
+//   ((signal_fused, 0))
+
+// // only 1 topic allowed
+// #define TOPICS_IN				\
+//   ((signal, data, std_msgs::Float64))
+// #define TOPICS_OUT				\
+//   ((signal_fused0, 0))				\
+//   ((signal_fused1, 1))
 
 // // invalid window size
-// #define TOPICS					\
+// #define TOPICS_IN					\
 //   ((signal, data, std_msgs::Float64))
+// #define TOPICS_OUT				\
+//   ((signal_fused, 0))
 // #define WINDOW_SIZE	-1
 
 // // invalid window size
-// #define TOPICS					\
+// #define TOPICS_IN					\
 //   ((signal, data, std_msgs::Float64))
+// #define TOPICS_OUT				\
+//   ((signal_fused, 0))
 // #define WINDOW_SIZE	0
 
 // // invalid window size
-// #define TOPICS					\
+// #define TOPICS_IN					\
 //   ((signal, data, std_msgs::Float64))
+// #define TOPICS_OUT				\
+//   ((signal_fused, 0))
 // #define WINDOW_SIZE	a
