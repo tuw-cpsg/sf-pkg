@@ -18,7 +18,16 @@
   ((signal, data, std_msgs::Float64))		\
   /**/
 
-// The signal's message include.
+// With this macro you can specify input topics which will be mapped
+// to the control input vector u. If you specify some topics here, you
+// should use the control input vector u in the state transition
+// model. Everytime the control input is received, the control input
+// is changed in the EKF.
+#define TOPICS_IN_CTRL			\
+  ((ctrl, data, std_msgs::Float64))	\
+  /**/
+
+// The message includes.
 #include <std_msgs/Float64.h>
 
 // -----------------------------------------
@@ -47,11 +56,11 @@
 // does not change (is a constant). Hence the old value is the new
 // value.
 // 
-// x_apriori[0] = x[0];
+// x_apriori[0] = x[0] + u[0];
 // x_apriori[1] = x[1];
 //
 #define STATE_TRANSITION_MODEL			\
-  (x[0])					\
+  (x[0] + u[0])					\
   (x[1])					\
   /**/
 
@@ -103,7 +112,6 @@
   /**/
 
 // optional
-//#define CONTROL_INPUT
 //#define INITIAL_STATE
 //#define INITIAL_ERROR_COVARIANCE
 

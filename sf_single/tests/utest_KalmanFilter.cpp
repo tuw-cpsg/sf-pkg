@@ -52,18 +52,13 @@ namespace KalmanFilterTest
     kf.setObservationModel(H);
 
     // check setting optional params
-    /*
-    // check only for first initialization/validation
-    vector<double> u = { 0 };
-    kf.setControlInput(u);
-    EXPECT_THROW(kf.validate(), IEstimator::estimator_error);	// "CIM missing"
-    MatrixXd B_f = { {0} };
+    MatrixXd B_f(1,1); B_f << 0;
     kf.setControlInputModel(B_f);
     EXPECT_THROW(kf.validate(), IEstimator::estimator_error);	// "CIM invalid size"
-    MatrixXd B = { {0},{0} };
+    MatrixXd B(2,1); B << 0,0;
     kf.setControlInputModel(B);
     EXPECT_NO_THROW(kf.validate());
-    */
+    
     VectorXd x(2); x << 0,1;
     kf.setInitialState(x);
     EXPECT_NO_THROW(kf.validate());
@@ -160,6 +155,35 @@ namespace KalmanFilterTest
     EXPECT_NEAR(out[0].getVariance(), 0.1, 0.0001);
     EXPECT_NEAR(out[1].getValue(), 0.0099, 0.0001);
     EXPECT_NEAR(out[1].getVariance(), 0.0990, 0.0001);
+
+    // example with control input
+    MatrixXd B2(2,1); B2 << 0,1;
+    kf2.setControlInputModel(B2);
+    InputValue ctrl(0.5);
+    Input in_ctrl(ctrl);
+    kf2.setControlInput(in_ctrl);
+
+    in[0].setValue(5);
+    EXPECT_NO_THROW(kf2.validate());
+    EXPECT_NO_THROW(out = kf2.estimate(in));
+    
+    EXPECT_NEAR(out[0].getValue(), 0.0053, 0.0001);
+    EXPECT_NEAR(out[0].getVariance(), 0.20098, 0.0001);
+    EXPECT_NEAR(out[1].getValue(), 0.5975, 0.0001);
+    EXPECT_NEAR(out[1].getVariance(), 0.1951, 0.0001);
+
+    // pass control input with invalid size
+    in_ctrl.add(ctrl);	// -> u.size = 2
+
+    // setting invalid control input throws exception
+    EXPECT_THROW(kf2.setControlInput(in_ctrl), length_error);
+
+    // changing control input model works
+    MatrixXd B3(2,2); B3 << 0,0,0,0;
+    EXPECT_NO_THROW(kf2.setControlInputModel(B3));
+    EXPECT_ANY_THROW(out = kf2.estimate(in));		// not validated
+    EXPECT_NO_THROW(kf2.validate()); 
+    EXPECT_NO_THROW(out = kf2.estimate(in));
   }
 
 }

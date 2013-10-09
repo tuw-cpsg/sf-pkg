@@ -137,12 +137,6 @@ TEST(EstimatorFactoryTest, kalmanFilter)
   cfg.addParam("control-input-model", cim);
   EXPECT_NO_THROW(estimator = cfg.create());
 
-  cfg.addParam("control-input", pnc);
-  EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
-  VectorXd ci(1); ci << 0;
-  cfg.addParam("control-input", ci);
-  EXPECT_NO_THROW(estimator = cfg.create());
-
   cfg.addParam("initial-state", stm);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
   VectorXd is(1); is << -1.5;
@@ -218,12 +212,6 @@ TEST(EstimatorFactoryTest, extendedKalmanFilter)
 
 
   // optional params
-  cfg.addParam("control-input", pnc);
-  EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
-  VectorXd ci(1); ci << 0;
-  cfg.addParam("control-input", ci);
-  EXPECT_NO_THROW(estimator = cfg.create());
-
   cfg.addParam("initial-state", stm);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
   VectorXd is(1); is << -1.5;

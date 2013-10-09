@@ -77,11 +77,6 @@ void initEstimatorFactory(EstimatorFactory& factory)
   CODE_ASSIGN_VALUES_TO_MATRIX(cim, CONTROL_INPUT_MODEL);
   factory.addParam("control-input-model", cim);
 #endif
-#ifdef CONTROL_INPUT
-  VectorXd ci(VECTOR_SIZE(CONTROL_INPUT));
-  CODE_ASSIGN_VALUES_TO_VECTOR(ci, CONTROL_INPUT);
-  factory.addParam("control-input", ci);
-#endif
 #ifdef INITIAL_STATE
   VectorXd is(VECTOR_SIZE(INITIAL_STATE));
   CODE_ASSIGN_VALUES_TO_VECTOR(is, INITIAL_STATE);
@@ -100,6 +95,10 @@ void initEstimatorFactory(EstimatorFactory& factory)
 #ifdef MEASUREMENT_SIZE
   factory.addParam("measurement-size", MEASUREMENT_SIZE);
 #endif
+#ifdef CONTROL_SIZE
+  factory.addParam("control-input-size", CONTROL_SIZE);
+#endif
+
 #ifdef STATE_TRANSITION_MODEL_JACOBIAN
   ExtendedKalmanFilter::func_df stmj = df;
   factory.addParam("state-transition-model-jacobian", stmj);

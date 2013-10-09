@@ -37,11 +37,24 @@ struct TopicState {
   estimation::InputValue value;
 };
 
-/** @brief Collects the messages of subscribed topics. */
-struct TopicState topics[TOPICS_IN_NUM];
+/** @brief Collects the messages of subscribed topics_meas. */
+struct TopicState topics_meas[TOPICS_IN_MEAS_NUM];
 
-// Expands to the callback functions of the topics.
-RECEIVES(topics)
+// Expands to the callback functions of the topics representing
+// measurements.
+RECEIVES(TOPICS_IN, topics_meas, received_meas_)
+
+// Check if control input topics are defined (control inputs are
+// optional and not available in simple estimators like the Moving
+// Median). If defined, these topics must be subscribed too.
+#ifdef TOPICS_IN_CTRL
+/** @brief Collects the messages of subscribed topics_ctrl. */
+struct TopicState topics_ctrl[TOPICS_IN_CTRL_NUM];
+
+// Expands to the callback functions of the topics representing the
+// control input.
+RECEIVES(TOPICS_IN_CTRL, topics_ctrl, received_ctrl_)
+#endif
 
 /**
  * @brief This node implements a specified sensor fusion method.
@@ -80,11 +93,20 @@ int main(int argc, char **argv)
     // Create main access point to communicate with the ROS system.
     ros::NodeHandle n;
     
-    // Tell ROS that we want to subscribe to the sensor fusion input
-    // (given in the configuration header) and publish a fused version
-    // of it, i.e. the estimate(s).
-    ros::Subscriber subscribers[TOPICS_IN_NUM];
-    SUBSCRIBE(subscribers, n);
+    // Tell ROS that we want to subscribe to the inputs (given in the
+    // configuration header) and publish a fused version of it,
+    // i.e. the estimate(s).
+    // Measurement inputs.
+    ros::Subscriber subscribers_meas[TOPICS_IN_MEAS_NUM];
+    SUBSCRIBE(TOPICS_IN, subscribers_meas, n, received_meas_);
+
+    // Control inputs are optional.
+#ifdef TOPICS_IN_CTRL
+    ros::Subscriber subscribers_ctrl[TOPICS_IN_CTRL_NUM];
+    SUBSCRIBE(TOPICS_IN_CTRL, subscribers_ctrl, n, received_ctrl_);
+#endif
+
+    // Estimates to output.
     ros::Publisher publishers[TOPICS_OUT_NUM];
     PUBLISH_INIT(publishers, n);
     // Create messages for publishing.
@@ -96,29 +118,59 @@ int main(int argc, char **argv)
     // Check repeatedly whether there are samples to estimate.
     while (ros::ok()) 
     {
-      // Check if all samples for an estimation cycle were received.
-      bool all_recv = true;
-      for (int i = 0; i < TOPICS_IN_NUM; i++) 
-	all_recv &= topics[i].received;
+      // Control inputs are optional.
+#ifdef TOPICS_IN_CTRL
+      // Check if all control input variables were received.
+      bool all_ctrl_recv = true;
+      for (int i = 0; i < TOPICS_IN_CTRL_NUM; i++)
+	all_ctrl_recv &= topics_ctrl[i].received;
+      
+      if (all_ctrl_recv)
+      {
+	// Debug: Print jitter of each message/value in ms.
+	std::stringstream ss;
+	ss << "Ctrl-Jitter: ";
+	for (int i = 0; i < TOPICS_IN_CTRL_NUM; i++)
+	  ss << topics_ctrl[i].value.getJitter() << " ";
+	ROS_DEBUG_STREAM(ss.str());
 
-      if (all_recv)
+	// Collect inputs together.
+	estimation::Input in_ctrl;
+	for (int i = 0; i < TOPICS_IN_CTRL_NUM; i++)
+	  in_ctrl.add(topics_ctrl[i].value);
+
+	// Change control input of estimator.
+	estimator->setControlInput(in_ctrl);
+
+	// Control messages are processed, so reset all receive flags.
+	for (int i = 0; i < TOPICS_IN_CTRL_NUM; i++) 
+	  topics_ctrl[i].received = false;
+      }
+#endif
+
+      // Check if all samples for an estimation cycle were received.
+      bool all_meas_recv = true;
+      for (int i = 0; i < TOPICS_IN_MEAS_NUM; i++) 
+	all_meas_recv &= topics_meas[i].received;
+
+      if (all_meas_recv)
       {
 	try
 	{
 	  // Debug: Print jitter of each message/value in ms.
 	  std::stringstream ss;
-	  ss << "Jitter: ";
-	  for (int i = 0; i < TOPICS_IN_NUM; i++)
-	    ss << topics[i].value.getJitter() << " ";
+	  ss << "Meas-Jitter: ";
+	  for (int i = 0; i < TOPICS_IN_MEAS_NUM; i++)
+	    ss << topics_meas[i].value.getJitter() << " ";
 	  ROS_DEBUG_STREAM(ss.str());
 
 	  // Collect inputs together.
-	  estimation::Input in;
-	  for (int i = 0; i < TOPICS_IN_NUM; i++)
-	    in.add(topics[i].value);
+	  estimation::Input in_meas;
+	  for (int i = 0; i < TOPICS_IN_MEAS_NUM; i++)
+	    in_meas.add(topics_meas[i].value);
 
 	  // Estimate.
-	  estimation::Output out = estimator->estimate(in);
+	  estimation::Output out = estimator->estimate(in_meas);
 
 	  // Set output message(s) and publish.
 	  PUBLISH(publishers, out, sampleFused);
@@ -129,8 +181,8 @@ int main(int argc, char **argv)
 	}
 
 	// Samples/messages are processed, so reset all receive flags.
-	for (int i = 0; i < TOPICS_IN_NUM; i++) 
-	  topics[i].received = false;
+	for (int i = 0; i < TOPICS_IN_MEAS_NUM; i++) 
+	  topics_meas[i].received = false;
       }
       
       // Handle callbacks (check for next samples).
@@ -143,8 +195,6 @@ int main(int argc, char **argv)
     delete estimator;
 
     // Close connections.
-    //sub_signal.shutdown();
-    //pub_signalFused.shutdown();
     ROS_INFO("Exit.");
   }
   catch (std::exception& e)

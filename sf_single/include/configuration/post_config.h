@@ -34,8 +34,11 @@
   #define STATE_SIZE		1
   #define MEASUREMENT_SIZE	1
 #else
-  #define STATE_SIZE		BOOST_PP_SEQ_SIZE(STATE_TRANSITION_MODEL)
-  #define MEASUREMENT_SIZE	BOOST_PP_SEQ_SIZE(OBSERVATION_MODEL)
+  #define STATE_SIZE		BOOST_PP_SEQ_SIZE(STATE_TRANSITION_MODEL)	// n
+  #define MEASUREMENT_SIZE	BOOST_PP_SEQ_SIZE(OBSERVATION_MODEL)		// m
+  #ifdef TOPICS_IN_CTRL
+    #define CONTROL_SIZE		BOOST_PP_SEQ_SIZE(TOPICS_IN_CTRL)	// l
+  #endif
 #endif
 
 /** 
@@ -66,30 +69,35 @@
 // abbreviations for handling INPUTS/OUTPUTS
 // ----------------------------------------------------------------
 
-/** @brief Expands to the number of input topics defined in the
- * configuration header. */
-#define TOPICS_IN_NUM	BOOST_PP_SEQ_SIZE(TOPICS_IN)
+/** @brief Expands to the number of input topics representing
+ * measurements defined in the configuration header. */
+#define TOPICS_IN_MEAS_NUM	BOOST_PP_SEQ_SIZE(TOPICS_IN)
+/** @brief Expands to the number of input topics representing control
+ * input variables defined in the configuration header. */
+#ifdef TOPICS_IN_CTRL
+  #define TOPICS_IN_CTRL_NUM	BOOST_PP_SEQ_SIZE(TOPICS_IN_CTRL)
+#endif
 
 /** @brief Expands to the name of a topic T. */
-#define TOPIC_NAME(T)		BOOST_PP_TUPLE_ELEM(3, 0, T)
+#define TOPIC_IN_NAME(T)	BOOST_PP_TUPLE_ELEM(3, 0, T)
 /** @brief Expands to the name of a topic T as string. */
-#define TOPIC_NAME_STR(T)	BOOST_PP_STRINGIZE(BOOST_PP_TUPLE_ELEM(3, 0, T))
+#define TOPIC_IN_NAME_STR(T)	BOOST_PP_STRINGIZE(BOOST_PP_TUPLE_ELEM(3, 0, T))
 /** @brief Expands to the field to estimate of a topic T. */
-#define TOPIC_FIELD(T)		BOOST_PP_TUPLE_ELEM(3, 1, T)
+#define TOPIC_IN_FIELD(T)	BOOST_PP_TUPLE_ELEM(3, 1, T)
 /** @brief Expands to the type of a topic T. */
-#define TOPIC_TYPE(T)		BOOST_PP_TUPLE_ELEM(3, 2, T)
+#define TOPIC_IN_TYPE(T)	BOOST_PP_TUPLE_ELEM(3, 2, T)
 
 /** @brief Initializes an element of the given array of subscribers
  * according to a topic. */
 #define SUBSCRIBE_TO_TOPIC(r, data, i, elem)			\
   BOOST_PP_SEQ_ELEM(0, data)[i] =				\
-    BOOST_PP_SEQ_ELEM(1, data).subscribe<TOPIC_TYPE(elem)>	\
+    BOOST_PP_SEQ_ELEM(1, data).subscribe<TOPIC_IN_TYPE(elem)>	\
     (								\
-     TOPIC_NAME_STR(elem),					\
+     TOPIC_IN_NAME_STR(elem),					\
      20,							\
-     BOOST_PP_CAT(received_,i)			\
+     BOOST_PP_CAT(BOOST_PP_SEQ_ELEM(2, data),i)			\
     );								\
-  ROS_INFO("Subscribing to '%s'.", TOPIC_NAME_STR(elem));	\
+  ROS_INFO("Subscribing to '%s'.", TOPIC_IN_NAME_STR(elem));	\
   /**/
 
 /** 
@@ -99,8 +107,8 @@
  * processed to create a new subscriber which is stored in the given
  * array \c subscribers. 
  */
-#define SUBSCRIBE(subscribers, handle)					\
-  BOOST_PP_SEQ_FOR_EACH_I(SUBSCRIBE_TO_TOPIC, (subscribers)(handle), TOPICS_IN) \
+#define SUBSCRIBE(topics, subscribers, handle, fctPrefix)		\
+  BOOST_PP_SEQ_FOR_EACH_I(SUBSCRIBE_TO_TOPIC, (subscribers)(handle)(fctPrefix), topics) \
   /**/
 
 /** 
@@ -120,21 +128,25 @@
  * of message to receive.
  */
 #define RECEIVE_TOPIC(r, data, i, elem)					\
-  void BOOST_PP_CAT(received_,i)(const TOPIC_TYPE(elem)::ConstPtr& msg) \
+  void BOOST_PP_CAT(BOOST_PP_SEQ_ELEM(1, data),i)(			\
+    const TOPIC_IN_TYPE(elem)::ConstPtr& msg				\
+    )									\
   {									\
-    data[i].value.setValue(msg->TOPIC_FIELD(elem));			\
-    data[i].received = true;						\
+    BOOST_PP_SEQ_ELEM(0, data)[i].value.setValue(			\
+      msg->TOPIC_IN_FIELD(elem)						\
+      );								\
+    BOOST_PP_SEQ_ELEM(0, data)[i].received = true;			\
     ROS_DEBUG("RECV '%s': %.2f.",					\
-	      TOPIC_NAME_STR(elem),					\
-	      msg->TOPIC_FIELD(elem));					\
+	      TOPIC_IN_NAME_STR(elem),					\
+	      msg->TOPIC_IN_FIELD(elem));				\
   }									\
   /**/
 
 /** 
  * @brief Generates the methods for receiving the defined topics.
  */
-#define RECEIVES(curTopicState)						\
-  BOOST_PP_SEQ_FOR_EACH_I(RECEIVE_TOPIC, curTopicState, TOPICS_IN)	\
+#define RECEIVES(topics, topicState, fctPrefix)				\
+  BOOST_PP_SEQ_FOR_EACH_I(RECEIVE_TOPIC, (topicState)(fctPrefix), topics) \
   /**/
 
 /** @brief Expands to the number of output topics defined in the

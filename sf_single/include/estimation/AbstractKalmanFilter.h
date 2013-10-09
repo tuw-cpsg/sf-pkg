@@ -109,15 +109,6 @@ namespace estimation
      * @param P0 Initial error covariance.
      */
     void setInitialErrorCovariance(MatrixXd& P0);
-    
-    /** 
-     * @brief Sets the control input.
-     *
-     * The control input is an optional vector.
-     *
-     * @param u The control input.
-     */
-    void setControlInput (VectorXd& u);
 
     /** 
      * @brief Sets the process noise covariance.
@@ -141,6 +132,19 @@ namespace estimation
     void setMeasurementNoiseCovariance (MatrixXd& R);
 
     /**
+     * @brief Sets the size of the control input vector. 
+     *
+     * This is the only way to initialize the control input
+     * vector. When the control input is included in the state
+     * transition formulas, this setter MUST be called. Otherwise an
+     * exception will be thrown when applying the state transition
+     * model f.
+     * 
+     * @param l The size of the control input vector.
+     */
+    void setControlInputSize (unsigned int l);
+
+    /**
      * @brief Releases the Kalman filter if the parameters are
      * correct. 
      *
@@ -161,6 +165,15 @@ namespace estimation
      * its value=-1).
      */
     virtual Output estimate (Input next) = 0;
+    
+    /** 
+     * @brief Sets the control input.
+     *
+     * The control input is an optional vector.
+     *
+     * @param u The control input.
+     */
+    void setControlInput (Input u);
 
     /**
      * @brief Returns the last estimated value.

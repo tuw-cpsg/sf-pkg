@@ -41,12 +41,6 @@ namespace estimation
     validated = false;
   }
 
-  void AbstractKalmanFilter::setControlInput (VectorXd& u) 
-  {
-    this->u = u;
-    validated = false;
-  }
-
   void AbstractKalmanFilter::setProcessNoiseCovariance (MatrixXd& Q)
   {
     this->Q = Q;
@@ -59,9 +53,32 @@ namespace estimation
     validated = false;
   }
 
+  void AbstractKalmanFilter::setControlInputSize (unsigned int l)
+  {
+    this->u = VectorXd::Zero(l);
+    validated = false;
+  }
+
   // -----------------------------------------
   // IEstimator implementation (partly)
   // -----------------------------------------
+  void AbstractKalmanFilter::setControlInput (Input u) 
+  {
+    // The parameter u holds also timestamps of the control input
+    // variables. For simplicity u is copied without checking
+    // timestamps. When an estimation algorithm needs information
+    // about the actuality of the control input, the variable type
+    // should be changed to Input instead of a simple VectorXd.
+
+    // It is assumed that u is already initialized (size of vector u
+    // != 0). However, check (at least) if the sizes fit.
+    if (this->u.size() != u.size())
+      throw std::length_error("Setting control input failed. Control input has invalid size."); 
+
+    for (int i = 0; i < u.size(); i++)
+      this->u[i] = u[i].getValue();
+  }
+
   Output AbstractKalmanFilter::getLastEstimate(void) 
   {
     return out;

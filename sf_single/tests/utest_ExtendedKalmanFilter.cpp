@@ -20,7 +20,7 @@ namespace ExtendedKalmanFilterTest
 {
   void f(VectorXd& x, const VectorXd& u)
   {
-    x[0] = x[0];
+    x[0] = x[0] + u[0];
   }
   void df(MatrixXd& A, const VectorXd& x, const VectorXd& u)
   {
@@ -85,11 +85,7 @@ namespace ExtendedKalmanFilterTest
     ekf.setMeasurementNoiseCovariance(R);
     EXPECT_NO_THROW(ekf.validate());			// all required params given
 
-    // check setting optional params
-    VectorXd u(1); u << 0;
-    ekf.setControlInput(u);
-    EXPECT_NO_THROW(ekf.validate());
-  
+    // check setting optional params  
     // optional params doesn't set new sizes
     MatrixXd P0_f(2,2); P0_f << 1, 0, 0, 1;
     ekf.setInitialErrorCovariance(P0_f);
@@ -113,6 +109,13 @@ namespace ExtendedKalmanFilterTest
     OutputValue defaultOutVal;
     EXPECT_GT(out.size(), 0);
     EXPECT_DOUBLE_EQ(out.getValue(), defaultOutVal.getValue());
+
+    // check setting the control input
+    InputValue ctrl(0);
+    Input in_ctrl(ctrl);
+    EXPECT_THROW(ekf.setControlInput(in_ctrl), length_error);
+    ekf.setControlInputSize(1);
+    EXPECT_NO_THROW(ekf.setControlInput(in_ctrl));
   }
 
   TEST(ExtendedKalmanFilterTest, validation)
@@ -165,9 +168,6 @@ namespace ExtendedKalmanFilterTest
 
     // size of R cannot be checked, must match number of formulas in h
     // -> check during compile time
-
-    // size of u cannot be checked here either (u is only contained in
-    // f/df), nor during compile-time!
   }
 
   TEST(ExtendedKalmanFilterTest, validationEffect)
@@ -182,6 +182,7 @@ namespace ExtendedKalmanFilterTest
     ekf.setProcessNoiseCovariance(Q);
     MatrixXd R(1,1); R << 10;
     ekf.setMeasurementNoiseCovariance(R);
+    ekf.setControlInputSize(1);		// initializes u, so it can be used in f
 
     // validate has an effect?
     InputValue measurement(1);
@@ -191,6 +192,7 @@ namespace ExtendedKalmanFilterTest
     EXPECT_THROW(out = ekf.estimate(in), IEstimator::estimator_error);	// "not yet validated"
   
     EXPECT_NO_THROW(ekf.validate());
+    EXPECT_NO_THROW(out = ekf.estimate(in));
 
     // changing a parameter -> EKF must be re-validated
     ekf.setProcessNoiseCovariance(Q);
@@ -219,17 +221,35 @@ namespace ExtendedKalmanFilterTest
     ekf.setMeasurementNoiseCovariance(R);
 
     ekf.validate();
-  
+
     // check if the calculation of an estimate is correct
+    // first measurement z1:
     InputValue measurement(1);
     Input in(measurement);
-    Output out = ekf.estimate(in);
-  
+    Output out;
+
+    // u contained in a state transition formula, so an error will be
+    // thrown when u is not initialized with the correct size
+    //out = ekf.estimate(in);		// fail assertion produced by Eigen (out-of-range error)
+    ekf.setControlInputSize(1);
+    ekf.validate();
+    EXPECT_NO_THROW(out = ekf.estimate(in));
+
     EXPECT_EQ(out.size(), 1);
     EXPECT_NEAR(out[0].getValue(), 0.0099, 0.0001);
     EXPECT_NEAR(out[0].getVariance(), 0.0990, 0.0001);
 
+    // next measurement z2:
     in[0].setValue(5);
+
+    // setting a control input = 0 does not change the result, it can
+    // be calculated as if there is no control input
+    InputValue ctrl(0);
+    Input in_ctrl(ctrl);
+    ekf.setControlInput(in_ctrl);		// validation needed
+    EXPECT_ANY_THROW(out = ekf.estimate(in));	// not yet validated
+    EXPECT_NO_THROW(ekf.validate());
+
     EXPECT_NO_THROW(out = ekf.estimate(in));
   
     EXPECT_NEAR(out[0].getValue(), 0.1073, 0.0001);

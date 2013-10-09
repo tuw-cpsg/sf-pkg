@@ -34,6 +34,16 @@ namespace estimation
     virtual Output estimate (Input next) = 0;
 
     /**
+     * @brief Sets the control input.
+     *
+     * Estimators with a state transition model can additionally set a
+     * control input.
+     *
+     * @param u The control input.
+     */
+    virtual void setControlInput(Input u) { };
+
+    /**
      * @brief Prints a description fo the estimator.
      */
     virtual void serialize(std::ostream& os) const = 0;

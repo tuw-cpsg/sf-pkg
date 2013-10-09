@@ -176,9 +176,9 @@ namespace estimation
 	kf.setControlInputModel(cim);
       }
 
-      if (params.count("control-input")) {
-	VectorXd ci = boost::any_cast<VectorXd>(params["control-input"]);
-	kf.setControlInput(ci);
+      if (params.count("control-input-size")) {
+	int cis = boost::any_cast<int>(params["control-input-size"]);
+	kf.setControlInputSize(cis);
       }
 
       if (params.count("initial-state")) {
@@ -248,9 +248,9 @@ namespace estimation
 
       // optional -----
 
-      if (params.count("control-input")) {
-	VectorXd ci = boost::any_cast<VectorXd>(params["control-input"]);
-	ekf.setControlInput(ci);
+      if (params.count("control-input-size")) {
+      	int cis = boost::any_cast<int>(params["control-input-size"]);
+      	ekf.setControlInputSize(cis);
       }
 
       if (params.count("initial-state")) {
@@ -308,9 +308,9 @@ namespace estimation
 
       // optional -----
 
-      if (params.count("control-input")) {
-	VectorXd ci = boost::any_cast<VectorXd>(params["control-input"]);
-	ukf.setControlInput(ci);
+      if (params.count("control-input-size")) {
+	int cis = boost::any_cast<int>(params["control-input-size"]);
+	ukf.setControlInputSize(cis);
       }
 
       if (params.count("initial-state")) {
