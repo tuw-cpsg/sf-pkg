@@ -158,7 +158,7 @@ namespace KalmanFilterTest
 
     // example with control input
     MatrixXd B2(2,1); B2 << 0,1;
-    kf2.setControlInputModel(B2);
+    kf2.setControlInputModel(B2);	// needs to be validated
     InputValue ctrl(0.5);
     Input in_ctrl(ctrl);
     kf2.setControlInput(in_ctrl);

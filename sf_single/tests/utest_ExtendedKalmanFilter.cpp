@@ -246,9 +246,7 @@ namespace ExtendedKalmanFilterTest
     // be calculated as if there is no control input
     InputValue ctrl(0);
     Input in_ctrl(ctrl);
-    ekf.setControlInput(in_ctrl);		// validation needed
-    EXPECT_ANY_THROW(out = ekf.estimate(in));	// not yet validated
-    EXPECT_NO_THROW(ekf.validate());
+    ekf.setControlInput(in_ctrl);	// (no validation needed, cannot be validated)
 
     EXPECT_NO_THROW(out = ekf.estimate(in));
   

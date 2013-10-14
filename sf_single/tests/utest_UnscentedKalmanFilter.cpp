@@ -127,9 +127,7 @@ namespace UnscentedKalmanFilterTest
     // be calculated as if there is no control input
     InputValue ctrl(0);
     Input in_ctrl(ctrl);
-    ukf.setControlInput(in_ctrl);		// validation needed
-    EXPECT_ANY_THROW(out = ukf.estimate(in));	// not yet validated
-    EXPECT_NO_THROW(ukf.validate());
+    ukf.setControlInput(in_ctrl);	// (no validation needed, cannot be validated)
 
     EXPECT_NO_THROW(out = ukf.estimate(in));
 
