@@ -57,6 +57,12 @@ add_library(configuration STATIC
   include/configuration/configuration.h
   )
 
+add_library(other STATIC
+  src/probability/sampling.cpp
+  
+  include/probability/sampling.h
+  )
+
 # find_library(estimation 
 #   NAMES estimation libestimation #name
 #   lib/estimation #path
@@ -93,7 +99,7 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES estimation misc
+  LIBRARIES estimation
   CATKIN_DEPENDS message_runtime
   DEPENDS Boost Eigen
 )
@@ -116,6 +122,7 @@ add_executable(sf_single src/sf_single.cpp)
 target_link_libraries(sf_single 
   estimation 
   configuration
+  other
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
   )
@@ -138,9 +145,11 @@ if (CATKIN_ENABLE_TESTING)
     tests/utest_ExtendedKalmanFilter.cpp
     tests/utest_UnscentedTransform.cpp
     tests/utest_UnscentedKalmanFilter.cpp
+    tests/utest_sampling.cpp
     )
   target_link_libraries(utest
     estimation
+    other
     ${catkin_LIBRARIES}
     ${Boost_LIBRARIES}
     )
