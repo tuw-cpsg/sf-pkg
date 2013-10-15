@@ -15,20 +15,22 @@
 #include <stdexcept>
 #include <cmath>
 #include <boost/random/mersenne_twister.hpp>
-#include <boost/random/normal_distribution.hpp>
 #include <boost/random/variate_generator.hpp>
+#include <boost/random/normal_distribution.hpp>
+#include <boost/random/uniform_real.hpp>
 
 namespace probability
 {
+  // create the rng only once (otherwise the numbers generated are
+  // always the same)
+  static boost::mt19937 rng(time(NULL));
+
   VectorXd sampleNormalDistribution(VectorXd mean, MatrixXd covariance)
   {
     // save last covariance (so Cholesky decomposition needs not to
     // be done every time entering this function)
     static MatrixXd cov;		
     static MatrixXd T;			// transform matrix when cov is not diagonal
-    // create the rng only once (otherwise the numbers generated are
-    // always the same)
-    static boost::mt19937 rng(time(NULL));
 
     // additionally needed for rng
     boost::normal_distribution<> dist(0,1);	// mean = 0, standard deviation = 1
@@ -80,6 +82,25 @@ namespace probability
       // transform to x (and add mean!)
       sample = mean + T * sample;
     }
+
+    return sample;
+  }
+
+  VectorXd sampleUniformDistribution(VectorXd a, VectorXd b)
+  {
+    VectorXd sample = VectorXd::Zero(a.size());
+
+    if (a.size() != b.size())
+      throw std::runtime_error("sampleUniformDistribution: Bounds a and b must have equal sizes.");
+
+    // additionally needed for rng
+    boost::uniform_real<> dist(0,1);
+    boost::variate_generator<boost::mt19937&, boost::uniform_real<> >
+      random(rng, dist);
+
+    // sample each variable independently
+    for (int i = 0; i < sample.size(); i++)
+      sample[i] = a[i] + random() * (b[i]-a[i]);
 
     return sample;
   }
