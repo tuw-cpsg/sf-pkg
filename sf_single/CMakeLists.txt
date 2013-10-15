@@ -1,3 +1,4 @@
+
 cmake_minimum_required(VERSION 2.8.3)
 project(sf_single)
 
@@ -23,6 +24,8 @@ add_library(estimation
   src/estimation/ExtendedKalmanFilter.cpp
   src/estimation/UnscentedTransform.cpp
   src/estimation/UnscentedKalmanFilter.cpp
+  src/estimation/AbstractParticleFilter.cpp
+  src/estimation/ParticleFilterSIR.cpp
 
   include/estimation/EstimatorInterface.h
   include/estimation/InputValue.h
@@ -40,6 +43,8 @@ add_library(estimation
   include/estimation/ITransformer.h
   include/estimation/UnscentedTransform.h
   include/estimation/UnscentedKalmanFilter.h
+  include/estimation/AbstractParticleFilter.h
+  include/estimation/ParticleFilterSIR.h
   )
 
 add_library(configuration STATIC
@@ -149,6 +154,7 @@ if (CATKIN_ENABLE_TESTING)
     tests/utest_UnscentedKalmanFilter.cpp
     tests/utest_pdfs.cpp
     tests/utest_sampling.cpp
+    tests/utest_ParticleFilterSIR.cpp
     )
   target_link_libraries(utest
     estimation

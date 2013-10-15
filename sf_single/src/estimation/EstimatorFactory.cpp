@@ -7,11 +7,13 @@
  */
 
 #include "estimation/EstimatorFactory.h"
+#include "estimation/AbstractParticleFilter.h"
 
 namespace estimation 
 {
   void EstimatorFactory::addParam(std::string key, boost::any value)
   {
+    // when key already exists the value will be overwritten
     params[key] = value;
   }
 
@@ -68,6 +70,22 @@ namespace estimation
 	estimation::UnscentedKalmanFilter* ukf = new estimation::UnscentedKalmanFilter();
 	initUnscentedKalmanFilter(*ukf);
 	return ukf;
+      }
+
+      if (method.compare("ParticleFilterSIR") == 0)
+      {
+	estimation::ParticleFilterSIR* pf;
+
+	// create particle filter -----
+	if (params.count("number-of-particles")) {
+	  int N = boost::any_cast<int>(params["number-of-particles"]);
+	  pf = new ParticleFilterSIR(N);
+	} else {
+	  pf = new ParticleFilterSIR(1000);
+	}
+
+	initParticleFilterSIR(*pf);
+	return pf;
       }
     } catch(std::exception& e) {
       throw factory_error(std::string("Configuration failed. ") + e.what());
@@ -326,6 +344,78 @@ namespace estimation
       ukf.validate();	// throws on error
     } catch(std::exception& e) {
       std::string additionalInfo = "Initializing UnscentedKalmanFilter failed. ";
+      throw factory_error(additionalInfo + e.what());
+    }
+  }
+
+  void EstimatorFactory::initParticleFilterSIR(ParticleFilterSIR& pf)
+  {    
+    // required: state-transition-model, process-noise-covariance,
+    //   observation-model, measurement-noise-covariance,
+    //   initial-state / state-bounds
+
+    // optional: number-of-particles, control-input-size
+
+    try {
+
+      // required -----
+
+      if (params.count("state-transition-model")) {
+      	AbstractParticleFilter::func_f stm = boost::any_cast<AbstractParticleFilter::func_f>(params["state-transition-model"]);
+      	pf.setStateTransitionModel(stm);
+      } else
+      	throw factory_error("State transition model missing.");
+
+      if (params.count("process-noise-covariance")) {
+      	MatrixXd pnc = boost::any_cast<MatrixXd>(params["process-noise-covariance"]);
+      	pf.setProcessNoiseCovariance(pnc);
+      } else
+      	throw factory_error("Process noise covariance missing.");
+
+      if (params.count("observation-model")) {
+      	AbstractParticleFilter::func_h om = boost::any_cast<AbstractParticleFilter::func_h>(params["observation-model"]);
+      	pf.setObservationModel(om);
+      } else
+      	throw factory_error("Observation model missing.");
+
+      if (params.count("measurement-noise-covariance")) {
+      	MatrixXd mnc = boost::any_cast<MatrixXd>(params["measurement-noise-covariance"]);
+      	pf.setMeasurementNoiseCovariance(mnc);
+      } else
+      	throw factory_error("Measurement noise covariance missing.");
+
+      if (params.count("initial-state")) {
+      	VectorXd is = boost::any_cast<VectorXd>(params["initial-state"]);
+      	pf.setInitialState(is);
+      } else if (params.count("state-bounds")) {
+      	MatrixXd is = boost::any_cast<MatrixXd>(params["state-bounds"]);
+
+      	// do some validation here: each row of 'is' represents a
+      	// bound-tuple (a,b) -> #col = 2, #rows = state-size
+      	if (params.count("state-size")) {
+      	  int n = boost::any_cast<int>(params["state-size"]);
+      	  if (is.rows() != n)
+      	    throw factory_error("Invalid number of state bounds.");
+      	}
+      	if (is.cols() != 2)
+      	  throw factory_error("Invalid state bounds.");
+
+      	VectorXd a = is.col(0);
+      	VectorXd b = is.col(1);
+      	pf.initializeParticles(a, b);
+      } else
+      	throw factory_error("Initial state / state bounds missing.");
+
+      // optional -----    
+
+      if (params.count("control-input-size")) {
+      	int cis = boost::any_cast<int>(params["control-input-size"]);
+      	pf.setControlInputSize(cis);
+      }
+
+      pf.validate();	// throws on error
+    } catch(std::exception& e) {
+      std::string additionalInfo = "Initializing ParticleFilterSIR failed. ";
       throw factory_error(additionalInfo + e.what());
     }
   }

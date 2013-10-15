@@ -231,3 +231,70 @@ TEST(EstimatorFactoryTest, extendedKalmanFilter)
   EXPECT_NE(string::npos, classname.find("ExtendedKalmanFilter",0)); // found ExtendedKalmanFilter in classname!
 }
 
+TEST(EstimatorFactoryTest, particleFilterSIR)
+{
+  EstimatorFactory cfg;
+  IEstimator* estimator;
+  string classname;
+
+  // check required params
+  cfg.addParam("method", string("ParticleFilterSIR"));
+
+  EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "STM missing"
+  VectorXd stm_f(1); stm_f << 1;
+  cfg.addParam("state-transition-model", stm_f);
+  EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
+  AbstractParticleFilter::func_f stm = 0;				   // will cause validation error
+  cfg.addParam("state-transition-model", stm);
+
+  EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "PNC missing"
+  int pnc_f = 1;
+  cfg.addParam("process-noise-covariance", pnc_f);
+  EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
+  MatrixXd pnc(1,1); pnc << 0.1;
+  cfg.addParam("process-noise-covariance", pnc);
+
+  EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "OM missing"
+  cfg.addParam("observation-model", stm);
+  EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
+  AbstractParticleFilter::func_h om = test_h;
+  cfg.addParam("observation-model", om);
+
+  EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "MNC missing"
+  double mnc_f = 0.1;
+  cfg.addParam("measurement-noise-covariance", mnc_f);
+  EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
+  MatrixXd mnc(1,1); mnc << 10;
+  cfg.addParam("measurement-noise-covariance", mnc);
+
+  EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "state missing"
+  VectorXd x0(1); x0 << -1;
+  cfg.addParam("state-bounds", x0);
+  EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
+  cfg.addParam("initial-state", x0);					   // param 'state-bounds' will be ignored
+
+  EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "validation failed (f=0)"
+  stm = test_f;
+  cfg.addParam("state-transition-model", stm);
+
+  EXPECT_NO_THROW(estimator = cfg.create());				   // all required params passed
+
+
+  // optional params
+  cfg.addParam("number-of-particles", x0);
+  EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
+  cfg.addParam("number-of-particles", 100);
+  EXPECT_NO_THROW(estimator = cfg.create());
+
+  cfg.addParam("control-input-size", 1.5);
+  EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
+  cfg.addParam("control-input-size", 1);
+  EXPECT_NO_THROW(estimator = cfg.create());
+
+
+  // check type
+  EXPECT_NO_THROW(estimator = cfg.create());
+  classname = typeid(*estimator).name();
+  EXPECT_NE(string::npos, classname.find("ParticleFilterSIR",0)); // found ParticleFilterSIR in classname!
+}
+

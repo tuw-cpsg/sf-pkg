@@ -14,5 +14,6 @@
 #include "estimation/KalmanFilter.h"
 #include "estimation/ExtendedKalmanFilter.h"
 #include "estimation/UnscentedKalmanFilter.h"
+#include "estimation/ParticleFilterSIR.h"
 
 #endif

@@ -74,6 +74,7 @@ namespace estimation
     void initKalmanFilter(KalmanFilter& kf);
     void initExtendedKalmanFilter(ExtendedKalmanFilter& ekf);
     void initUnscentedKalmanFilter(UnscentedKalmanFilter& ukf);
+    void initParticleFilterSIR(ParticleFilterSIR& pf);
   };
 }
 
