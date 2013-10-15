@@ -58,8 +58,10 @@ add_library(configuration STATIC
   )
 
 add_library(other STATIC
+  src/probability/pdfs.cpp
   src/probability/sampling.cpp
   
+  include/probability/pdfs.h
   include/probability/sampling.h
   )
 
@@ -145,6 +147,7 @@ if (CATKIN_ENABLE_TESTING)
     tests/utest_ExtendedKalmanFilter.cpp
     tests/utest_UnscentedTransform.cpp
     tests/utest_UnscentedKalmanFilter.cpp
+    tests/utest_pdfs.cpp
     tests/utest_sampling.cpp
     )
   target_link_libraries(utest
