@@ -1,14 +1,12 @@
 #include <gtest/gtest.h>
-#include <string>
 #include <stdexcept>
 #include <Eigen/Dense>
-#include <iostream>
 
 // testing following API
 #include "probability/sampling.h"
 
-using namespace std;
 using namespace Eigen;
+using namespace probability;
 
 namespace SamplingTest 
 {
@@ -23,7 +21,7 @@ namespace SamplingTest
     // create N samples
     for (int i = 0; i < N; i++)
     {
-      VectorXd sample = probability::sampleNormalDistribution(mean, covariance);
+      VectorXd sample = sampleNormalDistribution(mean, covariance);
 
       // accumulate for mean
       meanApprox = meanApprox + sample;

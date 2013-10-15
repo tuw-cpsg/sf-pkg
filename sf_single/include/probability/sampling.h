@@ -14,7 +14,7 @@ using namespace Eigen;
 
 namespace probability
 {
-  /*
+  /**
    * @brief Samples a random vector with normal distribution.
    *
    * @note When sampling with non-diagonal covariance this function

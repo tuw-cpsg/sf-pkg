@@ -24,7 +24,7 @@ namespace probability
   {
     // save last covariance (so Cholesky decomposition needs not to
     // be done every time entering this function)
-    static MatrixXd cov = covariance;		
+    static MatrixXd cov;		
     static MatrixXd T;			// transform matrix when cov is not diagonal
     // create the rng only once (otherwise the numbers generated are
     // always the same)
