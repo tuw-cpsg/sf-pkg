@@ -17,7 +17,9 @@ using namespace Eigen;
 // private functions
 std::string getMethod();
 
-#if METHOD == EXTENDED_KALMAN_FILTER  ||  METHOD == UNSCENTED_KALMAN_FILTER
+#if METHOD == EXTENDED_KALMAN_FILTER  ||	\
+  METHOD == UNSCENTED_KALMAN_FILTER  ||		\
+  METHOD == PARTICLE_FILTER_SIR
 void f(VectorXd& x, const VectorXd& u);
 void h(VectorXd& z, const VectorXd& x);
 #endif
@@ -44,7 +46,9 @@ void initEstimatorFactory(EstimatorFactory& factory)
   MatrixXd stm(MATRIX_ROWS(STATE_TRANSITION_MODEL),
 	       MATRIX_COLS(STATE_TRANSITION_MODEL));
   CODE_ASSIGN_VALUES_TO_MATRIX(stm, STATE_TRANSITION_MODEL);
-  #elif METHOD == EXTENDED_KALMAN_FILTER  ||  METHOD == UNSCENTED_KALMAN_FILTER
+  #elif METHOD == EXTENDED_KALMAN_FILTER  ||	\
+    METHOD == UNSCENTED_KALMAN_FILTER  ||	\
+    METHOD == PARTICLE_FILTER_SIR
   ExtendedKalmanFilter::func_f stm = f;
   #endif
   factory.addParam("state-transition-model", stm);
@@ -60,7 +64,9 @@ void initEstimatorFactory(EstimatorFactory& factory)
   MatrixXd om(MATRIX_ROWS(OBSERVATION_MODEL),
 	       MATRIX_COLS(OBSERVATION_MODEL));
   CODE_ASSIGN_VALUES_TO_MATRIX(om, OBSERVATION_MODEL);
-  #elif METHOD == EXTENDED_KALMAN_FILTER  ||  METHOD == UNSCENTED_KALMAN_FILTER
+  #elif METHOD == EXTENDED_KALMAN_FILTER  ||	\
+    METHOD == UNSCENTED_KALMAN_FILTER  ||	\
+    METHOD == PARTICLE_FILTER_SIR
   ExtendedKalmanFilter::func_h om = h;
   #endif
   factory.addParam("observation-model", om);
@@ -107,6 +113,17 @@ void initEstimatorFactory(EstimatorFactory& factory)
   ExtendedKalmanFilter::func_dh omj = dh;
   factory.addParam("observation-model-jacobian", omj);
 #endif
+
+// SIR
+#ifdef STATE_BOUNDS
+  MatrixXd sb(MATRIX_ROWS(STATE_BOUNDS),
+	      MATRIX_COLS(STATE_BOUNDS));
+  CODE_ASSIGN_VALUES_TO_MATRIX(sb, STATE_BOUNDS);
+  factory.addParam("state-bounds", sb);
+#endif
+#ifdef NUMBER_OF_PARTICLES
+  factory.addParam("number-of-particles", NUMBER_OF_PARTICLES);
+#endif
 }
 
 std::string getMethod()
@@ -121,10 +138,14 @@ std::string getMethod()
   return "ExtendedKalmanFilter";
 #elif METHOD == UNSCENTED_KALMAN_FILTER
   return "UnscentedKalmanFilter";
+#elif METHOD == PARTICLE_FILTER_SIR
+  return "ParticleFilterSIR";
 #endif
 }
 
-#if METHOD == EXTENDED_KALMAN_FILTER  ||  METHOD == UNSCENTED_KALMAN_FILTER
+#if METHOD == EXTENDED_KALMAN_FILTER  ||	\
+  METHOD == UNSCENTED_KALMAN_FILTER  ||		\
+  METHOD == PARTICLE_FILTER_SIR
 void f(VectorXd& x, const VectorXd& u)
 {
   if (x.size() != STATE_SIZE)
