@@ -172,37 +172,45 @@ namespace estimation
 
   void ParticleFilterSIR::resample (void)
   {
-    // // choose N particles according their weight 
-    // int N = particles.size();
-    // std::vector<VectorXd> particles_new(N);
+    int N = particles.size();
 
-    // // 1. generate CDF
-    // std::vector<double> cdf(N);
-    // cdf[0] = 0;
-    // for (int i = 1; i < N; i++)
-    //   cdf[i] = cdf[i-1] + weights[i];
+    if (Neff > 0.8*N)
+      return;
 
-    // // needed for random number generation
-    // boost::uniform_real<> dist(0,1);
-    // boost::variate_generator<boost::mt19937&, boost::uniform_real<> >
-    //   random(rng, dist);
+    // choose N particles according their weight 
+    std::vector<VectorXd> particles_new(N);
 
-    // for (int i = 0; i < N; i++)
-    // {
-    //   // 2. generate a random number between 0 and 1
-    //   double c = random();
-
-    //   // 3. check where the random number in the CDF fits -> this is the
-    //   // sample to choose; a sample with higher weight has a higher span
-    //   // in the CDF, hence will be chosen more likely
-    //   int ci = 0;
-    //   while (c > cdf[ci])
-    //   	ci++;
+    // 1. generate CDF
+    std::vector<double> cdf(N);
+    cdf[0] = 0;
+    for (int i = 1; i < N; i++)
+      cdf[i] = cdf[i-1] + weights[i];
     
-    //   particles_new[i] = particles[i];
-    // }
+    // needed for random number generation
+    boost::uniform_real<> dist(0,1);
+    boost::variate_generator<boost::mt19937&, boost::uniform_real<> >
+      random(rng, dist);
 
-    // // copy lots of vectors! :( -> pointer for particles in class
-    // particles = particles_new;
+    // 2. draw a starting point
+    double u0 = random();
+
+    for (int j = 0; j < N; j++)
+    {
+      // 3. move along the CDF
+      double uj = u0 + j/N;
+
+      // 3. check where the random number in the CDF fits -> this is the
+      // sample to choose; a sample with higher weight has a higher span
+      // in the CDF, hence will be chosen more often
+      while (uj > cdf[i])
+      	i++;
+    
+      particles_new[j] = particles[i];
+      weights[j] = 1.0 / N;
+    }
+
+    // copy lots of vectors! :( -> pointer for particles in class does
+    // not work with Eigen
+    particles = particles_new;
   }
 }
