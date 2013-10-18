@@ -26,6 +26,26 @@ namespace estimation
   {
     // nothing to do
   }
+  
+  void ParticleFilterSIR::log(std::ostream& os, Log type, int index) const
+  {
+    switch (type)
+    {
+    case PARTICLES:
+      for (int i = 0; i < particles.size(); i++)
+	os << particles[i][index] << " ";
+      os << std::endl;
+      break;
+    case WEIGHTS:
+      for (int i = 0; i < particles.size(); i++)
+	os << weights[i] << " ";
+      os << std::endl;
+      break;
+    case NEFF:
+      os << Neff << std::endl;
+      break;
+    }
+  }
 
   // -----------------------------------------
   // getters and setters
@@ -116,7 +136,7 @@ namespace estimation
 
   void ParticleFilterSIR::weight (VectorXd z)
   {
-    double sumWeights = 0;
+    double sumWeights = 0, sumWeightsSquare;
 
     if (z.size() != R.rows())
       throw std::runtime_error("Size of measurement vector invalid.");
@@ -133,50 +153,56 @@ namespace estimation
       // covariance = measurement noise covariance)
       double weight = probability::pdfNormalDistribution(z, z_expected, R);
       
-      weights[i] = weight;	// set weight
-      sumWeights += weight;	// add to sum for normalization
+      weights[i] = weights[i] * weight;	// set weight (consider old weight!)
+      sumWeights += weights[i];		// add to sum for normalization
     }
 
     // normalize weights
     for (int i = 0; i < particles.size(); i++)
     {
       weights[i] /= sumWeights;
+
+      // accumulate for Neff-calculation
+      sumWeightsSquare += weights[i] * weights[i];
     }
+
+    // evaluate effective number of particles
+    Neff = 1 / sumWeightsSquare;
   }
 
   void ParticleFilterSIR::resample (void)
   {
-    // choose N particles according their weight 
-    int N = particles.size();
-    std::vector<VectorXd> particles_new(N);
+    // // choose N particles according their weight 
+    // int N = particles.size();
+    // std::vector<VectorXd> particles_new(N);
 
-    // 1. generate CDF
-    std::vector<double> cdf(N);
-    cdf[0] = 0;
-    for (int i = 1; i < N; i++)
-      cdf[i] = cdf[i-1] + weights[i];
+    // // 1. generate CDF
+    // std::vector<double> cdf(N);
+    // cdf[0] = 0;
+    // for (int i = 1; i < N; i++)
+    //   cdf[i] = cdf[i-1] + weights[i];
 
-    // needed for random number generation
-    boost::uniform_real<> dist(0,1);
-    boost::variate_generator<boost::mt19937&, boost::uniform_real<> >
-      random(rng, dist);
+    // // needed for random number generation
+    // boost::uniform_real<> dist(0,1);
+    // boost::variate_generator<boost::mt19937&, boost::uniform_real<> >
+    //   random(rng, dist);
 
-    for (int i = 0; i < N; i++)
-    {
-      // 2. generate a random number between 0 and 1
-      double c = random();
+    // for (int i = 0; i < N; i++)
+    // {
+    //   // 2. generate a random number between 0 and 1
+    //   double c = random();
 
-      // 3. check where the random number in the CDF fits -> this is the
-      // sample to choose; a sample with higher weight has a higher span
-      // in the CDF, hence will be chosen more likely
-      int ci = 0;
-      while (c > cdf[ci])
-      	ci++;
+    //   // 3. check where the random number in the CDF fits -> this is the
+    //   // sample to choose; a sample with higher weight has a higher span
+    //   // in the CDF, hence will be chosen more likely
+    //   int ci = 0;
+    //   while (c > cdf[ci])
+    //   	ci++;
     
-      particles_new[i] = particles[i];
-    }
+    //   particles_new[i] = particles[i];
+    // }
 
-    // copy lots of vectors! :( -> pointer for particles in class
-    particles = particles_new;
+    // // copy lots of vectors! :( -> pointer for particles in class
+    // particles = particles_new;
   }
 }

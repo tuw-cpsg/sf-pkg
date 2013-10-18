@@ -49,6 +49,9 @@ namespace estimation
     /** @brief Measurement noise covariance. Size: m x m. */
     MatrixXd R;
 
+    /** Effective number of particles, i.e. measure of degeneracy. */
+    double Neff;
+
   public: 
     /**
      * @brief Constructor setting the type of the particle filter.
@@ -61,6 +64,19 @@ namespace estimation
      * @brief Destructor of this class.
      */
     ~ParticleFilterSIR ();
+
+    enum Log 
+    {
+      PARTICLES,
+      WEIGHTS,
+      NEFF
+    };
+
+    /**
+     * @brief Prints log information: first state variables of all
+     * particles, i.e. particles[i][0].
+     */
+    void log(std::ostream& os, Log type, int index) const;
 
     // -----------------------------------------
     // getters and setters

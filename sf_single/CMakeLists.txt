@@ -155,6 +155,8 @@ if (CATKIN_ENABLE_TESTING)
     tests/utest_pdfs.cpp
     tests/utest_sampling.cpp
     tests/utest_ParticleFilterSIR.cpp
+
+    tests/utest_log.cpp
     )
   target_link_libraries(utest
     estimation
