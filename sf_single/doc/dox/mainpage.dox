@@ -3,12 +3,20 @@
 
 \section intro_sec Introduction
 
-List of estimation methods:
-- \subpage movingaverage
-- \subpage movingmedian
+Several estimation methods are implemented. For details and usage see
+the references below.
+
+\subsection sec_kf Kalman Filters
 - \subpage kalmanfilter
 - \subpage extendedkalmanfilter
 - \subpage unscentedkalmanfilter
+
+\subsection sec_pf Particle Filters
+- \subpage particlefilterSIR
+
+\subsection sec_other Other
+- \subpage movingaverage
+- \subpage movingmedian
 
 \section install_sec Installation
 

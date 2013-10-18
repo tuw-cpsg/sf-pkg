@@ -107,6 +107,35 @@ estimation::IEstimator* EstimatorFactory::create (void)
   throw factory_error("Configuration failed. Unknown method.");
 }
    \endcode
+-# Make your method selectable in the configuration header with:
+   \code
+#define METHOD    MY_ESTIMATOR
+   \endcode
+   - Define the method. Add your method at the end of the list (with
+     the consecutive number) in 
+     <br><br> 
+     \c include/configuration/pre_config.h 
+     \code
+#define MY_ESTIMATOR   7
+     \endcode
+   - [optional] Add the method for validation at compile time of the
+     parameters given in the configuration header. Here you can
+     specify a header which validates your parameters at compile
+     time. Take an existing validation header as starting point, if
+     you want to implement compile time validation.
+     <br><br> 
+     \c include/configuration/validation.h 
+     \code
+#if METHOD == MOVING_MEDIAN
+  #include "validation_MovingMedian.h"
+#elif ...
+  :
+#elif METHOD == MY_ESTIMATOR
+  #include "validation_MyEstimator.h"
+#else
+  #error "Validation failed. Unknown method."
+#endif
+   \endcode
 -# Finally the \ref configuration has to be done: mapping the header
    defines to the parameter list. This is all done in \c
    src/estimation/configuration.cpp. Here you also define the
@@ -120,9 +149,8 @@ estimation::IEstimator* EstimatorFactory::create (void)
    So a parameter from the configuration header (a define expression)
    is only converted to lower case letters and all '_' are replaced by
    '-'.
-   <br>
-   Things to do in \c src/estimation/configuration.cpp:
-
+   <br><br>
+   \c src/estimation/configuration.cpp
    - Add your method name conversion, i.e. add these two lines (of
      course replaced with your estimator's name): 
      \code
@@ -135,7 +163,8 @@ std::string getMethod()
 {
 #if METHOD == MOVING_MEDIAN
   return "MovingMedian";
-  ...
+#elif ...
+  :
 #elif METHOD == MY_ESTIMATOR
   return "MyEstimator";
 #endif

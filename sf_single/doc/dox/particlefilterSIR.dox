@@ -1,0 +1,98 @@
+/** 
+\page particlefilterSIR Sampling Importance Resampling
+
+\section Introduction 
+
+Particle filters work with whole probability densities in contrast to
+the Kalman filters which only uses the mean and covariance for
+recursion because a Gaussion distribution is assumed. The probability
+density function is approximated with a set of particles.
+
+The description of the possibly nonlinear system is like that in the Kalman filters:
+
+\f[ x_k = f(x_{k-1}, u_{k-1}) + w_{k-1} \f]
+\f[ z_k = h(x_{k}) + v_{k} \f]
+
+- \f$x_k\f$ actual state on current step k
+- \f$f\f$ state transition model
+- \f$u\f$ control input
+- \f$w\f$ process noise
+- \f$z_k\f$ measurements taken on step k
+- \f$h\f$ observation or measurement model
+- \f$v\f$ measurement noise
+
+\note The process and measurement noise are assumed to be zero-mean
+gaussian. Hence they can be initialized as in the Kalman filters with
+their covariance.
+
+Basic approach: In a first step particles are chosen where each
+particle represents a possible state. Each particle is then "updated",
+i.e. the next state is estimated (cf. \em time \em update or \em
+predict step in KFs). The new measurements are taken to apply a weight
+to each particle (cf. \em measurement \em update or \em correct
+step). The more likely the measurement is regarding a particle
+\f$i\f$, i.e. regarding a specific state, the higher the weight of
+this particle will be set (e.g. \f$w_i \propto p(z|x_i)\f$). The next
+cycles choose the particles according to their weight. A particle,
+i.e. a state, with higher weight is more likely and should be
+therefore chosen with greater probability.
+
+\section Estimation
+
+\subsection sec_sampleAndWeight sample and weight
+
+- FOR i = 1:N
+  - Sample \f$x_k^i \sim p(x_k|x_{k-1}^i)\f$, here by selecting a
+    process noise sample 
+    \f[w_{k-1}^i \sim N(0,Q)\f] 
+    and setting
+    \f[ x_k^i = f(x_{k-1}^i, u_{k-1}) + w_{k-1}^i \f]
+  - Calculate weights: 
+    \f[w_k^i = w_{k-1}^i pdf_{N(\hat z_k^i,R)}(z_k)\f]
+    The expected measurement \f$\hat z_k^i = h(x_{k}^i)\f$ corresponds
+    to the mean of the distribution of the measurement vector, i.e.
+    \f$N(\hat z_k^i,R)\f$. The probability of the actual measurement
+    \f$z_k\f$ is then checked.
+- Calculate total weight (for normalization): 
+  \f[W = \sum_{i=1}^{N} w_k^i\f]
+- Normalize weights, \f$\forall w_k^i\f$:
+  \f[w_k^i = \frac{w_k^i}{W}\f]
+- Evaluate \f$N_eff\f$ (if conditional resampling is enabled):
+  \f[w_k^i = \frac{1}{ \sum_{i=1}^{N} (w_k^i)^2 }\f]
+
+\subsection sec_resample resample
+
+Resampling means eliminating particles with negligible weights. The
+algorithm is taken from \cite pfTutorial (Algorithm 2, p.179).
+
+- Initialize the CDF: \f$c_0 = 0\f$
+- FOR i = 1:N-1
+  - Construct CDF: \f$c_i = c_{i-1} + w_k^i\f$
+- Start at the bottom of the CDF: \f$i = 0\f$
+- Draw a starting point: \f$u_0 \sim U(0,\frac1N)\f$
+- FOR j = 0:N-1
+  - Move along the CDF: \f$u_j = u_0 + \frac{j}{N} \f$
+  - WHILE \f$u_j > c_i\f$
+    - \f$i = i+1\f$
+  - Assign sample: \f$x_k^j = x_k^i\f$
+  - Assign weight: \f$w_k^j = \frac1N \f$
+
+\note Resampling is done in every step, when option NEFF is not
+specified.
+
+\section Parameters
+
+required:
+- STATE_TRANSITION_MODEL
+- PROCESS_NOISE_COVARIANCE
+- OBSERVATION_MODEL
+- MEASUREMENT_NOISE_COVARIANCE
+- INITIAL_STATE or STATE_BOUNDS
+
+optional:
+- NUMBER_OF_PARTICLES
+- NEFF
+
+For details see \ref usage_particlefilterSIR.
+
+*/
