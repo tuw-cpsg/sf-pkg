@@ -140,7 +140,7 @@ namespace estimation
      * Calculates the conditional probability of an observed
      * measurement z under x (\f$p(z|x)\f$).
      */
-    virtual void weight (VectorXd z);
+    virtual void weight (Input measurements);
 
     /**
      * @brief Eliminates particles with negligible weights.

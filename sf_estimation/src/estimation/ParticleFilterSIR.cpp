@@ -134,12 +134,15 @@ namespace estimation
     }
   }
 
-  void ParticleFilterSIR::weight (VectorXd z)
+  void ParticleFilterSIR::weight (Input measurements)
   {
     double sumWeights = 0, sumWeightsSquare;
+   
+    // measurement vector z
+    VectorXd z(R.rows());
 
-    if (z.size() != R.rows())
-      throw std::runtime_error("Size of measurement vector invalid.");
+    if (measurements.size() != z.size())
+      throw std::runtime_error("Number of measurements invalid.");
 
     // calculate weight
     for (int i = 0; i < particles.size(); i++)
@@ -151,6 +154,7 @@ namespace estimation
 
       // get probability of the measurement (mean = z_expected,
       // covariance = measurement noise covariance)
+      prepareMeasurements(z, measurements, z_expected);	// fills z
       double weight = probability::pdfNormalDistribution(z, z_expected, R);
       
       weights[i] = weights[i] * weight;	// set weight (consider old weight!)
@@ -202,9 +206,9 @@ namespace estimation
       // 3. move along the CDF
       double uj = u0 + j/N;
 
-      // 3. check where the random number in the CDF fits -> this is the
-      // sample to choose; a sample with higher weight has a higher span
-      // in the CDF, hence will be chosen more often
+      // check where the random number in the CDF fits -> this is the
+      // sample to choose; a sample with higher weight has a higher
+      // span in the CDF, hence will be chosen more often
       while (uj > cdf[i])
       	i++;
     

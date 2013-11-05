@@ -107,10 +107,8 @@ namespace estimation
       if (!validated)
 	throw std::runtime_error("Not yet validated!");
 
-      // extract the values of next (the measurements) into a vector
+      // measurement vector z
       VectorXd z(R.rows());	// must have size m
-      for (int i = 0; i < R.rows(); i++)
-	z[i] = next[i].getValue();
     
       // Kalman Filtering ------------------------------------------
       // predict (time-update)
@@ -125,6 +123,7 @@ namespace estimation
       UnscentedTransform ut2(x, P, this);
       ut2.compute();
       VectorXd ze = ut2.mean();
+      prepareMeasurements(z, next, ze);
       MatrixXd Pzz = ut2.covariance();
       MatrixXd Pxz = ut2.crossCovarianceXY();
 

@@ -79,15 +79,10 @@ namespace estimation
     {
       if (!validated)
 	throw std::runtime_error("Not yet validated!");
-
-      // extract the values of next (the measurements) into a vector
-      VectorXd z(next.size());	// must have size m
-      for (int i = 0; i < next.size(); i++)
-      	z[i] = next[i].getValue();
     
       // Particle Filtering ----------------------------------------
       sample();		// samples from the importance density
-      weight(z);	// weights the samples, i.e. particles
+      weight(next);	// weights the samples, i.e. particles
       resample();	// eliminates particles with negligible weights
       // -----------------------------------------------------------
 
@@ -131,8 +126,19 @@ namespace estimation
   }
 
   // -----------------------------------------
-  // protected functions
+  // protected (helper) functions
   // -----------------------------------------
+  void AbstractParticleFilter::prepareMeasurements(VectorXd& z, Input& in, VectorXd& z_expected)
+  {
+    // evaluate 'z', i.e. fill with in-values or z_expected-values
+    // when in-value is missing
+    for (int i = 0; i < z.size(); i++)
+      if (in[i].isMissing())
+	z[i] = z_expected[i];
+      else
+	z[i] = in[i].getValue();
+  }
+
   void AbstractParticleFilter::updateOutput(void)
   {
     int N = particles.size();		// number of particles
@@ -158,7 +164,9 @@ namespace estimation
     for (int i = 0; i < out.size(); i++) {
       out[i].setValue(mean[i]);
       out[i].setVariance(variance(i,i));
-      // TODO: fill jitter_ms
+      // jitter is almost zero (updateOutput is called from the
+      // estimate method), hence not set explicitly (jitter_ms is
+      // initialized to 0 with setValue).
     }
   }
 }

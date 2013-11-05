@@ -234,7 +234,7 @@ namespace estimation
     /**
      * @brief Assigns a (normalized) weight to each particle.
      */
-    virtual void weight (VectorXd z) = 0;
+    virtual void weight (Input measurements) = 0;
 
     /**
      * @brief Eliminates particles with negligible weights.
@@ -242,10 +242,25 @@ namespace estimation
     virtual void resample (void) = 0;
 
     /**
+     * @brief Fills the measurement vector z.
+     *
+     * Missing values of Input in are replaced by the expected ones
+     * (already available in z_expected), i.e. on state variables
+     * depending on missing measurements only a time update will be
+     * applied (the term K*(z-z_expected) is dropped).
+     *
+     * @param z The measurement vector.
+     * @param in The InputValue(s), i.e. the measurements (this Input
+     * may also contain uninitialized InputValues - these will be
+     * interpreted as missing measurements).
+     * @param z_expected The expected measurements regarding the
+     * current a priori state.
+     */
+    void prepareMeasurements (VectorXd& z, Input& in, VectorXd& z_expected);
+
+    /**
      * @brief Puts the estimated state and its variance into an \c
      * Output object to match the interface \c IEstimator.
-     *
-     * TODO: fill jitter_ms
      */
     void updateOutput (void);
   };

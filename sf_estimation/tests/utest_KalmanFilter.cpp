@@ -134,7 +134,15 @@ namespace KalmanFilterTest
     EXPECT_NEAR(out[0].getValue(), 0.1073, 0.0001);
     EXPECT_NEAR(out[0].getVariance(), 0.1951, 0.0001);
 
-    // another example
+    // missing measurement
+    InputValue missingValue;
+    Input inMissing(missingValue);
+    EXPECT_NO_THROW(out = kf.estimate(inMissing));
+  
+    EXPECT_NEAR(out[0].getValue(), 0.1073, 0.0001);
+    EXPECT_NEAR(out[0].getVariance(), 0.2866, 0.0001);
+
+    // another example ---------------------------------
     KalmanFilter kf2;
     MatrixXd A2(2,2); A2 << 1,0.1,0,1;
     kf2.setStateTransitionModel(A2);
@@ -156,7 +164,7 @@ namespace KalmanFilterTest
     EXPECT_NEAR(out[1].getValue(), 0.0099, 0.0001);
     EXPECT_NEAR(out[1].getVariance(), 0.0990, 0.0001);
 
-    // example with control input
+    // add control input
     MatrixXd B2(2,1); B2 << 0,1;
     kf2.setControlInputModel(B2);	// needs to be validated
     InputValue ctrl(0.5);
@@ -183,7 +191,13 @@ namespace KalmanFilterTest
     EXPECT_NO_THROW(kf2.setControlInputModel(B3));
     EXPECT_ANY_THROW(out = kf2.estimate(in));		// not validated
     EXPECT_NO_THROW(kf2.validate()); 
-    EXPECT_NO_THROW(out = kf2.estimate(in));
-  }
 
+    // missing measurement
+    EXPECT_NO_THROW(out = kf2.estimate(inMissing));
+  
+    EXPECT_NEAR(out[0].getValue(), 0.0651, 0.0001);
+    EXPECT_NEAR(out[0].getVariance(), 0.3048, 0.0001);
+    EXPECT_NEAR(out[1].getValue(), 0.5975, 0.0001);
+    EXPECT_NEAR(out[1].getVariance(), 0.2867, 0.0001);
+  }
 }

@@ -54,6 +54,10 @@ namespace estimation
   void OutputValue::setValue(double value)
   {
     this->value = value;
+    // defaults - setting the value is like creating a new instance
+    this->variance = -1;
+    this->jitter_ms = 0;
+    this->t_creation = clock();
   }
 
   void OutputValue::setVariance(double variance)
@@ -63,11 +67,6 @@ namespace estimation
 
   void OutputValue::setJitter(unsigned int jitter_ms)
   {
-    // The time of creation is updated to now! It is assumed that a
-    // new value has been assigned with a different timestamp and a
-    // different jitter, i.e. a completely new OutputValue object is
-    // defined.
-    this->t_creation = clock();
     this->jitter_ms = jitter_ms;
   }
 

@@ -17,6 +17,7 @@ namespace estimation
     this->value = -1;
     this->jitter_ms = 0;
     this->t_creation = clock();
+    this->missing = true;
   }
 
   InputValue::InputValue(double value)
@@ -24,6 +25,7 @@ namespace estimation
     this->value = value;
     this->jitter_ms = 0;
     this->t_creation = clock();
+    this->missing = false;
   }
 
   InputValue::InputValue(double value, unsigned int jitter_ms)
@@ -31,6 +33,7 @@ namespace estimation
     this->value = value;
     this->jitter_ms = jitter_ms;
     this->t_creation = clock();
+    this->missing = false;
   }
 
   // -----------------------------------------
@@ -49,11 +52,17 @@ namespace estimation
     return jitter_ms + curLifetime_ms;
   }
 
+  bool InputValue::isMissing(void) const
+  {
+    return missing;
+  }
+
   void InputValue::setValue(double value)
   {
     this->value = value;
     this->jitter_ms = 0;
     this->t_creation = clock();
+    this->missing = false;
   }
 
   void InputValue::setJitter(unsigned int jitter_ms)
@@ -74,6 +83,7 @@ namespace estimation
     swap(first.value, second.value); 
     swap(first.jitter_ms, second.jitter_ms);
     swap(first.t_creation, second.t_creation);
+    swap(first.missing, second.missing);
   }
 
   InputValue& InputValue::operator=(InputValue right)

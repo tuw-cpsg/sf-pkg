@@ -130,10 +130,8 @@ namespace estimation
       if (!validated)
 	throw std::runtime_error("Not yet validated!");
 
-      // extract the values of next (the measurements) into a vector
+      // measurement vector z
       VectorXd z(H.rows());	// must have size m
-      for (int i = 0; i < H.rows(); i++)
-	z[i] = next[i].getValue();
     
       // Kalman Filtering ------------------------------------------
       // predict (time-update)
@@ -151,6 +149,7 @@ namespace estimation
       VectorXd ze(H.rows());
       // calc estimated measurement vector -> ze
       h(ze,x);
+      prepareMeasurements(z, next, ze);	// map Input 'next' to VectorXd 'z'
       // calc a posteriori state vector -> x
       x = x + K*(z - ze);
       P = P_apriori - K*H*P_apriori;

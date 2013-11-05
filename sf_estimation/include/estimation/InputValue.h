@@ -29,13 +29,24 @@ namespace estimation
      * using this value). */
     clock_t t_creation;
 
+    /** 
+     * @brief Indicates if this InputValue is initialized. 
+     * 
+     * An InputValue is correctly initialized if at least the value is
+     * set. Before setting the value, this member variable evaluates
+     * to true. 
+     *
+     * With this variable missing measurements can be modeled.
+     */
+    bool missing;
+
   public: 
     /**
      * @brief Basic constructor.
      *
      * This constructor initializes the members with default
      * values. The default values are -1 for the value, 0 for the
-     * jitter.
+     * jitter. Member missing is set to true.
      */
     InputValue(void);
 
@@ -72,6 +83,14 @@ namespace estimation
      * function call.
      */
     unsigned int getJitter(void) const;
+
+    /**
+     * @brief Returns true if this InputValue is uninitialized.
+     *
+     * @return True when this InputValue has been initialized at least
+     * with a value, otherwise false.
+     */
+    bool isMissing(void) const;
 
     /**
      * @brief Sets the value, resets this InputValue (jitter_ms is set

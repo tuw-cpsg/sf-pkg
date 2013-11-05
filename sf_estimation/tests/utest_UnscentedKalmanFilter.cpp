@@ -134,6 +134,13 @@ namespace UnscentedKalmanFilterTest
     EXPECT_EQ(out.size(), 1);
     EXPECT_NEAR(out[0].getValue(), 0.0991, 0.0001);
     EXPECT_NEAR(out[0].getVariance(), 1.0892, 0.0001);
+
+    // missing measurement
+    InputValue missingValue;
+    Input inMissing(missingValue);
+    EXPECT_NO_THROW(out = ukf.estimate(inMissing));
+  
+    EXPECT_NEAR(out[0].getValue(), 0.0991, 0.0001);
   }
 
 }

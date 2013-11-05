@@ -253,7 +253,15 @@ namespace ExtendedKalmanFilterTest
     EXPECT_NEAR(out[0].getValue(), 0.1073, 0.0001);
     EXPECT_NEAR(out[0].getVariance(), 0.1951, 0.0001);
 
-    // another example
+    // missing measurement
+    InputValue missingValue;
+    Input inMissing(missingValue);
+    EXPECT_NO_THROW(out = ekf.estimate(inMissing));
+  
+    EXPECT_NEAR(out[0].getValue(), 0.1073, 0.0001);
+    EXPECT_NEAR(out[0].getVariance(), 0.2866, 0.0001);
+
+    // another example -----------------------------------
     ExtendedKalmanFilter ekf2;
     ekf2.setStateTransitionModel(f2);
     ekf2.setJacobianOfStateTransitionModel(df2);
@@ -274,6 +282,12 @@ namespace ExtendedKalmanFilterTest
     EXPECT_NEAR(out[0].getVariance(), 0.1, 0.0001);
     EXPECT_NEAR(out[1].getValue(), 0.0099, 0.0001);
     EXPECT_NEAR(out[1].getVariance(), 0.0990, 0.0001);
+
+    // missing measurement
+    EXPECT_NO_THROW(out = ekf2.estimate(inMissing));
+    
+    EXPECT_NEAR(out[0].getValue(), 0.00099, 0.0001);
+    EXPECT_NEAR(out[1].getValue(), 0.0099, 0.0001);
   }
 
 }

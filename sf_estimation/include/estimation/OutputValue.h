@@ -75,26 +75,36 @@ namespace estimation
     unsigned int getJitter(void) const;
 
     /**
-     * @brief Sets the value.
+     * @brief Sets the value, resets this OutputValue (jitter_ms is
+     * set to 0).
+     *
+     * \note This function can be used instead of creating a new
+     * instance of this class. \c setJitter() can be called to update
+     * the jitter associated with the new value.
      *
      * @param value The data value.
      */
     void setValue(double value);
 
     /**
-     * @brief Sets the variance (maximum deviation around the value).
+     * @brief Sets the variance (square of standard deviation around
+     * the value).
+     *
+     * \note This function must be called after \c setValue()! The
+     * function \c setValue() resets an instance of \c OutputValue,
+     * i.e. variance would be set to -1.
      *
      * @param variance The variance.
      */
     void setVariance(double variance);
 
     /**
-     * @brief Sets the jitter in ms between sensing and creation of
-     * this output value.
+     * @brief Sets the jitter in ms between calculating the value and
+     * creation of this OutputValue.
      *
-     * When calling this function the time of creation is updated to
-     * now! Hence calling this function is like creating a new
-     * OutputValue object.
+     * \note This function must be called after \c setValue()! The
+     * function \c setValue() resets an instance of \c OutputValue,
+     * i.e. jitter_ms would be set to 0.
      *
      * @param The jitter in ms.
      */

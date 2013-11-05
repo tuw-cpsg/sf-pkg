@@ -98,6 +98,17 @@ namespace estimation
   // -----------------------------------------
   // private functions
   // -----------------------------------------
+  void AbstractKalmanFilter::prepareMeasurements(VectorXd& z, Input& in, VectorXd& z_expected)
+  {
+    // evaluate 'z', i.e. fill with in-values or z_expected-values
+    // when in-value is missing
+    for (int i = 0; i < z.size(); i++)
+      if (in[i].isMissing())
+	z[i] = z_expected[i];
+      else
+	z[i] = in[i].getValue();
+  }
+
   void AbstractKalmanFilter::updateOutput(void)
   {
     if (out.size() != x.size())
@@ -107,7 +118,9 @@ namespace estimation
     for (int i = 0; i < out.size(); i++) {
       out[i].setValue(x[i]);
       out[i].setVariance(P(i,i));
-      // TODO: fill jitter_ms
+      // jitter is almost zero (updateOutput is called from the
+      // estimate method), hence not set explicitly (jitter_ms is
+      // initialized to 0 with setValue).
     }
   }
 }

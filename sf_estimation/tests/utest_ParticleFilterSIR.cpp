@@ -9,9 +9,11 @@
 #include "estimation/InputValue.h"
 #include "estimation/Output.h"
 #include "estimation/OutputValue.h"
+#include "probability/sampling.h"
 
 using namespace std;
 using namespace estimation;
+using namespace probability;
 
 namespace ParticleFilterSIRTest 
 {
@@ -19,17 +21,9 @@ namespace ParticleFilterSIRTest
   {
     x[0] = x[0] + u[0];
   }
-  void df(MatrixXd& A, const VectorXd& x, const VectorXd& u)
-  {
-    A(0,0) = 1;
-  }
   void h(VectorXd& z, const VectorXd& x)
   {
     z[0] = x[0];
-  }
-  void dh(MatrixXd& H, const VectorXd& x)
-  {
-    H(0,0) = 1;
   }
 
   void f2(VectorXd& x, const VectorXd& u)
@@ -41,21 +35,9 @@ namespace ParticleFilterSIRTest
     
     x = x_apriori;
   }
-  void df2(MatrixXd& A, const VectorXd& x, const VectorXd& u)
-  {
-    A(0,0) = 1;
-    A(0,1) = 0.1;
-    A(1,0) = 0;
-    A(1,1) = 1;
-  }
   void h2(VectorXd& z, const VectorXd& x)
   {
     z[0] = x[1];
-  }
-  void dh2(MatrixXd& H, const VectorXd& x)
-  {
-    H(0,0) = 0;
-    H(0,1) = 1;
   }
 
   // -----------------------------------------
@@ -202,7 +184,7 @@ namespace ParticleFilterSIRTest
 
     // check if the calculation of an estimate is correct
     // first measurement z1:
-    InputValue measurement(-3);		// should result in the same with higher variance
+    InputValue measurement(-3);		// should result in the same value with higher variance
     Input in(measurement);
     Output out;
 
@@ -224,12 +206,23 @@ namespace ParticleFilterSIRTest
     out = pf.estimate(in);
     EXPECT_NEAR(out[0].getValue(), -3, 0.5);
 
+    double var;
+    var = out[0].getVariance();
+
+    // missing measurement
+    InputValue missingValue;
+    Input inMissing(missingValue);
+    EXPECT_NO_THROW(out = pf.estimate(inMissing));
+  
+    EXPECT_NEAR(out[0].getValue(), -3, 0.5);	// only time update
+    EXPECT_GT(out[0].getVariance(), var);	// variance increased
+
     // multi dimensional example -------------------------------------
     ParticleFilterSIR pf2(1000);
     
     pf.setStateTransitionModel(f2);
     pf.setObservationModel(h2);
-    MatrixXd Q2(2,2); Q2 << 1, 0.1, 0.1, 1;
+    MatrixXd Q2(2,2); Q2 << 0.1, 0.01, 0.01, 0.1;
     pf.setProcessNoiseCovariance(Q2);
     MatrixXd R2(1,1); R2 << 10;
     pf.setMeasurementNoiseCovariance(R2);
