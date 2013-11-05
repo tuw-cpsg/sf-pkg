@@ -193,6 +193,7 @@ namespace estimation
 
     // 2. draw a starting point
     double u0 = random();
+    int i = 0;
 
     for (int j = 0; j < N; j++)
     {
