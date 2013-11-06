@@ -25,6 +25,7 @@
  * \example kalman-filter_2.h
  * \example extended-kalman-filter_1.h
  * \example unscented-kalman-filter_1.h
+ * \example particle-filter-sir_1.h
  */
 
 #ifndef __CONFIG_H__
@@ -32,6 +33,6 @@
 
 // Place your configuration here. Include or insert it directly, I
 // chose to include an example.
-#include "../examples/unscented-kalman-filter_1.h"
+#include "../examples/particle-filter-sir_nav.h"
 
 #endif

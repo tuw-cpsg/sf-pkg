@@ -3,7 +3,11 @@ cmake_minimum_required(VERSION 2.8.3)
 project(sf_single)
 
 ## Find catkin and any catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp std_msgs message_generation)
+find_package(catkin REQUIRED COMPONENTS 
+  roscpp 
+  std_msgs 
+  geometry_msgs 
+  message_generation)
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED)

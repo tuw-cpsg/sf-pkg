@@ -91,7 +91,7 @@ int main(int argc, char **argv)
     }
  
     // Create main access point to communicate with the ROS system.
-    ros::NodeHandle n;
+    ros::NodeHandle n("~");
     
     // Tell ROS that we want to subscribe to the inputs (given in the
     // configuration header) and publish a fused version of it,
