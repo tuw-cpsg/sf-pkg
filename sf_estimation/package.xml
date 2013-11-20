@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package>
+  <name>sf_estimation</name>
+  <version>1.0.0</version>
+  <description>
+    Library containing state estimation methods (filtering).
+  </description>
+
+  <maintainer email="denise.ratasich@gmx.at">Denise Ratasich</maintainer>
+  <license>BSD</license>
+  <author email="denise.ratasich@gmx.at">Denise Ratasich</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+</package>

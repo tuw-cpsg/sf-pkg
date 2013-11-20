@@ -1,9 +1,0 @@
-<launch>
-  <!-- declare args to be passed in -->
-  <arg name="configuration-file" default="" />
-
-  <node name="sf_single" 
-	pkg="sf_single" 
-	type="sf_single"
-	output="screen" />
-</launch>

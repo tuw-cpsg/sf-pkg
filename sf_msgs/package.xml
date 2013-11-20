@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package>
+  <name>sf_msgs</name>
+  <version>1.0.0</version>
+  <description>
+    Messages published by a sensor fusion filter.
+  </description>
+
+  <maintainer email="denise.ratasich@gmx.at">Denise Ratasich</maintainer>
+  <license>BSD</license>
+  <author email="denise.ratasich@gmx.at">Denise Ratasich</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>message_generation</build_depend>
+  <build_depend>std_msgs</build_depend>
+
+  <run_depend>message_runtime</run_depend>
+  <run_depend>std_msgs</run_depend>
+</package>

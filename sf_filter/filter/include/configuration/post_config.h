@@ -120,7 +120,7 @@
  *
  * @param r Unnecessary, needed by Boost for repetitions.
  * @param data Must be an array of struct TopicState (defined in
- * sf_single.cpp) which saves the important parts of the message
+ * sf_filter.cpp) which saves the important parts of the message
  * needed for estimation.
  * @param i Number of the topic (position in the sequence TOPICS_IN
  * defined by the user).
@@ -167,7 +167,7 @@
 #define PUBLISH_INIT_TOPIC(r, data, i, elem)			\
   BOOST_PP_SEQ_ELEM(0, data)[i] =				\
     BOOST_PP_SEQ_ELEM(1, data).advertise			\
-    <sf_single::OutputEntityStamped>				\
+    <sf_msgs::OutputEntityStamped>				\
     (TOPIC_OUT_NAME_STR(elem),					\
      100);							\
   ROS_INFO("Publishing to '%s'.", TOPIC_OUT_NAME_STR(elem));	\
@@ -182,7 +182,7 @@
  * \endcode
  * PUBLISH_INIT(publishers,n) expands to:
  * \code
- * publishers[0] = n.advertise<sf_single::OutputEntityStamped>("state_0_fused",100);
+ * publishers[0] = n.advertise<sf_msgs::OutputEntityStamped>("state_0_fused",100);
  * ROS_INFO("Publishing to '%s'.", "state_0_fused");
  * \endcode
  */

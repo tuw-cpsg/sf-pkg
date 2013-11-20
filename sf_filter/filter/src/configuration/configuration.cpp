@@ -6,10 +6,10 @@
  * @brief Configuration for ROS node.
  */
 
-#include "configuration/configuration.h"
 #include <Eigen/Core>
 #include <string>
 #include <stdexcept>
+#include "configuration/configuration.h"
 
 using namespace estimation;
 using namespace Eigen;
@@ -162,7 +162,7 @@ void f(VectorXd& x, const VectorXd& u)
   // estimate
   CODE_ASSIGN_FORMULAS_TO_VECTOR(x_apriori, STATE_TRANSITION_MODEL);
 
-  // copy back, x will then represents the a priori state estimate
+  // copy back, x will then represent the a priori state estimate
   x = x_apriori;
 }
 

@@ -1,20 +1,29 @@
-
 cmake_minimum_required(VERSION 2.8.3)
-project(sf_single)
+project(sf_estimation)
 
-## Find catkin and any catkin packages
-find_package(catkin REQUIRED COMPONENTS 
-  roscpp 
-  std_msgs 
-  geometry_msgs 
-  message_generation)
+## Find catkin - needed for build.
+find_package(catkin REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED)
 find_package(Eigen REQUIRED)
 
+## Specify catkin-specific information to the build system which in
+## turn is used to generate pkg-config and CMake files.
+## INCLUDE_DIRS - The exported include paths (i.e. cflags) for the package
+## LIBRARIES - The exported libraries from the project
+## CATKIN_DEPENDS - Other catkin projects that this project depends on
+## DEPENDS - Non-catkin CMake projects that this project depends on
+catkin_package(
+  INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME}
+  CATKIN_DEPENDS
+  DEPENDS Boost Eigen
+  )
+
 ## Declare the estimation library
-add_library(estimation
+add_library(${PROJECT_NAME} SHARED
+  # estimation
   src/estimation/InputValue.cpp
   src/estimation/Input.cpp
   src/estimation/OutputValue.cpp
@@ -49,71 +58,14 @@ add_library(estimation
   include/estimation/UnscentedKalmanFilter.h
   include/estimation/AbstractParticleFilter.h
   include/estimation/ParticleFilterSIR.h
-  )
 
-add_library(configuration STATIC
-  src/configuration/configuration.cpp
-
-  include/configuration/validation_MovingMedian.h
-  include/configuration/validation_MovingAverage.h
-  include/configuration/validation_KalmanFilter.h
-  include/configuration/validation_ExtendedKalmanFilter.h
-  include/configuration/validation_UnscentedKalmanFilter.h
-  include/configuration/validation.h
-
-  include/configuration/pre_config.h
-  include/configuration/post_config.h
-  include/configuration/configuration.h
-  )
-
-add_library(other STATIC
+  # probabilities
   src/probability/pdfs.cpp
   src/probability/sampling.cpp
   
   include/probability/pdfs.h
   include/probability/sampling.h
   )
-
-# find_library(estimation 
-#   NAMES estimation libestimation #name
-#   lib/estimation #path
-#   )
-# if(estimation_FOUND)
-#   message(STATUS "estimation lib found")
-# else(estimation_FOUND)
-#   message(FATAL_ERROR "estimation lib not found")
-# endif(estimation_FOUND)
-
-#######################################
-## Declare ROS messages and services ##
-#######################################
-
-## Generate messages in the 'msg' folder
-add_message_files(
-  FILES
-  OutputEntityStamped.msg
-)
-
-## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-)
-
-###################################
-## catkin specific configuration ##
-###################################
-## The catkin_package macro generates cmake config files for your package
-## Declare things to be passed to dependent projects
-## LIBRARIES: libraries you create in this project that dependent projects also need
-## CATKIN_DEPENDS: catkin_packages dependent projects also need
-## DEPENDS: system dependencies of this project that dependent projects also need
-catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES estimation
-  CATKIN_DEPENDS message_runtime
-  DEPENDS Boost Eigen
-)
 
 ###########
 ## Build ##
@@ -122,27 +74,13 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
   include
-  cfg
-  ${catkin_INCLUDE_DIRS} 
   ${Boost_INCLUDE_DIRS} 
   ${Eigen_INCLUDE_DIRS}
   )
 
-## cpp executables and libs
-add_executable(sf_single src/sf_single.cpp)
-target_link_libraries(sf_single 
-  estimation 
-  configuration
-  other
-  ${catkin_LIBRARIES}
+target_link_libraries(${PROJECT_NAME}
   ${Boost_LIBRARIES}
   )
-add_dependencies(sf_single sf_single_gencpp)
-
-## Specify libraries to link a library or executable target against
-# target_link_libraries(sf_estimation_node
-#   ${catkin_LIBRARIES}
-# )
 
 ##########
 ## Test ##
@@ -163,8 +101,7 @@ if (CATKIN_ENABLE_TESTING)
     tests/utest_log.cpp
     )
   target_link_libraries(utest
-    estimation
-    other
+    libestimation
     ${catkin_LIBRARIES}
     ${Boost_LIBRARIES}
     )

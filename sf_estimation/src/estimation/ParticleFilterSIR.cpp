@@ -177,8 +177,10 @@ namespace estimation
     if (Neff > 0.8*N)
       return;
 
-    // choose N particles according their weight 
-    std::vector<VectorXd> particles_new(N);
+    // copy current particles to the buffer 'partices_old' where the
+    // new ones will be chosen from; the array 'particles' will be
+    // filled with these drawn ones
+    std::vector<VectorXd> particles_old(particles);
 
     // 1. generate CDF
     std::vector<double> cdf(N);
@@ -206,12 +208,8 @@ namespace estimation
       while (uj > cdf[i])
       	i++;
     
-      particles_new[j] = particles[i];
+      particles[j] = particles_old[i];
       weights[j] = 1.0 / N;
     }
-
-    // copy lots of vectors! :( -> pointer for particles in class does
-    // not work with Eigen
-    particles = particles_new;
   }
 }

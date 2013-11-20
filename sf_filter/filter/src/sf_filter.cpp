@@ -19,7 +19,7 @@
 // ROS includes
 #include <ros/ros.h>
 
-#include "sf_single/OutputEntityStamped.h"
+#include "sf_msgs/OutputEntityStamped.h"
 
 // estimation framework includes
 #include "estimation/EstimatorFactory.h"
@@ -72,7 +72,7 @@ int main(int argc, char **argv)
     // Initialization
     // --------------------------------------------
     // Initialize for ROS.
-    ros::init(argc, argv, "sf_single");
+    ros::init(argc, argv, "sf_filter");
 
     // ROS specific arguments are handled and removed by ros::init(..),
     // f.e. remapping arguments added by roslaunch.
@@ -110,7 +110,7 @@ int main(int argc, char **argv)
     ros::Publisher publishers[TOPICS_OUT_NUM];
     PUBLISH_INIT(publishers, n);
     // Create messages for publishing.
-    sf_single::OutputEntityStamped sampleFused[TOPICS_OUT_NUM];
+    sf_msgs::OutputEntityStamped sampleFused[TOPICS_OUT_NUM];
 
     // --------------------------------------------
     // Running application.

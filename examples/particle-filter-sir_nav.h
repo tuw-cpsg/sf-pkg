@@ -11,14 +11,14 @@
 // application specific defines and includes
 // -----------------------------------------
 
-// #include <cmath>
+#include <cmath>
 
 #define FILTER_PERIOD	(0.1)		// filter period
-#define GRAVITY		(9.81)		// 1g = 9m/s^2
+#define GRAVITY		(9.81)		// 1g = 9.81m/s^2
 #ifdef M_PI	
   #define PI	M_PI
 #else
-  #define PI	3.1415926536
+#define PI	(3.1415926536)
 #endif
 
 // -----------------------------------------
@@ -27,8 +27,8 @@
 
 // Get x-acceleration and angular velocity around z-axis.
 #define TOPICS_IN						\
-  ((acceleration, vector.x, geometry_msgs::Vector3Stamped))	\
   ((angular_velocity, vector.z, geometry_msgs::Vector3Stamped))	\
+  ((acceleration, vector.y, geometry_msgs::Vector3Stamped))	\
   /**/
 
 // The message includes.
@@ -42,7 +42,11 @@
 #define TOPICS_OUT			\
   ((x, 0))				\
   ((y, 1))				\
-  ((theta, 2))				\
+  ((th, 2))				\
+  ((omega, 3))				\
+  ((ds, 4))				\
+  ((v, 5))				\
+  ((a, 6))				\
   /**/
 
 // -----------------------------------------
@@ -54,30 +58,32 @@
 
 // State transition model.
 //
-// x0: x = x + v_x * T
-// x1: y = y + v_x * tan(omega * T)
+// x0: x = x + ds * cos(th)
+// x1: y = y + ds * sin(th)
 // x2: th = th + omega * T
-// x3: v_x = v_x + a_x * T
-// x4: omega = omega
-// x5: a_x = a_x (in m/s^2)
+// x3: omega = omega (in rad/s)
+// x4: ds = v * T
+// x5: v = v + a * T
+// x6: a = a (in m/s^2)
 //
 #define STATE_TRANSITION_MODEL			\
-  (x[0] + x[3]*FILTER_PERIOD)			\
-  (x[1] + x[3]*tan(x[4]*FILTER_PERIOD))		\
-  (x[2] + x[4]*FILTER_PERIOD)			\
-  (x[3] + x[5]*FILTER_PERIOD)			\
-  (x[4])					\
-  (x[5])					\
+  (x[0] + x[4]*cos(x[2]))			\
+  (x[1] + x[4]*sin(x[2]))			\
+  (x[2] + x[3]*FILTER_PERIOD)			\
+  (x[3])					\
+  (x[5]*FILTER_PERIOD)				\
+  (x[5] + x[6]*FILTER_PERIOD)			\
+  (x[6])					\
   /**/
 
 // Observation model.
 //
-// z0: omega (in dps/s) = omega (in rad/s) * 180 / PI
-// z1: a_x (in 1g) = a_x (in m/s^2) / G
+// z0: omega_z (in dps/s) = omega (in rad/s) * 180 / PI
+// z1: a_y (in 1g) = - a (in m/s^2) / G
 //
 #define OBSERVATION_MODEL			\
-  (x[4] * 180 / PI)				\
-  (x[5] / GRAVITY)				\
+  (x[3] * 180 / PI)				\
+  (- x[6] / GRAVITY)				\
   /**/
 
 // Process noise covariance.
@@ -85,12 +91,13 @@
 // guess...
 //
 #define PROCESS_NOISE_COVARIANCE		\
-  ( (0.01) (0) (0) (0) (0) (0) )		\
-  ( (0) (0.01) (0) (0) (0) (0) )		\
-  ( (0) (0) (0.01) (0) (0) (0) )		\
-  ( (0) (0) (0) (0.01) (0) (0) )		\
-  ( (0) (0) (0) (0) (0.01) (0) )		\
-  ( (0) (0) (0) (0) (0) (0.01) )		\
+  ( (0.0001) (0) (0) (0) (0) (0) (0) )		\
+  ( (0) (0.0001) (0) (0) (0) (0) (0) )		\
+  ( (0) (0) (0.0001) (0) (0) (0) (0) )		\
+  ( (0) (0) (0) (1) (0) (0) (0) )		\
+  ( (0) (0) (0) (0) (0.0001) (0) (0) )		\
+  ( (0) (0) (0) (0) (0) (0.0001) (0) )		\
+  ( (0) (0) (0) (0) (0) (0) (1000) )		\
   /**/
 
 // The variance of the sensor, i.e. our measurement.
@@ -99,8 +106,8 @@
 // IMU3000: about 0.01dps
 //
 #define MEASUREMENT_NOISE_COVARIANCE \
-  ( (0.0009)  (0) )		     \
-  ( (0)    (0.01) )		     \
+  ( (0.01)      (0) )		     \
+  ( (0)    (0.0009) )		     \
   /**/
 
 // Initialize with start position (0).
@@ -111,7 +118,8 @@
   ( 0 )						\
   ( 0 )						\
   ( 0 )						\
+  ( 0 )						\
   /**/
 
 // optional
-#define NUMBER_OF_PARTICLES	1000
+#define NUMBER_OF_PARTICLES	5000

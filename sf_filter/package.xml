@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<package>
+  <!-- Insert here the name of your filter. This name must equal NAME
+       in CMakeLists.txt and must be unique in the ROS system! -->
+  <name>sf_filter</name>
+  <version>1.0.0</version>
+  <description>
+    Template package for a concrete filter from the sf_filter
+    library. Edit config.h to specify type and parameters of your
+    filter. Don't forget to specify a name and dependencies in
+    CMakeLists.txt and this file, e.g. when you're using special
+    messages.
+  </description>
+
+  <license>BSD</license>
+  <maintainer email="denise.ratasich@gmx.at">Denise Ratasich</maintainer>
+  <author email="denise.ratasich@gmx.at">Denise Ratasich</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>sf_msgs</build_depend>
+  <build_depend>sf_estimation</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>sf_msgs</run_depend>
+  <run_depend>sf_estimation</run_depend>
+  <run_depend>message_runtime</run_depend>
+
+  <!-- Add additional dependencies for further message types below: -->
+  <build_depend>geometry_msgs</build_depend>
+  <run_depend>geometry_msgs</run_depend>
+
+</package>

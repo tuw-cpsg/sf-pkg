@@ -10,14 +10,20 @@ The configuration can be divided into following parts:
   i.e. topics to subscribe.
 - \em Outputs. The estimated entities (e.g. state variables),
   i.e. topics to publish.
-- \em Method. The type of estimation or fusion to perform.
+- \em Method. The type of estimation or fusion to perform and
+  parameters for general configuration of a method.
 - \em Parameters. The method specific parameters.
 
 Required macros are:
 - \c TOPICS_IN, see \ref sec_inputs
 - \c TOPICS_OUT, see \ref sec_outputs
 - \c METHOD, see \ref sec_method
-- required parameters of the method, see \ref sec_params
+- required parameters according \c METHOD, see \ref sec_params
+
+Optional macros are:
+- \c ESTIMATION_RATE, see \ref sec_estimation_rate
+- \c TOPICS_IN_CTRL, see \ref sec_inputs
+- optional parameters according \c METHOD, see \ref sec_params
 
 
 \section sec_inputs Inputs
@@ -37,9 +43,17 @@ An input topic is specified in a tuple of 3 elements:
 - \em type The message type as it would be used when instantiating
   such a message in C++.
 
-The topics to subscribe are collected in a <a
+An input topic can be a measurement, e.g. a sensor value, or a control
+input variable (optional). The topics containing measurements are
+collected in the <a
 href="http://www.boost.org/doc/libs/1_46_1/libs/preprocessor/doc/data/sequences.html">sequence</a>
-called \c TOPICS_IN, e.g.:
+TOPICS_IN. Topics containing control input variables are specified in
+the <a
+href="http://www.boost.org/doc/libs/1_46_1/libs/preprocessor/doc/data/sequences.html">sequence</a>
+TOPICS_IN_CTRL.
+
+Every variable of the measurement vector z must be specified (in
+order) in the macro \c TOPICS_IN, e.g.:
 
 \code
 #define TOPICS_IN \
@@ -47,7 +61,9 @@ called \c TOPICS_IN, e.g.:
   ((signal_B, data, std_msgs::Float64))
 \endcode
 
-The number of topics in the sequence \c TOPICS_IN is not bounded.
+Similar is valid for \c TOPIC_IN_CTRL, the tuples in \c TOPIC_IN_CTRL
+are mapped to the control input u. The number of topics in the
+sequence \c TOPICS_IN and \c TOPICS_IN_CTRL is not bounded.
 
 \note Invalid \em field or \em type can raise exceptions during
 runtime.
@@ -94,6 +110,26 @@ to indicate that another line is following. Forgetting \c \ causes
 strange compile errors!
 
 
+\section sec_estimation_rate Estimation Rate
+
+Optional the estimation or filter rate can be specified. Default value
+is 10Hz. The value should be given in Hz, e.g.:
+
+\code
+#define ESTIMATION_RATE		20
+\endcode
+
+The above configuration sets the estimation rate to 20Hz, i.e. the
+filter will be called every 50ms to estimate the state with new
+measurements.
+
+\note With higher estimation rate you will get a better resolution of
+your state. However when the sensor's sample rates are smaller you
+should adjust the estimation rate to be close to the sample
+rates. Without measurements only a time update will be done, which is
+only a "next state guess".
+
+
 \section sec_method Method
 
 The method is specified by defining the macro \c METHOD, e.g.:
@@ -112,6 +148,8 @@ parameters see the referenced sites.
   usage_extendedkalmanfilter
 - \c UNSCENTED_KALMAN_FILTER : \ref unscentedkalmanfilter, \ref
   usage_unscentedkalmanfilter
+- \c PARTICLE_FILTER_SIR : \ref particlefilterSIR, \ref
+  usage_particlefilterSIR
 
 
 \section sec_params Parameters
@@ -125,6 +163,7 @@ parameters of a method.
 - \subpage usage_kalmanfilter
 - \subpage usage_extendedkalmanfilter
 - \subpage usage_unscentedkalmanfilter
+- \subpage usage_particlefilterSIR
 
 Parameters are often specified as matrices and vectors. See the
 description below for how to define such parameters.
@@ -145,7 +184,9 @@ Example matrix:
   ( (3) (4) )
 \endcode
 
-The state transition model would then be initialized as follows:
+E.g. the state transition model of a Kalman filter would then be
+initialized as follows (the same is valid for other matrices like
+covariances):
 \code
 A(0,0) = 1;
 A(0,1) = 2;

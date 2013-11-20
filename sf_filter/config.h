@@ -33,6 +33,6 @@
 
 // Place your configuration here. Include or insert it directly, I
 // chose to include an example.
-#include "../examples/particle-filter-sir_nav.h"
+#include "../examples/unscented-kalman-filter_nav.h"
 
 #endif
