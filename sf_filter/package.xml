@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <!-- Insert here the name of your filter. This name must equal NAME
-       in CMakeLists.txt and must be unique in the ROS system! -->
+  <!-- Insert here the name of your filter. This name must equal the
+       project's name in CMakeLists.txt and must be unique in the ROS
+       system! -->
   <name>sf_filter</name>
   <version>1.0.0</version>
   <description>

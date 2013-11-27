@@ -1,5 +1,5 @@
-Single Sensor Fusion Package for ROS
-====================================
+Low-Level Sensor Fusion Package for ROS
+=======================================
 
 Implementation of estimation methods for low-level sensor fusion in
 C++ libraries with a generic ROS node using this framework.
@@ -22,7 +22,7 @@ Installation
 ------------
 
 These packages depend on Eigen3, so when not installed (you will get
-an error when runngin catkin_make if so), get it from
+an error when running catkin_make if so), get it from
 http://eigen.tuxfamily.org/index.php?title=Main_Page. It is sufficient
 to copy the directory 'Eigen/' from this archive to
 /usr/include/eigen3, i.e. there is no installation necessary.
@@ -31,8 +31,9 @@ to copy the directory 'Eigen/' from this archive to
 Directory Structure
 -------------------
 
-* sf_estimation: the low-level sensor fusion framework implementing
-  the state estimation algorithms or filters respectively.
+* sf_estimation: the generic low-level sensor fusion framework
+  implementing the state estimation algorithms or filters
+  respectively.
 * sf_msgs: package containing the messages a sf_filter node can
   publish.
 * sf_filter: the source for the ROS node with configuration. Copy this

@@ -1,0 +1,121 @@
+/** 
+\page usage_package Package and ROS Node
+
+Every concrete estimator or filter respectively is put into a separate
+package. A template is given to you with the package \c
+sf_filter. Copy this folder to create your own estimator.
+
+The code to compile is collected in the folder \c filter. You do not
+have to touch this one. The only files to adapt are located in the
+root of the filter package:
+- package.xml, see \ref sec_pkg.
+- CMakeLists.txt, see \ref sec_cmake.
+- config.h, see \ref usage_configuration.
+
+\note Be sure the name in \c package.xml equals the project's name in
+\c CMakeLists.txt, otherwise a \c CMake \c Error will occur.
+
+
+\section sec_pkg package.xml
+
+In the package file you provide catkin (the build system in ROS) the
+basic properties of your ROS package and dependencies on other
+packages or tools, see also <a
+href="http://wiki.ros.org/catkin/package.xml">ROS.org on packages</a>.
+
+\subsection Required Changes
+
+- \em name Each package in ROS has to have a unique name. Replace \c
+  sf_filter of the template with an appropriate name of your
+  estimator, e.g. type, purpose, a.s.o. (<a
+  href="http://wiki.ros.org/ROS/Patterns/Conventions#Naming_ROS_Resources">ROS
+  naming conventions</a>). This name will specify the name of the
+  package containing the ROS node.
+  <br/>
+  \code
+...
+<package>
+  <!-- Insert here the name of your filter. This name must equal the
+       project's name in CMakeLists.txt and must be unique in the ROS
+       system! -->
+  <name>sf_filter</name>
+...
+  \endcode
+
+- \em dependencies An estimator can subscribe to every possible
+  topic. The package defining the message of a topic must be
+  specified, e.g. when subscribing to a topic of type \c
+  geometry_msgs::Vector3 you have to add \c geometry_msgs as
+  dependency.
+  <br/>
+  \code
+<build_depend>geometry_msgs</build_depend>
+<run_depend>geometry_msgs</run_depend>
+  \endcode
+
+\subsection Optional Changes
+
+In general all other tags can be changed, except the already specified
+"depend"-tags (catkin, roscpp, sf_msgs, sf_estimation,
+message_runtime).
+
+
+\section sec_cmake CMakeLists.txt
+
+This file is the input for cmake (build system) and specifies how to
+build a package, see also <a
+href="http://wiki.ros.org/catkin/CMakeLists.txt">ROS.org on
+CMakeLists.txt</a>.
+
+\subsection Required Changes
+
+As with \ref sec_pkg you only need to change the name of the project
+or package respectively and add the dependencies on message types.
+
+- \em project Fill in here the name you already specified in the \ref
+  sec_pkg. The name of the executable, i.e. the ROS node type, will be
+  set to this value too.
+  <br/>
+  \code
+## MODIFY. Sets the name of this project. Must be a unique name, since
+## it will be used for generating the package name. This name must
+## equal the name specified in package.xml.
+project(sf_filter)
+  \endcode
+
+- \em dependencies An estimator can subscribe to every possible
+  topic. The package defining the message of a topic must be
+  specified, e.g. when subscribing to a topic of type \c
+  geometry_msgs::Vector3 you have to add \c geometry_msgs as
+  dependency.
+  <br/>
+  \code
+## MODIFY. Find catkin and any catkin packages.
+find_package(catkin REQUIRED COMPONENTS
+  # add the messages you want to be able to receive below:
+  geometry_msgs
+  )
+  \endcode
+
+\subsection Optional Changes
+
+- \em CONFIG_PATH The path to the configuration header \c config.h can
+  additionally be set. In general you won't need to change this
+  value. But you could use it if you want to try out some different
+  configurations, e.g. put several config.h in separate folders. Then
+  you could choose the configuration for the filter by setting the
+  path to this folder.
+  <br/>
+  \code
+## Specify the path to the config file. In this template the
+## configuration header is put directly into this folder.
+set(CONFIG_PATH ./)
+  \endcode
+
+\note Do not change the order of the commands \c find_package, \c
+catkin_package and \c add_subdirectory.
+
+\note You cannot change the name of the configuration header, it must
+be called \c config.h.
+
+*/

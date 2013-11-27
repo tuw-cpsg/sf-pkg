@@ -5,8 +5,12 @@
  *
  * @brief Collects things for configuration needed by the ROS node.
  *
- * Collects macros needed by the user for config.h and macros needed
- * for code generation and initialization of the Configurator.
+ * Includes the configuration header from the user. Collects macros
+ * needed by the user for config.h and macros needed for code
+ * generation and initialization of the Configurator.
+ *
+ * \example extended-kalman-filter_nav.h
+ * \example unscented-kalman-filter_nav.h
  */
 
 #ifndef __CONFIGURATION_H__

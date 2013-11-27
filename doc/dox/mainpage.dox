@@ -1,0 +1,69 @@
+/** 
+\mainpage Documentation
+
+\section intro_sec Introduction
+
+Several estimation methods are implemented. For details and usage see
+the references below.
+
+\subsection sec_kf Kalman Filters
+- \subpage kalmanfilter
+- \subpage extendedkalmanfilter
+- \subpage unscentedkalmanfilter
+
+\subsection sec_pf Particle Filters
+- \subpage particlefilterSIR
+
+\subsection sec_other Other
+- \subpage movingaverage
+- \subpage movingmedian
+
+\section install_sec Installation
+
+Simply copy the package (folder \c sf-pkg) to the source folder of
+your catkin workspace and build the package with \c catkin_make.
+
+\subsection Dependencies
+
+The \c sf-pkg uses the <a
+href="http://eigen.tuxfamily.org/index.php?title=Main_Page">Eigen
+library</a> for matrix manipulations (needed in nearly all
+filters). When running \c catkin_make to build the filters in \c
+sf-pkg for the first time you will be noticed if Eigen is
+missing. Installing Eigen is as simple as installing the \c
+sf-pkg. Get the library in an archive from <a
+href="http://eigen.tuxfamily.org/index.php?title=Main_Page">Eigen's
+main page</a>.  Copy the directory \c Eigen/ from this archive to \c
+/usr/include/eigen3.
+
+\section usage_sec Usage
+
+A template for a concrete state estimator or filter respectively is
+given within the directory \c sf_filter. To create a new customized
+filter copy this directory and configure the following files for your
+needs:
+
+- package.xml, CMakeLists.txt: the name and dependencies to other ROS
+  packages have to be set here, see \subpage usage_package.
+- config.h: the configuration header file, see \subpage
+  usage_configuration for details and examples.
+
+By compiling the package a specific filter node is created. So when x
+\em different estimators should be used in your ROS system you have to
+copy the template package \c sf_filter x times and adapt the three
+files \c package.xml, \c CMakeLists.txt und \c config.h for your
+needs.
+
+Finally you can run a filter, e.g. the template filter provided in the
+folder \c sf_filter, with:
+\code
+rosrun sf_filter sf_filter
+\endcode
+Where \c sf_filter is the name specified in package.xml and
+CMakeLists.txt.
+
+\section developement_sec Development
+
+- \subpage dev_addingmethod - Tutorial on how to add an algorithm.
+	
+*/	

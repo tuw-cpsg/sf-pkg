@@ -1,9 +1,9 @@
 /** 
 \page usage_configuration Configuration
 
-The configuration is done in the single header file \em config.h in
-the folder \em cfg of the sensor fusion package. Here the interface of
-the ROS node and the fusion method is specified.
+The configuration is done in the single header file \em config.h of
+the filter package. Here the interface of the ROS node and the fusion
+method is specified.
 
 The configuration can be divided into following parts:
 - \em Inputs. The entities (e.g. sensors) which should be fused,
@@ -57,9 +57,16 @@ order) in the macro \c TOPICS_IN, e.g.:
 
 \code
 #define TOPICS_IN \
-  ((signal_A, data, std_msgs::Float64))	\
-  ((signal_B, data, std_msgs::Float64))
+  ((angular_velocity, vector.z, geometry_msgs::Vector3Stamped))	\
+  ((acceleration, vector.y, geometry_msgs::Vector3Stamped))
 \endcode
+
+In the above example the topics are defined in a relative way to the
+ROS node. So in particular the topics \c /sf_filter/angular_velocity
+and \c /sf_filter/acceleration are subscribed where \c sf_filter is
+the name specified in CMakeLists.txt and package.xml, i.e. the name of
+your filter. Its a good practice to do remapping separately,
+e.g. within a launch file.
 
 Similar is valid for \c TOPIC_IN_CTRL, the tuples in \c TOPIC_IN_CTRL
 are mapped to the control input u. The number of topics in the
@@ -72,6 +79,10 @@ runtime.
 to indicate that another line is following. Forgetting \c \ causes
 strange compile errors!
 
+\note Don't forget to include the appropriate header files for the
+message types. The packages containing the messages, e.g. \c
+geometry_msgs have to be specified in \c CMakeLists.txt and \c
+package.xml too.
 
 \section sec_outputs Outputs
 
