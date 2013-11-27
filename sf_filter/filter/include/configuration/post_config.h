@@ -81,9 +81,11 @@
 /** @brief Expands to the name of a topic T. */
 #define TOPIC_IN_NAME(T)	BOOST_PP_TUPLE_ELEM(3, 0, T)
 /** @brief Expands to the name of a topic T as string. */
-#define TOPIC_IN_NAME_STR(T)	BOOST_PP_STRINGIZE(BOOST_PP_TUPLE_ELEM(3, 0, T))
+#define TOPIC_IN_NAME_STR(T)	BOOST_PP_STRINGIZE(TOPIC_IN_NAME(T))
 /** @brief Expands to the field to estimate of a topic T. */
 #define TOPIC_IN_FIELD(T)	BOOST_PP_TUPLE_ELEM(3, 1, T)
+/** @brief Expands to the field to estimate of a topic T as string. */
+#define TOPIC_IN_FIELD_STR(T)	BOOST_PP_STRINGIZE(TOPIC_IN_FIELD(T))
 /** @brief Expands to the type of a topic T. */
 #define TOPIC_IN_TYPE(T)	BOOST_PP_TUPLE_ELEM(3, 2, T)
 
@@ -136,8 +138,9 @@
       msg->TOPIC_IN_FIELD(elem)						\
       );								\
     BOOST_PP_SEQ_ELEM(0, data)[i].received = true;			\
-    ROS_DEBUG("RECV '%s': %.2f.",					\
+    ROS_DEBUG("RECV '%s.%s': %.2f.",					\
 	      TOPIC_IN_NAME_STR(elem),					\
+      	      TOPIC_IN_FIELD_STR(elem),					\
 	      msg->TOPIC_IN_FIELD(elem));				\
   }									\
   /**/
