@@ -51,6 +51,15 @@
   #error "Validation failed. Output topics missing."
 #endif
 
+#ifdef ESTIMATION_PERIOD
+  #if ESTIMATION_PERIOD > 0
+  #else
+    #error "Validation of configuration header failed. Invalid estimation period."
+  #endif
+#else
+  #define ESTIMATION_PERIOD	100	// ms
+#endif
+
 
 #ifndef METHOD
   #error "Validation failed. A method must be defined."

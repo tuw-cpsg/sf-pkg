@@ -3,8 +3,7 @@
  * @author Denise Ratasich
  * @date 26.07.2013
  *
- * @brief ROS node for using a single sensor fusion method, in
- * particular estimation.
+ * @brief ROS node for using a generic low-level sensor fusion method.
  */
 
 
@@ -15,6 +14,7 @@
 // cpp includes
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 // ROS includes
 #include <ros/ros.h>
@@ -30,11 +30,12 @@
 
 /** @brief Collects the messages together. */
 struct TopicState {
-  /** @brief True when a new message has been received. */
+  /** @brief True when at least one message has been received. */
   bool received;
-  /** @brief The latest message received, converted into an InputValue
-   * for an estimator. **/
-  estimation::InputValue value;
+  /** @brief The timestamp of the last message received. **/
+  ros::Time stamp;
+  /** @brief The messages received in a filter period. **/
+  std::vector<double> values;
 };
 
 /** @brief Collects the messages of subscribed topics_meas. */
@@ -89,6 +90,11 @@ int main(int argc, char **argv)
       ROS_ERROR_STREAM(e.what());
       return 1;
     }
+
+    // Get further parameters from the configuration header file.
+    ros::Duration period;
+    period.fromSec((double) getEstimatePeriod() / 1000);
+    ROS_INFO("Estimate every %.0f ms.", period.toSec()*1000);
  
     // Create main access point to communicate with the ROS system.
     ros::NodeHandle n("~");
@@ -115,74 +121,106 @@ int main(int argc, char **argv)
     // --------------------------------------------
     // Running application.
     // --------------------------------------------
-    // Check repeatedly whether there are samples to estimate.
+    // Estimate according the specified filter period (configuration).
+    ros::Time lastEstimation = ros::Time::now();
     while (ros::ok()) 
     {
-      // Control inputs are optional.
-#ifdef TOPICS_IN_CTRL
-      // Check if all control input variables were received.
-      bool all_ctrl_recv = true;
-      for (int i = 0; i < TOPICS_IN_CTRL_NUM; i++)
-	all_ctrl_recv &= topics_ctrl[i].received;
-      
-      if (all_ctrl_recv)
+      try
       {
-	// Debug: Print jitter of each message/value in ms.
-	std::stringstream ss;
-	ss << "Ctrl-Jitter: ";
+	// Control inputs are optional. 
+#ifdef TOPICS_IN_CTRL
+	// A received control value is immediately passed to the
+	// estimator. So check if at least one control input has been
+	// received.
+	bool ctrl_recv = false;
 	for (int i = 0; i < TOPICS_IN_CTRL_NUM; i++)
-	  ss << topics_ctrl[i].value.getJitter() << " ";
-	ROS_DEBUG_STREAM(ss.str());
+	  ctrl_recv |= topics_ctrl[i].received;
+      
+	if (ctrl_recv)
+	{
+	  // Collect inputs together.
+	  estimation::Input in_ctrl;
+	  for (int i = 0; i < TOPICS_IN_CTRL_NUM; i++)
+	  {
+	    estimation::InputValue in_ctrl_val;
+	    if (topics_ctrl[i].received)
+	    {
+	      double value = topics_ctrl[i].values.back();				// take most actual value
+	      double jitter = (ros::Time::now() - topics_ctrl[i].stamp).toSec()*1000;	// and its jitter
+	      //ROS_DEBUG("ctrl-jitter[%d] (ms): %.2f", i, jitter);
+	    
+	      // initialize the InputValue
+	      in_ctrl_val.setValue(value);
+	      in_ctrl_val.setJitter(jitter);
+	    }
+	    in_ctrl.add(in_ctrl_val);
+	  }
 
-	// Collect inputs together.
-	estimation::Input in_ctrl;
-	for (int i = 0; i < TOPICS_IN_CTRL_NUM; i++)
-	  in_ctrl.add(topics_ctrl[i].value);
+	  // Change control input of estimator.
+	  estimator->setControlInput(in_ctrl);
 
-	// Change control input of estimator.
-	estimator->setControlInput(in_ctrl);
-
-	// Control messages are processed, so reset all receive flags.
-	for (int i = 0; i < TOPICS_IN_CTRL_NUM; i++) 
-	  topics_ctrl[i].received = false;
-      }
+	  // Control messages are processed, so reset all receive flags
+	  // and delete values.
+	  for (int i = 0; i < TOPICS_IN_CTRL_NUM; i++) 
+	  {
+	    topics_ctrl[i].received = false;
+	    topics_ctrl[i].values.clear();
+	  }
+	}
 #endif
 
-      // Check if all samples for an estimation cycle were received.
-      bool all_meas_recv = true;
-      for (int i = 0; i < TOPICS_IN_MEAS_NUM; i++) 
-	all_meas_recv &= topics_meas[i].received;
-
-      if (all_meas_recv)
-      {
-	try
+	// Check if its time to do the estimation.
+	if ((ros::Time::now() - lastEstimation) >= period)
 	{
-	  // Debug: Print jitter of each message/value in ms.
-	  std::stringstream ss;
-	  ss << "Meas-Jitter: ";
-	  for (int i = 0; i < TOPICS_IN_MEAS_NUM; i++)
-	    ss << topics_meas[i].value.getJitter() << " ";
-	  ROS_DEBUG_STREAM(ss.str());
-
 	  // Collect inputs together.
 	  estimation::Input in_meas;
 	  for (int i = 0; i < TOPICS_IN_MEAS_NUM; i++)
-	    in_meas.add(topics_meas[i].value);
+	  {
+	    estimation::InputValue in_meas_val;
+
+	    if (topics_meas[i].received)
+	    {
+	      // At least one message of a topic has been received.
+	      double jitter = (ros::Time::now() - topics_meas[i].stamp).toSec()*1000;
+	      //ROS_DEBUG("meas-jitter[%d] (ms): %.2f", i, jitter);
+
+	      // Average the message values (when more than one
+	      // message is received from a topic in a filter period).
+	      double value = 0;
+	      for (int j = 0; j < topics_meas[i].values.size(); j++)
+		value += topics_meas[i].values[j];
+	      value = value / topics_meas[i].values.size();
+	      //ROS_DEBUG("meas-value[%d] (avg): %.2f", i, value);
+
+	      // Initialize the InputValue.
+	      in_meas_val.setValue(value);
+	      in_meas_val.setJitter(jitter);
+	    }
+
+	    in_meas.add(in_meas_val);
+	  }
 
 	  // Estimate.
+	  ROS_DEBUG("estimate");
+	  lastEstimation = ros::Time::now();
 	  estimation::Output out = estimator->estimate(in_meas);
+	  ROS_DEBUG("duration of estimation (ms): %.1f", (ros::Time::now() - lastEstimation).toSec()*1000);
 
 	  // Set output message(s) and publish.
 	  PUBLISH(publishers, out, sampleFused);
-	}
-	catch (std::exception& e)
-	{
-	  ROS_ERROR_STREAM(e.what());
-	}
 
-	// Samples/messages are processed, so reset all receive flags.
-	for (int i = 0; i < TOPICS_IN_MEAS_NUM; i++) 
-	  topics_meas[i].received = false;
+	  // Samples/messages are processed, so reset all receive flags
+	  // and delete values.
+	  for (int i = 0; i < TOPICS_IN_MEAS_NUM; i++) 
+	  {
+	    topics_meas[i].received = false;
+	    topics_meas[i].values.clear();
+	  }
+	}
+      }
+      catch (std::exception& e)
+      {
+	ROS_ERROR_STREAM(e.what());
       }
       
       // Handle callbacks (check for next samples).

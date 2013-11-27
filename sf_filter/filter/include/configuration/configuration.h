@@ -22,7 +22,24 @@
 // file members
 // -----------------------------------------
 /**
- * @brief Initializes the estimator factory.
+ * @brief Returns the estimator's period in ms.
+ *
+ * This method is called by the ROS node to get the period which
+ * should be used for filtering. 
+ *
+ * @return Filter period in ms.
+ */
+int getEstimatePeriod(void);
+
+/**
+ * @brief Initializes an estimator factory.
+ *
+ * Passes parameters to an estimator factory, i.e. maps the parameters
+ * given in the configuration header to variables for initializing an
+ * estimator. Once called, the create() method of a factory can be
+ * used to get the initialized estimator.
+ *
+ * @param factory An estimator factory.
  */
 void initEstimatorFactory(estimation::EstimatorFactory& factory);
 

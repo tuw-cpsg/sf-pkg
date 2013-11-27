@@ -17,6 +17,11 @@ using namespace Eigen;
 // private functions
 std::string getMethod();
 
+int getEstimatePeriod(void)
+{
+  return ESTIMATION_PERIOD;
+}
+
 #if METHOD == EXTENDED_KALMAN_FILTER  ||	\
   METHOD == UNSCENTED_KALMAN_FILTER  ||		\
   METHOD == PARTICLE_FILTER_SIR

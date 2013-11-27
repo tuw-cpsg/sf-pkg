@@ -134,7 +134,8 @@
     const TOPIC_IN_TYPE(elem)::ConstPtr& msg				\
     )									\
   {									\
-    BOOST_PP_SEQ_ELEM(0, data)[i].value.setValue(			\
+    BOOST_PP_SEQ_ELEM(0, data)[i].stamp = ros::Time::now();		\
+    BOOST_PP_SEQ_ELEM(0, data)[i].values.push_back(			\
       msg->TOPIC_IN_FIELD(elem)						\
       );								\
     BOOST_PP_SEQ_ELEM(0, data)[i].received = true;			\
@@ -172,7 +173,7 @@
     BOOST_PP_SEQ_ELEM(1, data).advertise			\
     <sf_msgs::OutputEntityStamped>				\
     (TOPIC_OUT_NAME_STR(elem),					\
-     100);							\
+     1);							\
   ROS_INFO("Publishing to '%s'.", TOPIC_OUT_NAME_STR(elem));	\
   /**/
 
@@ -185,7 +186,7 @@
  * \endcode
  * PUBLISH_INIT(publishers,n) expands to:
  * \code
- * publishers[0] = n.advertise<sf_msgs::OutputEntityStamped>("state_0_fused",100);
+ * publishers[0] = n.advertise<sf_msgs::OutputEntityStamped>("state_0_fused",1);
  * ROS_INFO("Publishing to '%s'.", "state_0_fused");
  * \endcode
  */
