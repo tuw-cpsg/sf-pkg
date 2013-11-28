@@ -9,6 +9,7 @@
 #include <Eigen/Core>
 #include <string>
 #include <stdexcept>
+#include "estimation/models.h"
 #include "configuration/configuration.h"
 
 using namespace estimation;
@@ -17,11 +18,7 @@ using namespace Eigen;
 // private functions
 std::string getMethod();
 
-int getEstimatePeriod(void)
-{
-  return ESTIMATION_PERIOD;
-}
-
+// models
 #if METHOD == EXTENDED_KALMAN_FILTER  ||	\
   METHOD == UNSCENTED_KALMAN_FILTER  ||		\
   METHOD == PARTICLE_FILTER_SIR
@@ -32,6 +29,12 @@ void h(VectorXd& z, const VectorXd& x);
 void df(MatrixXd& A, const VectorXd& x, const VectorXd& u);
 void dh(MatrixXd& H, const VectorXd& x);
 #endif
+
+// public functions for the ROS node
+int getEstimatePeriod(void)
+{
+  return ESTIMATION_PERIOD;
+}
 
 void initEstimatorFactory(EstimatorFactory& factory)
 {
@@ -54,7 +57,7 @@ void initEstimatorFactory(EstimatorFactory& factory)
   #elif METHOD == EXTENDED_KALMAN_FILTER  ||	\
     METHOD == UNSCENTED_KALMAN_FILTER  ||	\
     METHOD == PARTICLE_FILTER_SIR
-  ExtendedKalmanFilter::func_f stm = f;
+  func_f stm = f;
   #endif
   factory.addParam("state-transition-model", stm);
 #endif
@@ -72,7 +75,7 @@ void initEstimatorFactory(EstimatorFactory& factory)
   #elif METHOD == EXTENDED_KALMAN_FILTER  ||	\
     METHOD == UNSCENTED_KALMAN_FILTER  ||	\
     METHOD == PARTICLE_FILTER_SIR
-  ExtendedKalmanFilter::func_h om = h;
+  func_h om = h;
   #endif
   factory.addParam("observation-model", om);
 #endif
@@ -111,11 +114,11 @@ void initEstimatorFactory(EstimatorFactory& factory)
 #endif
 
 #ifdef STATE_TRANSITION_MODEL_JACOBIAN
-  ExtendedKalmanFilter::func_df stmj = df;
+  func_df stmj = df;
   factory.addParam("state-transition-model-jacobian", stmj);
 #endif
 #ifdef OBSERVATION_MODEL_JACOBIAN
-  ExtendedKalmanFilter::func_dh omj = dh;
+  func_dh omj = dh;
   factory.addParam("observation-model-jacobian", omj);
 #endif
 
@@ -131,6 +134,7 @@ void initEstimatorFactory(EstimatorFactory& factory)
 #endif
 }
 
+// implementation of private functions
 std::string getMethod()
 {
 #if METHOD == MOVING_MEDIAN
@@ -148,6 +152,7 @@ std::string getMethod()
 #endif
 }
 
+// implementation of models
 #if METHOD == EXTENDED_KALMAN_FILTER  ||	\
   METHOD == UNSCENTED_KALMAN_FILTER  ||		\
   METHOD == PARTICLE_FILTER_SIR

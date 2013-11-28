@@ -7,7 +7,6 @@
  */
 
 #include "estimation/EstimatorFactory.h"
-#include "estimation/AbstractParticleFilter.h"
 
 namespace estimation 
 {
@@ -49,13 +48,6 @@ namespace estimation
 	estimation::KalmanFilter* kf = new estimation::KalmanFilter();
 	initKalmanFilter(*kf);
 	return kf;
-      }
-
-      if (method.compare("ExtendedKalmanFilter") == 0)
-      {
-	estimation::ExtendedKalmanFilter* ekf = new estimation::ExtendedKalmanFilter();
-	initExtendedKalmanFilter(*ekf);
-	return ekf;
       }
 
       if (method.compare("ExtendedKalmanFilter") == 0)
@@ -229,13 +221,13 @@ namespace estimation
     // required -----
     try {
       if (params.count("state-transition-model")) {
-	ExtendedKalmanFilter::func_f stm = boost::any_cast<ExtendedKalmanFilter::func_f>(params["state-transition-model"]);
+	func_f stm = boost::any_cast<func_f>(params["state-transition-model"]);
 	ekf.setStateTransitionModel(stm);
       } else
 	throw factory_error("State transition model missing.");
 
       if (params.count("state-transition-model-jacobian")) {
-	ExtendedKalmanFilter::func_df stmj = boost::any_cast<ExtendedKalmanFilter::func_df>(params["state-transition-model-jacobian"]);
+	func_df stmj = boost::any_cast<func_df>(params["state-transition-model-jacobian"]);
 	ekf.setJacobianOfStateTransitionModel(stmj);
       } else
 	throw factory_error("Jacobian of state transition model missing.");
@@ -247,13 +239,13 @@ namespace estimation
 	throw factory_error("Process noise covariance missing.");
 
       if (params.count("observation-model")) {
-	ExtendedKalmanFilter::func_h om = boost::any_cast<ExtendedKalmanFilter::func_h>(params["observation-model"]);
+	func_h om = boost::any_cast<func_h>(params["observation-model"]);
 	ekf.setObservationModel(om);
       } else
 	throw factory_error("Observation model missing.");
 
       if (params.count("observation-model-jacobian")) {
-	ExtendedKalmanFilter::func_dh omj = boost::any_cast<ExtendedKalmanFilter::func_dh>(params["observation-model-jacobian"]);
+	func_dh omj = boost::any_cast<func_dh>(params["observation-model-jacobian"]);
 	ekf.setJacobianOfObservationModel(omj);
       } else
 	throw factory_error("Jacobian of observation model missing.");
@@ -301,7 +293,7 @@ namespace estimation
       // required -----
 
       if (params.count("state-transition-model")) {
-	UnscentedKalmanFilter::func_f stm = boost::any_cast<UnscentedKalmanFilter::func_f>(params["state-transition-model"]);
+	func_f stm = boost::any_cast<func_f>(params["state-transition-model"]);
 	ukf.setStateTransitionModel(stm);
       } else
 	throw factory_error("State transition model missing.");
@@ -313,7 +305,7 @@ namespace estimation
 	throw factory_error("Process noise covariance missing.");
 
       if (params.count("observation-model")) {
-	UnscentedKalmanFilter::func_h om = boost::any_cast<UnscentedKalmanFilter::func_h>(params["observation-model"]);
+	func_h om = boost::any_cast<func_h>(params["observation-model"]);
 	ukf.setObservationModel(om);
       } else
 	throw factory_error("Observation model missing.");
@@ -361,7 +353,7 @@ namespace estimation
       // required -----
 
       if (params.count("state-transition-model")) {
-      	AbstractParticleFilter::func_f stm = boost::any_cast<AbstractParticleFilter::func_f>(params["state-transition-model"]);
+      	func_f stm = boost::any_cast<func_f>(params["state-transition-model"]);
       	pf.setStateTransitionModel(stm);
       } else
       	throw factory_error("State transition model missing.");
@@ -373,7 +365,7 @@ namespace estimation
       	throw factory_error("Process noise covariance missing.");
 
       if (params.count("observation-model")) {
-      	AbstractParticleFilter::func_h om = boost::any_cast<AbstractParticleFilter::func_h>(params["observation-model"]);
+      	func_h om = boost::any_cast<func_h>(params["observation-model"]);
       	pf.setObservationModel(om);
       } else
       	throw factory_error("Observation model missing.");

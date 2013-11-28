@@ -14,6 +14,7 @@
 #include "estimation/AbstractKalmanFilter.h"
 #include "estimation/Input.h"
 #include "estimation/Output.h"
+#include "estimation/models.h"
 
 #include <Eigen/Dense>
 using namespace Eigen;
@@ -43,19 +44,6 @@ namespace estimation
    */
   class ExtendedKalmanFilter : public AbstractKalmanFilter
   {
-  public:
-    /** Pointer to a function representing the state transition
-     * model. */
-    typedef void (*func_f)(VectorXd& x, const VectorXd& u);
-    /** Pointer to a function calculating the Jacobian of the state
-     * transition model. */
-    typedef void (*func_df)(MatrixXd& A, const VectorXd& x, const VectorXd& u);
-    /** Pointer to a function representing the observation model. */
-    typedef void (*func_h)(VectorXd& z, const VectorXd& x);
-    /** Pointer to a function calculating the Jacobian of the
-     * observation model. */
-    typedef void (*func_dh)(MatrixXd& H, const VectorXd& x);
-
   private:
     // -----------------------------------------
     // parameters

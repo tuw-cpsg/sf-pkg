@@ -6,6 +6,7 @@
 
 // testing following API
 #include "estimation/EstimatorFactory.h"
+#include "estimation/models.h"
 
 using namespace std;
 using namespace estimation;
@@ -126,9 +127,12 @@ TEST(EstimatorFactoryTest, kalmanFilter)
   MatrixXd mnc(1,1); mnc << 10;
   cfg.addParam("measurement-noise-covariance", mnc);
 
+
+  // check type
   EXPECT_NO_THROW(estimator = cfg.create());
   classname = typeid(*estimator).name();
   EXPECT_NE(string::npos, classname.find("KalmanFilter",0)); // found KalmanFilter in classname!
+
 
   // optional params
   cfg.addParam("control-input-model", stm_f);
@@ -168,14 +172,14 @@ TEST(EstimatorFactoryTest, extendedKalmanFilter)
   VectorXd stm_f(1); stm_f << 1;
   cfg.addParam("state-transition-model", stm_f);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
-  ExtendedKalmanFilter::func_f stm = 0;
+  func_f stm = 0;
   cfg.addParam("state-transition-model", stm);
 
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "STMJ missing"
   int stmj_f = 1;
   cfg.addParam("state-transition-model-jacobian", stmj_f);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
-  ExtendedKalmanFilter::func_df stmj = test_df;
+  func_df stmj = test_df;
   cfg.addParam("state-transition-model-jacobian", stmj);
 
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "PNC missing"
@@ -188,13 +192,13 @@ TEST(EstimatorFactoryTest, extendedKalmanFilter)
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "OM missing"
   cfg.addParam("observation-model", stm);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
-  ExtendedKalmanFilter::func_h om = test_h;
+  func_h om = test_h;
   cfg.addParam("observation-model", om);
 
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "OMJ missing"
   cfg.addParam("observation-model-jacobian", stm);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
-  ExtendedKalmanFilter::func_dh omj = test_dh;
+  func_dh omj = test_dh;
   cfg.addParam("observation-model-jacobian", omj);
 
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "MNC missing"
@@ -224,8 +228,8 @@ TEST(EstimatorFactoryTest, extendedKalmanFilter)
   cfg.addParam("initial-error-covariance", iec);
   EXPECT_NO_THROW(estimator = cfg.create());
 
-  // validation is done in utest_ExtendedKalmanFilter?
-
+  
+  // check type
   EXPECT_NO_THROW(estimator = cfg.create());
   classname = typeid(*estimator).name();
   EXPECT_NE(string::npos, classname.find("ExtendedKalmanFilter",0)); // found ExtendedKalmanFilter in classname!
@@ -244,7 +248,7 @@ TEST(EstimatorFactoryTest, particleFilterSIR)
   VectorXd stm_f(1); stm_f << 1;
   cfg.addParam("state-transition-model", stm_f);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
-  AbstractParticleFilter::func_f stm = 0;				   // will cause validation error
+  func_f stm = 0;				   // will cause validation error
   cfg.addParam("state-transition-model", stm);
 
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "PNC missing"
@@ -257,7 +261,7 @@ TEST(EstimatorFactoryTest, particleFilterSIR)
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "OM missing"
   cfg.addParam("observation-model", stm);
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "bad cast"
-  AbstractParticleFilter::func_h om = test_h;
+  func_h om = test_h;
   cfg.addParam("observation-model", om);
 
   EXPECT_THROW(estimator = cfg.create(), EstimatorFactory::factory_error); // "MNC missing"

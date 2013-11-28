@@ -15,6 +15,7 @@
 #include "estimation/Input.h"
 #include "estimation/Output.h"
 #include "estimation/ITransformer.h"
+#include "estimation/models.h"
 
 #include <Eigen/Dense>
 using namespace Eigen;
@@ -45,13 +46,6 @@ namespace estimation
    */
   class UnscentedKalmanFilter : public AbstractKalmanFilter, public ITransformer
   {
-  public:
-    /** Pointer to a function representing the state transition
-     * model. */
-    typedef void (*func_f)(VectorXd& x, const VectorXd& u);
-    /** Pointer to a function representing the observation model. */
-    typedef void (*func_h)(VectorXd& z, const VectorXd& x);
-
   private:
     enum ut_functionType {
       STATE_TRANSITION_MODEL,

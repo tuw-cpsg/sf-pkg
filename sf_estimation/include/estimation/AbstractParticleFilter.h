@@ -15,6 +15,7 @@
 #include "estimation/IEstimator.h"
 #include "estimation/Input.h"
 #include "estimation/Output.h"
+#include "estimation/models.h"
 
 #include <boost/random.hpp>
 #include <Eigen/Dense>
@@ -49,25 +50,6 @@ namespace estimation
    */
   class AbstractParticleFilter : public IEstimator
   {
-  public:    
-    /** 
-     * @brief Pointer to a function representing the state transition
-     * model.
-     *
-     * @param x The state x at time k-1 (input) used to calculate the
-     * estimated (a priori) state vector at time k (output).
-     * @param[in] The control input at time k-1.
-     */
-    typedef void (*func_f)(VectorXd& x, const VectorXd& u);
-    /** 
-     * @brief Pointer to a function representing the observation
-     * model. 
-     * 
-     * @param[out] z The estimated measurement vector.
-     * @param[in] x The a priori state vector.
-     */
-    typedef void (*func_h)(VectorXd& z, const VectorXd& x);
-
   protected:
     /** @brief Flag indicating if the parameters were checked and are
      * OK.  
