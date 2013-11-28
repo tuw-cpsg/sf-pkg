@@ -101,7 +101,7 @@ if (CATKIN_ENABLE_TESTING)
     tests/utest_log.cpp
     )
   target_link_libraries(utest
-    libestimation
+    sf_estimation
     ${catkin_LIBRARIES}
     ${Boost_LIBRARIES}
     )
