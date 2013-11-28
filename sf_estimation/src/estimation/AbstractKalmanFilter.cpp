@@ -73,10 +73,11 @@ namespace estimation
     // It is assumed that u is already initialized (size of vector u
     // != 0). However, check (at least) if the sizes fit.
     if (this->u.size() != u.size())
-      throw std::length_error("Setting control input failed. Control input has invalid size."); 
+      throw std::length_error("AbstractKalmanFilter: Setting control input failed. Control input has invalid size."); 
 
     for (int i = 0; i < u.size(); i++)
-      this->u[i] = u[i].getValue();
+      if (!u[i].isMissing())			// new control input?
+	this->u[i] = u[i].getValue();		// replace current control input
   }
 
   Output AbstractKalmanFilter::getLastEstimate(void) 

@@ -111,7 +111,8 @@ namespace estimation
       throw std::length_error("AbstractParticleFilter: Setting control input failed. Control input has invalid size."); 
 
     for (int i = 0; i < u.size(); i++)
-      this->u[i] = u[i].getValue();    
+      if (!u[i].isMissing())			// new control input?
+	this->u[i] = u[i].getValue();		// replace current control input
   }
   
   Output AbstractParticleFilter::getLastEstimate (void)
