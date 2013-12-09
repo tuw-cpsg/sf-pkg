@@ -67,6 +67,9 @@ namespace estimation
      * L. */
     MatrixXd Pxy;
 
+    /** @brief True when compute() has already been called. */
+    bool locked;
+
     // -----------------------------------------
     // parameters
     // -----------------------------------------
@@ -115,6 +118,10 @@ namespace estimation
      *
      * \note Before calling this function the mean and covariance is
      * zero.
+     * \note The Unscented Transform object can only be used once. The
+     * parameters mean and covariance cannot be reset. So this
+     * function is not allowed to be called twice! An exception will
+     * be thrown if so.
      */
     void compute (void);
 

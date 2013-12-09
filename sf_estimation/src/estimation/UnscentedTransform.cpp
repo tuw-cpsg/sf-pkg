@@ -34,7 +34,7 @@ namespace estimation
     // set default scaling factors
     alpha = 1;			// spread
     beta = 2;			// distribution = Gaussian
-    kappa = 3 - x.size();	// TODO whatever?!
+    kappa = 3 - x.size();
 
     // initialize output; to get the size of y, we must propagate a
     // vector through the transformer
@@ -42,6 +42,8 @@ namespace estimation
     y = VectorXd::Zero(testY.size());
     Py = MatrixXd::Zero(testY.size(),testY.size());
     Pxy = MatrixXd::Zero(x.size(),testY.size());
+
+    locked = false;	// compute() not called yet
   }
 
   UnscentedTransform::~UnscentedTransform () 
@@ -55,9 +57,14 @@ namespace estimation
     std::vector<VectorXd> sigmaPoints_prior;
     std::vector<VectorXd> sigmaPoints_post;
 
+    if (locked)
+      throw new std::runtime_error("Unscented Transform. Called compute a second time - not allowed.");
+
+    locked = true;
+
     try
     {
-      // fill array sigmaPoints_prior with sigma points
+      // fill arrays: sigma points with associated weights
       generateSigmaPoints(sigmaPoints_prior, weights);
 
       // pop last element because its not for calculating the mean;
@@ -65,7 +72,7 @@ namespace estimation
       // covariance
       double w0_cov = weights.back();
       weights.pop_back();
-
+    
       // calculate mean y -----------------------------------
       for (int i = 0; i < sigmaPoints_prior.size(); i++)
       {
@@ -77,6 +84,7 @@ namespace estimation
 	// accumulate to the approximated mean
 	y += weights[i] * sigmaPoints_post[i];
       }
+
       // calculate covariances Py, Pxy ----------------------
       weights[0] = w0_cov;			// prepare weights
       VectorXd t(sigmaPoints_post[0].size());	// help vector (for transform)
@@ -84,7 +92,7 @@ namespace estimation
       for (int i = 0; i < sigmaPoints_post.size(); i++)
       {
 	t = sigmaPoints_post[i] - y;
-	Py += weights[i] * (sigmaPoints_post[i] - y) * t.transpose();
+	Py += weights[i] * t * t.transpose();
 	Pxy += weights[i] * (sigmaPoints_prior[i] - x) * t.transpose();
       }
     } 
@@ -122,7 +130,7 @@ namespace estimation
     int L = x.size();
 
     // calculate values which are needed more often
-    double alphaPow2 = pow(alpha,2);
+    double alphaPow2 = alpha*alpha;
     double lambda = alphaPow2 * (L + kappa) - L;
     double lPlusLambda = L + lambda;
 

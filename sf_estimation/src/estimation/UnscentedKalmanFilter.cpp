@@ -124,10 +124,10 @@ namespace estimation
       ut2.compute();
       VectorXd ze = ut2.mean();
       prepareMeasurements(z, next, ze);
-      MatrixXd Pzz = ut2.covariance();
+      MatrixXd Pzz = ut2.covariance() + R;
       MatrixXd Pxz = ut2.crossCovarianceXY();
 
-      K = Pxz * (Pzz + R).inverse();
+      K = Pxz * Pzz.inverse();
       x = x + K * (z - ze);
       P = P - K * Pzz * K.transpose();
       // -----------------------------------------------------------
