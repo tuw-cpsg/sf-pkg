@@ -9,6 +9,10 @@
 #include <ctime>
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/uniform_real.hpp>
+// uniform_real gets depricated with newer versions, change to
+// uniform_real_distribution with newer version of boost! (see also
+// ParticleFilterSIR::resample)
+//#include <boost/random/uniform_real_distribution.hpp>
 
 #include "estimation/ParticleFilterSIR.h"
 #include "probability/pdfs.h"
@@ -126,7 +130,7 @@ namespace estimation
     // estimate next state of particles
     for (int i = 0; i < particles.size(); i++)
     {      
-      // assume zero mean gaussian noise
+      // sample from process noise: zero mean gaussian with covariance Q
       VectorXd w = probability::sampleNormalDistribution(VectorXd::Zero(Q.rows()), Q);
       
       f(particles[i], u);		// time update
@@ -136,7 +140,7 @@ namespace estimation
 
   void ParticleFilterSIR::weight (Input measurements)
   {
-    double sumWeights = 0, sumWeightsSquare;
+    double sumWeights = 0, sumWeightsSquare = 0;
    
     // measurement vector z
     VectorXd z(R.rows());
@@ -188,30 +192,28 @@ namespace estimation
 
     // 1. generate CDF
     std::vector<double> cdf(N);
-    cdf[0] = 0;
+    cdf[0] = weights[0];
     for (int i = 1; i < N; i++)
       cdf[i] = cdf[i-1] + weights[i];
     
-    // needed for random number generation
-    boost::uniform_real<> dist(0,1);
+    // 2. draw a starting point
+    boost::uniform_real<> dist(0, 1.0 / N);
     boost::variate_generator<boost::mt19937&, boost::uniform_real<> >
       random(rng, dist);
-
-    // 2. draw a starting point
-    double u0 = random();
+    double u0 = random();	// u0 is then betw 0..1/N
     int i = 0;
 
     for (int j = 0; j < N; j++)
     {
       // 3. move along the CDF
-      double uj = u0 + j/N;
+      double uj = u0 + ((double)j)/N;
 
       // check where the random number in the CDF fits -> this is the
       // sample to choose; a sample with higher weight has a higher
       // span in the CDF, hence will be chosen more often
       while (uj > cdf[i])
       	i++;
-    
+
       particles[j] = particles_old[i];
       weights[j] = 1.0 / N;
     }
