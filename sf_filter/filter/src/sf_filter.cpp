@@ -85,7 +85,7 @@ int main(int argc, char **argv)
       // Pass definitions of the configuration header to the factory.
       initEstimatorFactory(eFactory);
       estimator = eFactory.create();
-      ROS_DEBUG("Estimator initialized.");
+      ROS_INFO_STREAM((*estimator) << " created.");
     } catch(std::exception& e) {
       ROS_ERROR_STREAM(e.what());
       return 1;
@@ -201,10 +201,20 @@ int main(int argc, char **argv)
 	  }
 
 	  // Estimate.
-	  ROS_DEBUG("estimate");
+	  std::stringstream ss;
+	  for (int i = 0; i < in_meas.size(); i++)
+	    ss << "(" << in_meas[i].getValue()
+	       << "," << in_meas[i].getJitter() << ") ";
+	  ROS_DEBUG_STREAM("estimate | in: " << ss.str());
 	  lastEstimation = ros::Time::now();
 	  estimation::Output out = estimator->estimate(in_meas);
-	  ROS_DEBUG("duration of estimation (ms): %.1f", (ros::Time::now() - lastEstimation).toSec()*1000);
+	  ROS_DEBUG("estimate | duration (ms): %.1f", (ros::Time::now() - lastEstimation).toSec()*1000);
+	  ss.str("");
+	  for (int i = 0; i < out.size(); i++)
+	    ss << "(" << out[i].getValue()
+	       << "," << out[i].getVariance()
+	       << "," << out[i].getJitter() << ") ";
+	  ROS_DEBUG_STREAM("estimate | out: " << ss.str());
 
 	  // Set output message(s) and publish.
 	  PUBLISH(publishers, out, sampleFused);

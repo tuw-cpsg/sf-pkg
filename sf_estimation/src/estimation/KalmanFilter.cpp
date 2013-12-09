@@ -179,15 +179,6 @@ namespace estimation
 
   void KalmanFilter::serialize(std::ostream& os) const
   {
-    os << "KalmanFilter" << std::endl
-       << "state (x) = " << this->x << std::endl
-       << "error covariance (P)" << std::endl << this->P << std::endl
-       << "Kalman gain (K)" << std::endl << this->K << std::endl
-       << "state transition model (A)" << std::endl << this->A << std::endl
-       << "process noise covariance (Q)" << std::endl << this->Q << std::endl
-       << "observation model (H)" << std::endl << this->H << std::endl
-       << "measurement noise covariance (R)" << std::endl << this->R << std::endl
-       << "control input (u) = " << this->u << std::endl
-       << "control input model (B)" << std::endl << this->B << std::endl;
+    os << "Kalman Filter";
   }
 }

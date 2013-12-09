@@ -196,7 +196,7 @@ namespace estimation
     /**
      * @brief Returns the last estimated value.
      */
-    Output getLastEstimate (void);
+    Output getLastEstimate (void) const;
 
     /**
      * @brief Prints (debug) information of this particle filter.

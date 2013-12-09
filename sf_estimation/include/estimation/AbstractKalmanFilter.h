@@ -178,7 +178,7 @@ namespace estimation
     /**
      * @brief Returns the last estimated value.
      */
-    Output getLastEstimate (void);
+    Output getLastEstimate (void) const;
 
     /**
      * @brief Prints (debug) information of this Kalman filter
@@ -207,8 +207,6 @@ namespace estimation
     /**
      * @brief Puts the estimated state and its variance into an \c
      * Output object to match the interface \c IEstimator.
-     *
-     * TODO: fill jitter_ms
      */
     void updateOutput(void);
   };

@@ -115,7 +115,7 @@ namespace estimation
 	this->u[i] = u[i].getValue();		// replace current control input
   }
   
-  Output AbstractParticleFilter::getLastEstimate (void)
+  Output AbstractParticleFilter::getLastEstimate (void) const
   {
     return out;
   }
@@ -153,11 +153,12 @@ namespace estimation
     for (int i = 0; i < N; i++)
       mean = mean + weights[i] * particles[i];
 
-    // // variance: sum over i (p_i * (x[i] - mean)^2)
+    // // variance: sum over i (p_i * (x_i - mean)^2)
     MatrixXd variance = MatrixXd::Zero(n,n);
+    VectorXd x(n);
     for (int i = 0; i < N; i++)
     {
-      VectorXd x = particles[i] - mean;
+      x = particles[i] - mean;
       variance = variance + weights[i] * (x * x.transpose());
     }
 

@@ -44,6 +44,11 @@ namespace estimation
     virtual void setControlInput(Input u) { };
 
     /**
+     * @brief Returns the last estimated value.
+     */
+    virtual Output getLastEstimate(void) const = 0;
+
+    /**
      * @brief Prints a description fo the estimator.
      */
     virtual void serialize(std::ostream& os) const = 0;

@@ -168,12 +168,6 @@ namespace estimation
 
   void ExtendedKalmanFilter::serialize(std::ostream& os) const
   {
-    os << "ExtendedKalmanFilter" << std::endl
-       << "state (x) = " << this->x << std::endl
-       << "error covariance (P)" << std::endl << this->P << std::endl
-       << "Kalman gain (K)" << std::endl << this->K << std::endl
-       << "process noise covariance (Q)" << std::endl << this->Q << std::endl
-       << "measurement noise covariance (R)" << std::endl << this->R << std::endl
-       << "control input (u) = " << this->u << std::endl;
+    os << "Extended Kalman Filter";
   }
 }

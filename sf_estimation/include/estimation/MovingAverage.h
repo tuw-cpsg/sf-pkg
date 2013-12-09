@@ -126,7 +126,7 @@ namespace estimation
     /**
      * @brief Returns the last estimated value.
      */
-    Output getLastEstimate (void);
+    Output getLastEstimate (void) const;
 
     /**
      * @brief Overloads << operator to print (debug) information of

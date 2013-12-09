@@ -119,7 +119,7 @@ namespace estimation
 
   void ParticleFilterSIR::serialize(std::ostream& os) const
   {
-    os << "SIR ParticleFilter" << std::endl;
+    os << "SIR Particle Filter";
   }
 
   // -----------------------------------------
