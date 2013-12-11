@@ -19,7 +19,7 @@ namespace estimation
     this->value = -1;
     this->variance = -1;
     this->jitter_ms = 0;
-    this->t_creation = clock();
+    this->t_creation = std::clock();
   }
 
   OutputValue::OutputValue(double value, double variance, unsigned int jitter_ms)
@@ -27,7 +27,7 @@ namespace estimation
     this->value = value;
     this->variance = variance;
     this->jitter_ms = jitter_ms;
-    this->t_creation = clock();
+    this->t_creation = std::clock();
   }
 
   // -----------------------------------------
@@ -46,7 +46,7 @@ namespace estimation
   unsigned int OutputValue::getJitter(void) const
   {
     unsigned int curLifetime_ms;
-    curLifetime_ms = float(clock() - t_creation)*1000/CLOCKS_PER_SEC;
+    curLifetime_ms = (double)(std::clock() - t_creation)*1000/CLOCKS_PER_SEC;
 
     return jitter_ms + curLifetime_ms;
   }
@@ -57,7 +57,7 @@ namespace estimation
     // defaults - setting the value is like creating a new instance
     this->variance = -1;
     this->jitter_ms = 0;
-    this->t_creation = clock();
+    this->t_creation = std::clock();
   }
 
   void OutputValue::setVariance(double variance)

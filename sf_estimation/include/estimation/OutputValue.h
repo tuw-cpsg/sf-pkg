@@ -29,7 +29,7 @@ namespace estimation
 
     /** @brief Timestamp of creation (for updating the jitter when
      * using this value). */
-    clock_t t_creation;
+    std::clock_t t_creation;
 
   public: 
     /**

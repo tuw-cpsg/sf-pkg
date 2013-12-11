@@ -89,6 +89,8 @@ target_link_libraries(${PROJECT_NAME}
 if (CATKIN_ENABLE_TESTING)
   catkin_add_gtest(utest 
     tests/utest_main.cpp
+    tests/utest_OutputValue.cpp
+    tests/utest_EstimatorInterface.cpp
     tests/utest_EstimatorFactory.cpp
     tests/utest_KalmanFilter.cpp
     tests/utest_ExtendedKalmanFilter.cpp
