@@ -58,8 +58,8 @@ namespace estimation
 
       // get median of array and set new values
       out[0].setValue(values[windowSize/2].getValue());
-      out[0].setVariance(0);
-      out[0].setJitter(values[windowSize/2].getJitter());
+      out[0].setVariance(-1);
+      out[0].setJitter(0);
 
       // delete oldest element for the next estimation
       in.pop_front();
