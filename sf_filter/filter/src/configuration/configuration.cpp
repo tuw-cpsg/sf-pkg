@@ -167,10 +167,18 @@ void f(VectorXd& x, const VectorXd& u)
   // x[1]; x_apriori[1] = x[0];!!
   VectorXd x_apriori(x.size());
 
-  // assign formulas of the state transition model (from the
-  // configuration header) to vector x, i.e. calculate a priori state
-  // estimate
-  CODE_ASSIGN_FORMULAS_TO_VECTOR(x_apriori, STATE_TRANSITION_MODEL);
+  try
+  {
+    // assign formulas of the state transition model (from the
+    // configuration header) to vector x, i.e. calculate a priori state
+    // estimate
+    CODE_ASSIGN_FORMULAS_TO_VECTOR(x_apriori, STATE_TRANSITION_MODEL);
+  }
+  catch (std::exception& e)
+  {
+    std::string additionalInfo = "Applying state transition model failed. ";
+    throw std::runtime_error(additionalInfo + e.what());
+  }
 
   // copy back, x will then represent the a priori state estimate
   x = x_apriori;
@@ -181,19 +189,43 @@ void h(VectorXd& z, const VectorXd& x)
   if (z.size() != MEASUREMENT_SIZE)
     throw std::runtime_error("Applying observation model failed, measurement vector has invalid size.");
 
-  // z doesn't occur on the right-hand side, so no copying necessary
-  CODE_ASSIGN_FORMULAS_TO_VECTOR(z, OBSERVATION_MODEL);
+  try
+  {
+    // z doesn't occur on the right-hand side, so no copying necessary
+    CODE_ASSIGN_FORMULAS_TO_VECTOR(z, OBSERVATION_MODEL);
+  }
+  catch (std::exception& e)
+  {
+    std::string additionalInfo = "Applying observation model failed. ";
+    throw std::runtime_error(additionalInfo + e.what());
+  }
 }
 #endif
 
 #if METHOD == EXTENDED_KALMAN_FILTER
 void df(MatrixXd& A, const VectorXd& x, const VectorXd& u)
 {
-  CODE_ASSIGN_FORMULAS_TO_MATRIX(A, STATE_TRANSITION_MODEL_JACOBIAN);
+  try
+  {
+    CODE_ASSIGN_FORMULAS_TO_MATRIX(A, STATE_TRANSITION_MODEL_JACOBIAN);
+  }
+  catch (std::exception& e)
+  {
+    std::string additionalInfo = "Applying Jacobian of state transition model failed. ";
+    throw std::runtime_error(additionalInfo + e.what());
+  }
 }
 
 void dh(MatrixXd& H, const VectorXd& x)
 {
-  CODE_ASSIGN_FORMULAS_TO_MATRIX(H, OBSERVATION_MODEL_JACOBIAN);
+  try
+  {
+    CODE_ASSIGN_FORMULAS_TO_MATRIX(H, OBSERVATION_MODEL_JACOBIAN);
+  }
+  catch (std::exception& e)
+  {
+    std::string additionalInfo = "Applying Jacobian of observation model failed. ";
+    throw std::runtime_error(additionalInfo + e.what());
+  }
 }
 #endif
