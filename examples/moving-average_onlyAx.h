@@ -1,9 +1,10 @@
 /**
  * @file 
  * @author Denise Ratasich
- * @date 03.09.2013
+ * @date 10.12.2013
  *
- * @brief Example configuration MA 2.
+ * @brief Example configuration MA filtering the x-axis of the
+ * accelerometer.
  */
 
 // -----------------------------------------
@@ -24,7 +25,7 @@
 // -----------------------------------------
 
 #define TOPICS_OUT				\
-  ((kxtf9_ax_avg, 0))				\
+  ((ay, 0))					\
   /**/
 
 // -----------------------------------------

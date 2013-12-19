@@ -1,17 +1,10 @@
 /**
  * @file 
  * @author Denise Ratasich
- * @date 20.11.2013
+ * @date 16.12.2013
  *
  * @brief Example configuration UKF for navigation.
  *
- * In this second example, using only a gyroscope and an
- * accelerometer, the offset of the accelerometer to the base_link is
- * also considered. This offset causes an additional acceleration
- * (centripedal acceleration) on the y-axis of the accelerometer when
- * rotating. The centripedal acceleration can be calculated by the
- * offset parameters (radius to base_link) and the angular velocity
- * (from the gyroscope).
  */
 
 // -----------------------------------------
@@ -28,9 +21,7 @@
 #define PI	(3.1415926536)
 #endif
 
-#define		ACC_RAD	(0.05)		// radius in m, i.e. distance to the base_link
-#define		ACC_PHI	(-0.5)		// -45,8° in the robot's frame 
-#define		ACC_FAC (0.1)		// radius*cos(phi)
+#define WHEEL_BASE_RADIUS	0.28	// m
 
 // -----------------------------------------
 // input
@@ -40,12 +31,14 @@
 // z-axis (rotation).
 #define TOPICS_IN						\
   ((angular_velocity, vector.z, geometry_msgs::Vector3Stamped))	\
-  ((acceleration, vector.x, geometry_msgs::Vector3Stamped))	\
   ((acceleration, vector.y, geometry_msgs::Vector3Stamped))	\
+  ((velocity_wheel_left, data, std_msgs::Float32))	\
+  ((velocity_wheel_right, data, std_msgs::Float32))	\
   /**/
 
 // The message includes.
 #include <geometry_msgs/Vector3Stamped.h>
+#include <std_msgs/Float32.h>
 
 // -----------------------------------------
 // output
@@ -60,8 +53,6 @@
   ((ds, 4))				\
   ((v, 5))				\
   ((a, 6))				\
-  ((ax, 7))				\
-  ((ay, 8))				\
   /**/
 
 // -----------------------------------------
@@ -79,9 +70,7 @@
 // x3: omega = omega
 // x4: ds = v * T
 // x5: v = v + a * T
-// x6: a = ax - ay/tan(ACC_PHI) | a = ax - omega^2*r*cos(phi)
-// x7: ax = ax
-// x8: ay = ay
+// x6: a = a		// acceleration in heading direction
 //
 #define STATE_TRANSITION_MODEL			\
   (x[0] + x[4]*cos(x[2]))			\
@@ -90,41 +79,49 @@
   (x[3])					\
   (x[5]*FILTER_PERIOD)				\
   (x[5] + x[6]*FILTER_PERIOD)			\
-  (x[7] - x[3]*x[3]*ACC_FAC)			\
-  (x[7])					\
-  (x[8])					\
+  (x[6])					\
   /**/
 
 // Observation model.
 //
 // All measurements arrive in fundamental units. The acceleration in
-// heading direction (robot's x-axis) equals accelerometers y-axis
-// because of the mounting position of the accelerometer.
+// heading direction equals a_y of the KXTF9 because of the mounting
+// position on the robot.
 //
-// z0: angular_velocity.vector.z = omega
-// z1: acceleration.vector.x = -ay
-// z2: acceleration.vector.y = ax
+// z0: omega_z = omega
+// z1: a_y = a
+// z2: v_l = v + omega*r
+// z3: v_r = v - omega*r
 //
 #define OBSERVATION_MODEL			\
-  (  x[3] )					\
-  ( -x[8] )					\
-  (  x[7] )					\
+  (x[3])					\
+  (x[6])					\
+  (x[5] + x[3]*WHEEL_BASE_RADIUS)		\
+  (x[5] - x[3]*WHEEL_BASE_RADIUS)		\
   /**/
 
 // Process noise covariance.
 // 
-// guess...
+// We assume our formulas are the "perfect" model, only the formulas
+// containing the acceleration and angular velocity of the sensor may
+// vary. In the state transition model we assumed these variables do
+// not change, but when accelerating the robot these values change of
+// course. The following values in the process noise covariance
+// specify the amount they can possibly change within a filter period
+// (this is more a guess).
+// 
+// KXTF9: acceleration may change 10m/s^2 ... a guess
+// IMU3000: max angular velocity is ??dps regarding the datasheet of
+// the robot, so maybe 0.5rad/s is a good choice
 //
 #define PROCESS_NOISE_COVARIANCE		\
-  ( (0) (0) (0) (0) (0) (0) (0) (0) (0) )	\
-  ( (0) (0) (0) (0) (0) (0) (0) (0) (0) )	\
-  ( (0) (0) (0) (0) (0) (0) (0) (0) (0) )	\
-  ( (0) (0) (0) (0.1) (0) (0) (0) (0) (0) )	\
-  ( (0) (0) (0) (0) (0) (0) (0) (0) (0) )	\
-  ( (0) (0) (0) (0) (0) (0) (0) (0) (0) )	\
-  ( (0) (0) (0) (0) (0) (0) (0.00001) (0) (0) )	\
-  ( (0) (0) (0) (0) (0) (0) (0) (0.002) (0) )	\
-  ( (0) (0) (0) (0) (0) (0) (0) (0) (0.002) )	\
+  ( (0) (0) (0) (0) (0) (0) (0) )		\
+  ( (0) (0) (0) (0) (0) (0) (0) )		\
+  ( (0) (0) (0) (0) (0) (0) (0) )		\
+  ( (0) (0) (0) (0.5) (0) (0) (0) )		\
+  ( (0) (0) (0) (0) (0) (0) (0) )		\
+  ( (0) (0) (0) (0) (0) (0.05) (0) )		\
+  ( (0) (0) (0) (0) (0) (0) (0.5) )		\
   /**/
 
 // The variance of the sensor, i.e. our measurement.
@@ -132,18 +129,18 @@
 // KXTF9 worst case deviation: about 0.05g=0.5m/s^2 -> choose 0.5^2
 // for variance
 // IMU3000: about 0.01dps=0.00017rad/s
+// wheel encoders: about 2mm/s
 //
 #define MEASUREMENT_NOISE_COVARIANCE		\
-  ( (0.00017)    (0)    (0) )			\
-  ( (0)       (0.24)    (0) )			\
-  ( (0)          (0) (0.24) )			\
+  ( (0.00017)    (0) (0)     (0) )		\
+  ( (0)       (0.25) (0)     (0) )		\
+  ( (0)          (0) (0.002) (0) )		\
+  ( (0)          (0) (0) (0.002) )		\
   /**/
 
 // optional
 // Initialize with start position (0).
 #define INITIAL_STATE				\
-  ( 0 )						\
-  ( 0 )						\
   ( 0 )						\
   ( 0 )						\
   ( 0 )						\

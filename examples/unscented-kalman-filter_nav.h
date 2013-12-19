@@ -65,7 +65,7 @@
 // x3: omega = omega
 // x4: ds = v * T
 // x5: v = v + a * T
-// x6: a = a
+// x6: a = a		// acceleration in heading direction
 //
 #define STATE_TRANSITION_MODEL			\
   (x[0] + x[4]*cos(x[2]))			\
@@ -80,8 +80,8 @@
 // Observation model.
 //
 // All measurements arrive in fundamental units. The acceleration in
-// heading direction equals a_y because of the mounting position on
-// the robot.
+// heading direction equals a_y of the KXTF9 because of the mounting
+// position on the robot.
 //
 // z0: omega_z = omega
 // z1: a_y = a
@@ -112,7 +112,7 @@
   ( (0) (0) (0) (0.5) (0) (0) (0) )		\
   ( (0) (0) (0) (0) (0) (0) (0) )		\
   ( (0) (0) (0) (0) (0) (0) (0) )		\
-  ( (0) (0) (0) (0) (0) (0) (10) )		\
+  ( (0) (0) (0) (0) (0) (0) (0.5) )		\
   /**/
 
 // The variance of the sensor, i.e. our measurement.
@@ -123,7 +123,7 @@
 //
 #define MEASUREMENT_NOISE_COVARIANCE		\
   ( (0.00017)    (0) )				\
-  ( (0)       (0.24) )				\
+  ( (0)       (0.25) )				\
   /**/
 
 // optional
