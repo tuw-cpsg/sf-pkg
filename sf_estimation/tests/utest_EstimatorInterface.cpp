@@ -10,6 +10,8 @@
 using namespace std;
 using namespace estimation;
 
+#define CLOCK_RESOLUTION	10
+
 namespace EstimatorInterfaceTest 
 {
   // -----------------------------------------
@@ -52,9 +54,10 @@ namespace EstimatorInterfaceTest
     {
       outMulti.add(empty);
       
+      // check defaults
       EXPECT_DOUBLE_EQ(outMulti[i].getValue(), -1);
-      EXPECT_DOUBLE_EQ(outMulti[i].getVariance(), -1);
-      EXPECT_NEAR(outMulti[i].getJitter(), 0, 0.01);
+      EXPECT_DOUBLE_EQ(outMulti[i].getVariance(), 0);
+      EXPECT_NEAR(outMulti[i].getJitter(), 0, CLOCK_RESOLUTION + 0.01);
     }
 
     EXPECT_ANY_THROW(outMulti[N].getValue());
@@ -67,11 +70,11 @@ namespace EstimatorInterfaceTest
 
       EXPECT_DOUBLE_EQ(outMulti[i].getValue(), i + 100);
       EXPECT_DOUBLE_EQ(outMulti[i].getVariance(), i + 10);
-      EXPECT_NEAR(outMulti[i].getJitter(), 0, 0.01);
+      EXPECT_NEAR(outMulti[i].getJitter(), 0, CLOCK_RESOLUTION + 0.01);
 
       outMulti[i].setJitter(i*20);
       
-      EXPECT_NEAR(outMulti[i].getJitter(), i*20, 0.01);
+      EXPECT_NEAR(outMulti[i].getJitter(), i*20, CLOCK_RESOLUTION + 0.01);
     }
   }
 }

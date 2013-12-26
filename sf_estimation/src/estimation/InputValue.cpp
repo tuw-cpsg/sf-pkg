@@ -14,44 +14,28 @@ namespace estimation
   InputValue::InputValue(void)
   {
     // set to defaults
-    this->value = -1;
-    this->jitter_ms = 0;
-    this->t_creation = clock();
     this->missing = true;
   }
 
   InputValue::InputValue(double value)
   {
-    this->value = value;
-    this->jitter_ms = 0;
-    this->t_creation = clock();
+    this->setValue(value);
+  }
+
+  InputValue::InputValue(double value, double variance, unsigned int jitter_ms)
+    : Value(value, variance, jitter_ms)
+  {
     this->missing = false;
   }
 
-  InputValue::InputValue(double value, unsigned int jitter_ms)
+  InputValue::~InputValue(void)
   {
-    this->value = value;
-    this->jitter_ms = jitter_ms;
-    this->t_creation = clock();
-    this->missing = false;
+    // nothing to do
   }
 
   // -----------------------------------------
   // getters and setters
   // -----------------------------------------
-  double InputValue::getValue(void) const
-  {
-    return value;
-  }
-
-  unsigned int InputValue::getJitter(void) const
-  {
-    unsigned int curLifetime_ms;
-    curLifetime_ms = float(clock() - t_creation)*1000/CLOCKS_PER_SEC;
-
-    return jitter_ms + curLifetime_ms;
-  }
-
   bool InputValue::isMissing(void) const
   {
     return missing;
@@ -59,15 +43,8 @@ namespace estimation
 
   void InputValue::setValue(double value)
   {
-    this->value = value;
-    this->jitter_ms = 0;
-    this->t_creation = clock();
-    this->missing = false;
-  }
-
-  void InputValue::setJitter(unsigned int jitter_ms)
-  {
-    this->jitter_ms = jitter_ms;
+    Value::setValue(value);
+    missing = false;
   }
 
   // -----------------------------------------
@@ -80,46 +57,14 @@ namespace estimation
 
     // by swapping the members of two classes,
     // the two classes are effectively swapped
-    swap(first.value, second.value); 
-    swap(first.jitter_ms, second.jitter_ms);
-    swap(first.t_creation, second.t_creation);
-    swap(first.missing, second.missing);
+    Value::swap(first,second);			// swap members in Value
+    swap(first.missing, second.missing);	// swap additional members
   }
 
   InputValue& InputValue::operator=(InputValue right)
   {
     swap(*this, right);
     return *this;
-  }
-
-  bool InputValue::operator==(const InputValue& rhs) const 
-  { 
-    return (*this).value == rhs.value; 
-  }
-
-  bool InputValue::operator!=(const InputValue& rhs) const 
-  { 
-    return !(*this).operator==(rhs);
-  }
-
-  bool InputValue::operator<(const InputValue& rhs) const 
-  { 
-    return (*this).value < rhs.value; 
-  }
-
-  bool InputValue::operator>(const InputValue& rhs) const 
-  { 
-    return rhs.operator<(*this); 
-  }
-
-  bool InputValue::operator<=(const InputValue& rhs) const 
-  { 
-    return !(*this).operator>(rhs); 
-  }
-
-  bool InputValue::operator>=(const InputValue& rhs) const 
-  { 
-    return !(*this).operator<(rhs); 
   }
 }
 

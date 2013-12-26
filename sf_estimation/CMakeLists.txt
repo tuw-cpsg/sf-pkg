@@ -24,6 +24,7 @@ catkin_package(
 ## Declare the estimation library
 add_library(${PROJECT_NAME} SHARED
   # estimation
+  src/estimation/Value.cpp
   src/estimation/InputValue.cpp
   src/estimation/Input.cpp
   src/estimation/OutputValue.cpp
@@ -41,6 +42,7 @@ add_library(${PROJECT_NAME} SHARED
   src/estimation/ParticleFilterSIR.cpp
 
   include/estimation/EstimatorInterface.h
+  include/estimation/Value.h
   include/estimation/InputValue.h
   include/estimation/Input.h
   include/estimation/OutputValue.h
@@ -90,6 +92,7 @@ if (CATKIN_ENABLE_TESTING)
   catkin_add_gtest(utest 
     tests/utest_main.cpp
     tests/utest_OutputValue.cpp
+    tests/utest_InputValue.cpp
     tests/utest_EstimatorInterface.cpp
     tests/utest_EstimatorFactory.cpp
     tests/utest_KalmanFilter.cpp

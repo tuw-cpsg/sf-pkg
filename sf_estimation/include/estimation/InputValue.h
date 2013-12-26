@@ -6,9 +6,10 @@
  * @brief Header file of an input value of an estimation algorithm.
  */
 
-#ifndef ESTIMATION_INPUTVALUE_H
-#define ESTIMATION_INPUTVALUE_H
+#ifndef __ESTIMATION_INPUTVALUE_H__
+#define __ESTIMATION_INPUTVALUE_H__
 
+#include "estimation/Value.h"
 #include <ctime>
 
 namespace estimation 
@@ -17,18 +18,8 @@ namespace estimation
   /**
    * @brief Holds a data value to use for estimation of an entity.
    */
-  class InputValue 
+  class InputValue : public Value
   { 
-    /** @brief Stores a data value of an entity. */
-    double value;
-    /** @brief The jitter in ms from sensing till creating this
-     * instance. */
-    unsigned int jitter_ms;
-
-    /** @brief Timestamp of creation (for updating the jitter when
-     * using this value). */
-    clock_t t_creation;
-
     /** 
      * @brief Indicates if this InputValue is initialized. 
      * 
@@ -63,26 +54,32 @@ namespace estimation
      * a new value to pass to an estimation algorithm.
      *
      * @param value A data value of an entity.
+     * @param variance The variance of the value.
      * @param jitter_ms The jitter from measuring the value till calling
      * this constructor.
      */
-    InputValue(double value, unsigned int jitter_ms);
+    InputValue(double value, double variance, unsigned int jitter_ms);
+
+    /**
+     * @brief Basic destructor.
+     */
+    ~InputValue(void);
 
     // -----------------------------------------
     // getters and setters
     // -----------------------------------------
     /**
-     * @brief Returns the value.
+     * @brief Sets the value, resets this InputValue (jitter_ms is
+     * set to 0).
      *
-     * @return The data value.
+     * \note This function can be used instead of creating a new
+     * instance of this class. \c setJitter() can be called to update
+     * the jitter associated with the new value. \c missing is set to
+     * false, because a value is given.
+     *
+     * @param value The data value.
      */
-    double getValue(void) const;
-
-    /**
-     * @brief Returns the jitter in ms between sensing and this
-     * function call.
-     */
-    unsigned int getJitter(void) const;
+    void setValue(double value);
 
     /**
      * @brief Returns true if this InputValue is uninitialized.
@@ -92,78 +89,24 @@ namespace estimation
      */
     bool isMissing(void) const;
 
-    /**
-     * @brief Sets the value, resets this InputValue (jitter_ms is set
-     * to 0).
-     *
-     * \note This function can be used instead of creating a new
-     * instance of this class. \c setJitter() can be called to update
-     * the jitter associated with the new value.
-     *
-     * @param value The data value.
-     */
-    void setValue(double value);
-
-    /**
-     * @brief Sets the jitter in ms between sensing and this function
-     * call.
-     *
-     * \note This function must be called after \c setValue()! The
-     * function \c setValue() resets an instance of \c InputValue,
-     * i.e. jitter_ms would be set to 0.
-     *
-     * @param jitter_ms The jitter in ms.
-     */
-    void setJitter(unsigned int jitter_ms);
-
     // -----------------------------------------
     // overloading operators
     // -----------------------------------------
     /**
      * @brief Swaps the data of two elements.
+     *
+     * Reimplemented from Value::swap because additional members have
+     * to be swapped.
      */
     void swap(InputValue& first, InputValue& second);
 
     /**
      * @brief Overloads the assign operator.
+     *
+     * Reimplemented from Value::operator= because additional members
+     * have to be swapped.
      */
     InputValue& operator=(InputValue right);
-
-    /**
-     * @brief Overloads the == (equal) operator (compares the value
-     * member).
-     */
-    bool operator==(const InputValue& rhs) const;
-
-    /**
-     * @brief Overloads the != (not-equal) operator (compares the
-     * value member).
-     */
-    bool operator!=(const InputValue& rhs) const;
-
-    /**
-     * @brief Overloads the < (less-than) operator (compares the value
-     * member).
-     */
-    bool operator<(const InputValue& rhs) const;
-
-    /**
-     * @brief Overloads the > (greater-than) operator (compares the
-     * value member).
-     */
-    bool operator>(const InputValue& rhs) const;
-
-    /**
-     * @brief Overloads the <= (less-or-equal) operator (compares the
-     * value member).
-     */
-    bool operator<=(const InputValue& rhs) const;
-
-    /**
-     * @brief Overloads the >= (greater-or-equal) operator (compares
-     * the value member).
-     */
-    bool operator>=(const InputValue& rhs) const;
   };
 
 }
