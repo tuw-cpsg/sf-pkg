@@ -30,10 +30,7 @@
 // SIZE defines for ROS node, and abbreviations for checking SIZES
 // ----------------------------------------------------------------
 
-#if METHOD == MOVING_AVERAGE  ||  METHOD == MOVING_MEDIAN
-  #define STATE_SIZE		1
-  #define MEASUREMENT_SIZE	1
-#else
+#if (defined STATE_TRANSITION_MODEL)  &&  (defined OBSERVATION_MODEL)
   #define STATE_SIZE		BOOST_PP_SEQ_SIZE(STATE_TRANSITION_MODEL)	// n
   #define MEASUREMENT_SIZE	BOOST_PP_SEQ_SIZE(OBSERVATION_MODEL)		// m
   #ifdef TOPICS_IN_CTRL

@@ -80,8 +80,6 @@
   #include "validation_UnscentedKalmanFilter.h"
 #elif METHOD == PARTICLE_FILTER_SIR
   #include "validation_ParticleFilterSIR.h"
-#else
-  #error "Validation failed. Unknown method."
 #endif
 
 #endif	// METHOD defined
