@@ -40,6 +40,7 @@ add_library(${PROJECT_NAME} SHARED
   src/estimation/UnscentedKalmanFilter.cpp
   src/estimation/AbstractParticleFilter.cpp
   src/estimation/ParticleFilterSIR.cpp
+  src/estimation/ConfidenceWeightedAveraging.cpp
 
   include/estimation/EstimatorInterface.h
   include/estimation/Value.h
@@ -60,6 +61,7 @@ add_library(${PROJECT_NAME} SHARED
   include/estimation/UnscentedKalmanFilter.h
   include/estimation/AbstractParticleFilter.h
   include/estimation/ParticleFilterSIR.h
+  include/estimation/ConfidenceWeightedAveraging.h
 
   # probabilities
   src/probability/pdfs.cpp
@@ -102,7 +104,7 @@ if (CATKIN_ENABLE_TESTING)
     tests/utest_pdfs.cpp
     tests/utest_sampling.cpp
     tests/utest_ParticleFilterSIR.cpp
-
+    tests/utest_ConfidenceWeightedAveraging.cpp
     tests/utest_log.cpp
     )
   target_link_libraries(utest
