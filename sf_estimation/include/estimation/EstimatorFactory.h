@@ -75,6 +75,7 @@ namespace estimation
     void initExtendedKalmanFilter(ExtendedKalmanFilter& ekf);
     void initUnscentedKalmanFilter(UnscentedKalmanFilter& ukf);
     void initParticleFilterSIR(ParticleFilterSIR& pf);
+    void initConfidenceWeightedAveraging(ConfidenceWeightedAveraging& cwa);
   };
 }
 

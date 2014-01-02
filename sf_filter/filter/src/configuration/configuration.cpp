@@ -132,6 +132,11 @@ void initEstimatorFactory(EstimatorFactory& factory)
 #ifdef NUMBER_OF_PARTICLES
   factory.addParam("number-of-particles", NUMBER_OF_PARTICLES);
 #endif
+
+// Confidence-Weighted Averaging
+#ifdef IGNORE_ZERO_VARIANCE_VALUES
+  factory.addParam("ignore-zero-variance-values", 0);
+#endif
 }
 
 // implementation of private functions
@@ -149,6 +154,8 @@ std::string getMethod()
   return "UnscentedKalmanFilter";
 #elif METHOD == PARTICLE_FILTER_SIR
   return "ParticleFilterSIR";
+#elif METHOD == CONFIDENCE_WEIGHTED_AVERAGING
+  return "ConfidenceWeightedAveraging";
 #endif
 }
 

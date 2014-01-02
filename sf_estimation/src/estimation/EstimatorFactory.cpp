@@ -79,6 +79,13 @@ namespace estimation
 	initParticleFilterSIR(*pf);
 	return pf;
       }
+
+      if (method.compare("ConfidenceWeightedAveraging") == 0)
+      {
+	estimation::ConfidenceWeightedAveraging* cwa = new estimation::ConfidenceWeightedAveraging();
+	initConfidenceWeightedAveraging(*cwa);
+	return cwa;
+      }
     } catch(std::exception& e) {
       throw factory_error(std::string("Configuration failed. ") + e.what());
     }
@@ -408,6 +415,21 @@ namespace estimation
       pf.validate();	// throws on error
     } catch(std::exception& e) {
       std::string additionalInfo = "Initializing ParticleFilterSIR failed. ";
+      throw factory_error(additionalInfo + e.what());
+    }
+  }
+  
+  void EstimatorFactory::initConfidenceWeightedAveraging(estimation::ConfidenceWeightedAveraging& cwa)
+  {
+    // required: none
+    // optional: ignore-zero-variance-values
+
+    try {
+      if (params.count("ignore-zero-variance-values")) {
+	cwa.setIgnoreZeroVarianceValues();	// param available so set flag
+      }
+    } catch(std::exception& e) {
+      std::string additionalInfo = "Initializing ConfidenceWeightedAveraging failed. ";
       throw factory_error(additionalInfo + e.what());
     }
   }

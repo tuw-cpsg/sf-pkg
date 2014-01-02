@@ -15,5 +15,6 @@
 #include "estimation/ExtendedKalmanFilter.h"
 #include "estimation/UnscentedKalmanFilter.h"
 #include "estimation/ParticleFilterSIR.h"
+#include "estimation/ConfidenceWeightedAveraging.h"
 
 #endif

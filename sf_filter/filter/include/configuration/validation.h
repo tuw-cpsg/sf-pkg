@@ -80,6 +80,8 @@
   #include "validation_UnscentedKalmanFilter.h"
 #elif METHOD == PARTICLE_FILTER_SIR
   #include "validation_ParticleFilterSIR.h"
+#elif METHOD == CONFIDENCE_WEIGHTED_AVERAGING
+  #include "validation_ConfidenceWeightedAveraging.h"
 #endif
 
 #endif	// METHOD defined
