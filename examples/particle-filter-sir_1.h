@@ -17,12 +17,12 @@
 
 // We only have one measurement or sensor to subscribe.
 #define TOPICS_IN				\
-  ((signal, data, std_msgs::Float64))		\
+  ((signal) (std_msgs::Float64) (data))		\
   /**/
 
 // For the offset we subscribe to a specific control input.
-#define TOPICS_IN_CTRL			\
-  ((ctrl, data, std_msgs::Float64))	\
+#define TOPICS_IN_CTRL				\
+  ((ctrl) (std_msgs::Float64) (data))		\
   /**/
 
 // The message includes.
@@ -34,8 +34,8 @@
 
 // Publish both state variables.
 #define TOPICS_OUT				\
-  ((with_offset, 0))				\
-  ((without_offset, 1))				\
+  ((with_offset) (0))				\
+  ((without_offset) (1))			\
   /**/
 
 // -----------------------------------------

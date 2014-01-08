@@ -14,7 +14,7 @@
 // List input topics here, format (no commas needed between topic
 // tuples): ((name, field, type)).
 #define TOPICS_IN						\
-  ((acceleration, vector.x, geometry_msgs::Vector3Stamped))	\
+  ((acceleration) (geometry_msgs::Vector3Stamped) (vector.x))	\
   /**/
 
 // Define the includes needed for these topics!
@@ -25,7 +25,7 @@
 // -----------------------------------------
 
 #define TOPICS_OUT				\
-  ((ay, 0))					\
+  ((ay) (0))					\
   /**/
 
 // -----------------------------------------

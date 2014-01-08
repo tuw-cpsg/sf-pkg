@@ -16,7 +16,7 @@
 
 // The noisy signal to estimate.
 #define TOPICS_IN				\
-  ((signal, data, std_msgs::Float64))		\
+  ((signal) (std_msgs::Float64) (data))		\
   /**/
 
 // No control input.
@@ -30,7 +30,7 @@
 
 // Publish the estimated signal.
 #define TOPICS_OUT				\
-  ((signal_estimated, 0))			\
+  ((signal_estimated) (0))			\
   /**/
 
 // -----------------------------------------

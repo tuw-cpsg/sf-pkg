@@ -23,7 +23,7 @@
 
 // We only have one signal to subscribe.
 #define TOPICS_IN				\
-  ((signal, data, std_msgs::Float64))		\
+  ((signal) (std_msgs::Float64) (data))		\
   /**/
 
 // No control input.
@@ -37,7 +37,7 @@
 
 // Publish both state variables.
 #define TOPICS_OUT				\
-  ((signal_estimated, 0))			\
+  ((signal_estimated) (0))			\
   /**/
 
 // -----------------------------------------

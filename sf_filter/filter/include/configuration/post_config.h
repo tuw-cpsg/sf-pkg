@@ -13,7 +13,6 @@
 #define __CONFIGURATION_POSTCONFIG_H__
 
 // boost preprocessor includes
-#include <boost/preprocessor/tuple/elem.hpp>
 #include <boost/preprocessor/seq/for_each_i.hpp>
 #include <boost/preprocessor/seq/size.hpp>
 #include <boost/preprocessor/seq/elem.hpp>
@@ -21,7 +20,10 @@
 #include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/repetition/for.hpp>
 #include <boost/preprocessor/arithmetic/inc.hpp>
+#include <boost/preprocessor/comparison/equal.hpp>
 #include <boost/preprocessor/comparison/not_equal.hpp>
+#include <boost/preprocessor/control/if.hpp>
+#include <boost/preprocessor/facilities/empty.hpp>
 
 #include "estimation/InputValue.h"
 
@@ -76,15 +78,41 @@
 #endif
 
 /** @brief Expands to the name of a topic T. */
-#define TOPIC_IN_NAME(T)	BOOST_PP_TUPLE_ELEM(3, 0, T)
+#define TOPIC_IN_NAME(T)		BOOST_PP_SEQ_ELEM(0, T)
 /** @brief Expands to the name of a topic T as string. */
-#define TOPIC_IN_NAME_STR(T)	BOOST_PP_STRINGIZE(TOPIC_IN_NAME(T))
-/** @brief Expands to the field to estimate of a topic T. */
-#define TOPIC_IN_FIELD(T)	BOOST_PP_TUPLE_ELEM(3, 1, T)
-/** @brief Expands to the field to estimate of a topic T as string. */
-#define TOPIC_IN_FIELD_STR(T)	BOOST_PP_STRINGIZE(TOPIC_IN_FIELD(T))
+#define TOPIC_IN_NAME_STR(T)		BOOST_PP_STRINGIZE(TOPIC_IN_NAME(T))
 /** @brief Expands to the type of a topic T. */
-#define TOPIC_IN_TYPE(T)	BOOST_PP_TUPLE_ELEM(3, 2, T)
+#define TOPIC_IN_TYPE(T)		BOOST_PP_SEQ_ELEM(1, T)
+/** @brief Expands to the value to estimate of a topic T. */
+#define TOPIC_IN_VALUE(T)		BOOST_PP_SEQ_ELEM(2, T)
+/** @brief Expands to the value to estimate of a topic T as string. */
+#define TOPIC_IN_VALUE_STR(T)		BOOST_PP_STRINGIZE(TOPIC_IN_VALUE(T))
+/** @brief Expands to the variance of a topic T. Use this macro only
+ * if you are sure that the variance is given, e.g. use
+ * TOPIC_IN_HAS_VARIANCE for checking. */
+#define TOPIC_IN_VARIANCE(T)		BOOST_PP_SEQ_ELEM(3, T)
+/** @brief Expands to the variance of a topic T as string. Use this
+ * macro only if you are sure that the variance is given, e.g. use
+ * TOPIC_IN_HAS_VARIANCE for checking. */
+#define TOPIC_IN_VARIANCE_STR(T)	BOOST_PP_STRINGIZE(TOPIC_IN_VARIANCE(T))
+/** @brief Expands to 1 when an additional field containing the
+ * variance is specified, otherwise 0. */
+#define TOPIC_IN_HAS_VARIANCE(T)	BOOST_PP_EQUAL(BOOST_PP_SEQ_SIZE(T),4)
+
+/** @brief Expands to the number of output topics defined in the
+ * configuration header. */
+#define TOPICS_OUT_NUM	BOOST_PP_SEQ_SIZE(TOPICS_OUT)
+
+/** @brief Expands to the name of a topic T. */
+#define TOPIC_OUT_NAME(T)	BOOST_PP_SEQ_ELEM(0, T)
+/** @brief Expands to the name of a topic T. */
+#define TOPIC_OUT_NAME_STR(T)	BOOST_PP_STRINGIZE(TOPIC_OUT_NAME(T))
+/** @brief Expands to the field to estimate of a topic T. */
+#define TOPIC_OUT_INDEX(T)	BOOST_PP_SEQ_ELEM(1, T)
+
+// ----------------------------------------------------------------
+// subscribing to topics
+// ----------------------------------------------------------------
 
 /** @brief Initializes an element of the given array of subscribers
  * according to a topic. */
@@ -123,8 +151,8 @@
  * needed for estimation.
  * @param i Number of the topic (position in the sequence TOPICS_IN
  * defined by the user).
- * @param elem The topic tuple from TOPICS_IN, i.e. name, type, field
- * of message to receive.
+ * @param elem The topic tuple from TOPICS_IN, i.e. name, type,
+ * value[, variance] of message to receive.
  */
 #define RECEIVE_TOPIC(r, data, i, elem)					\
   void BOOST_PP_CAT(BOOST_PP_SEQ_ELEM(1, data),i)(			\
@@ -133,13 +161,19 @@
   {									\
     BOOST_PP_SEQ_ELEM(0, data)[i].stamp = ros::Time::now();		\
     BOOST_PP_SEQ_ELEM(0, data)[i].values.push_back(			\
-      msg->TOPIC_IN_FIELD(elem)						\
+      msg->TOPIC_IN_VALUE(elem)						\
       );								\
-    BOOST_PP_SEQ_ELEM(0, data)[i].received = true;			\
+    BOOST_PP_IF(							\
+      TOPIC_IN_HAS_VARIANCE(elem),					\
+      BOOST_PP_SEQ_ELEM(0, data)[i].variances.push_back(		\
+	msg->TOPIC_IN_VALUE(elem)					\
+	);,								\
+      BOOST_PP_EMPTY())							\
+      BOOST_PP_SEQ_ELEM(0, data)[i].received = true;			\
     ROS_DEBUG("RECV '%s.%s': %.2f.",					\
 	      TOPIC_IN_NAME_STR(elem),					\
-      	      TOPIC_IN_FIELD_STR(elem),					\
-	      msg->TOPIC_IN_FIELD(elem));				\
+      	      TOPIC_IN_VALUE_STR(elem),					\
+	      msg->TOPIC_IN_VALUE(elem));				\
   }									\
   /**/
 
@@ -150,16 +184,9 @@
   BOOST_PP_SEQ_FOR_EACH_I(RECEIVE_TOPIC, (topicState)(fctPrefix), topics) \
   /**/
 
-/** @brief Expands to the number of output topics defined in the
- * configuration header. */
-#define TOPICS_OUT_NUM	BOOST_PP_SEQ_SIZE(TOPICS_OUT)
-
-/** @brief Expands to the name of a topic T. */
-#define TOPIC_OUT_NAME(T)	BOOST_PP_TUPLE_ELEM(2, 0, T)
-/** @brief Expands to the name of a topic T. */
-#define TOPIC_OUT_NAME_STR(T)	BOOST_PP_STRINGIZE(BOOST_PP_TUPLE_ELEM(2, 0, T))
-/** @brief Expands to the field to estimate of a topic T. */
-#define TOPIC_OUT_INDEX(T)	BOOST_PP_TUPLE_ELEM(2, 1, T)
+// ----------------------------------------------------------------
+// publishing topics
+// ----------------------------------------------------------------
 
 /** 
  * @brief Initializes a publisher for a specific topic to output

@@ -14,8 +14,8 @@
 // inputs, so the EKF gets two measurements (that these measurements
 // are the same the EKF doesn't know).
 #define TOPICS_IN				\
-  ((signal, data, std_msgs::Float64))		\
-  ((signal, data, std_msgs::Float64))		\
+  ((signal) (std_msgs::Float64) (data))		\
+  ((signal) (std_msgs::Float64) (data))		\
   /**/
 
 // With this macro you can specify input topics which will be mapped
@@ -24,7 +24,7 @@
 // model. Everytime the control input is received, the control input
 // is changed in the EKF.
 #define TOPICS_IN_CTRL			\
-  ((ctrl, data, std_msgs::Float64))	\
+  ((ctrl) (std_msgs::Float64) (data))	\
   /**/
 
 // The message includes.
@@ -39,7 +39,7 @@
 // variables in the state vector. With following configuration (only)
 // the first state variable will be published.
 #define TOPICS_OUT				\
-  ((state_0_fused, 0))				\
+  ((state_0_fused) (0))				\
   /**/
 
 // -----------------------------------------

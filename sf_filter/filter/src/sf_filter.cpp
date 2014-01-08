@@ -34,8 +34,12 @@ struct TopicState {
   bool received;
   /** @brief The timestamp of the last message received. **/
   ros::Time stamp;
-  /** @brief The messages received in a filter period. **/
+  /** @brief The values of the messages received in a filter
+   * period. **/
   std::vector<double> values;
+  /** @brief The variance of the messages received in a filter
+   * period. **/
+  std::vector<double> variances;
 };
 
 /** @brief Collects the messages of subscribed topics_meas. */
@@ -184,16 +188,25 @@ int main(int argc, char **argv)
 	      double jitter = (ros::Time::now() - topics_meas[i].stamp).toSec()*1000;
 	      //ROS_DEBUG("meas-jitter[%d] (ms): %.2f", i, jitter);
 
-	      // Average the message values (when more than one
-	      // message is received from a topic in a filter period).
+	      // Average the message values and variances (when more
+	      // than one message is received from a topic in a filter
+	      // period).
 	      double value = 0;
 	      for (int j = 0; j < topics_meas[i].values.size(); j++)
 		value += topics_meas[i].values[j];
-	      value = value / topics_meas[i].values.size();
+	      value = value / topics_meas[i].values.size();	// size always > 0 when received is true
 	      //ROS_DEBUG("meas-value[%d] (avg): %.2f", i, value);
+	      double variance = 0;
+	      if (topics_meas[i].variances.size() > 0)		// variance may be missing when no additional field is specified
+	      {
+		for (int j = 0; j < topics_meas[i].variances.size(); j++)
+		  variance += topics_meas[i].variances[j];
+		variance = variance / topics_meas[i].variances.size();
+	      }
 
 	      // Initialize the InputValue.
 	      in_meas_val.setValue(value);
+	      in_meas_val.setVariance(variance);
 	      in_meas_val.setJitter(jitter);
 	    }
 
@@ -204,6 +217,7 @@ int main(int argc, char **argv)
 	  std::stringstream ss;
 	  for (int i = 0; i < in_meas.size(); i++)
 	    ss << "(" << in_meas[i].getValue()
+	       << "," << in_meas[i].getVariance()
 	       << "," << in_meas[i].getJitter() << ") ";
 	  ROS_DEBUG_STREAM("estimate | in: " << ss.str());
 	  lastEstimation = ros::Time::now();
@@ -225,6 +239,7 @@ int main(int argc, char **argv)
 	  {
 	    topics_meas[i].received = false;
 	    topics_meas[i].values.clear();
+	    topics_meas[i].variances.clear();
 	  }
 	}
       }

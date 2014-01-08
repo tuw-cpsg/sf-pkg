@@ -21,13 +21,13 @@
 
 // Constant signal but noisy.
 #define TOPICS_IN				\
-  ((/signal, data, std_msgs::Float64))		\
+  ((signal) (std_msgs::Float64) (data))		\
   /**/
 
 // Additional offsets for the signal.
 #define TOPICS_IN_CTRL				\
-  ((/ctrl1, data, std_msgs::Float64))		\
-  ((/ctrl2, data, std_msgs::Float64))		\
+  ((ctrl1) (std_msgs::Float64) (data))		\
+  ((ctrl2) (std_msgs::Float64) (data))		\
   /**/
 
 // Define the includes needed for the topics.
@@ -38,8 +38,8 @@
 // -----------------------------------------
 
 #define TOPICS_OUT				\
-  ((state_0, 0))				\
-  ((state_1, 1))				\
+  ((state_0) (0))				\
+  ((state_1) (1))				\
   /**/
 
 // -----------------------------------------

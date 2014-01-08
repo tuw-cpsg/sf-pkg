@@ -11,7 +11,7 @@
 // -----------------------------------------
 
 #define TOPICS_IN				\
-  ((signal, data, std_msgs::Float64))		\
+  ((signal) (std_msgs::Float64) (data))		\
   /**/
 
 // Define the includes needed for these topics!
@@ -22,7 +22,7 @@
 // -----------------------------------------
 
 #define TOPICS_OUT				\
-  ((state_0_fused, 0))				\
+  ((state_0_fused) (0))				\
   /**/
 
 // -----------------------------------------

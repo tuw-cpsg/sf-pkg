@@ -26,9 +26,9 @@
 // -----------------------------------------
 
 // Get x-acceleration and angular velocity around z-axis.
-#define TOPICS_IN						\
-  ((angular_velocity, vector.z, geometry_msgs::Vector3Stamped))	\
-  ((acceleration, vector.y, geometry_msgs::Vector3Stamped))	\
+#define TOPICS_IN							\
+  ((angular_velocity) (geometry_msgs::Vector3Stamped) (vector.z))	\
+  ((acceleration) (geometry_msgs::Vector3Stamped) (vector.y))		\
   /**/
 
 // The message includes.
@@ -40,13 +40,13 @@
 
 // Publish pose (x, y and heading).
 #define TOPICS_OUT			\
-  ((x, 0))				\
-  ((y, 1))				\
-  ((th, 2))				\
-  ((omega, 3))				\
-  ((ds, 4))				\
-  ((v, 5))				\
-  ((a, 6))				\
+  ((x) (0))				\
+  ((y) (1))				\
+  ((th) (2))				\
+  ((omega) (3))				\
+  ((ds) (4))				\
+  ((v) (5))				\
+  ((a) (6))				\
   /**/
 
 // -----------------------------------------

@@ -20,8 +20,8 @@
 
 // The noisy signal to estimate.
 #define TOPICS_IN						\
-  ((acceleration, vector.x, geometry_msgs::Vector3Stamped))	\
-  ((acceleration, vector.y, geometry_msgs::Vector3Stamped))	\
+  ((acceleration) (geometry_msgs::Vector3Stamped) (vector.x))	\
+  ((acceleration) (geometry_msgs::Vector3Stamped) (vector.y))	\
   /**/
 
 // no control input
@@ -35,8 +35,8 @@
 
 // Filtered acceleration w.r.t. robot coordinate frame.
 #define TOPICS_OUT				\
-  ((ax, 0))					\
-  ((ay, 1))					\
+  ((ax) (0))					\
+  ((ay) (1))					\
   /**/
 
 // -----------------------------------------
