@@ -10,7 +10,6 @@
 #define __ESTIMATION_INPUTVALUE_H__
 
 #include "estimation/Value.h"
-#include <ctime>
 
 namespace estimation 
 {
@@ -92,6 +91,16 @@ namespace estimation
     // -----------------------------------------
     // overloading operators
     // -----------------------------------------
+    /**
+     * @brief Prints an appropriate description to an output stream.
+     *
+     * Reimplemented from Value::serialize because additional memebers
+     * should be printed.
+     *
+     * @param os The output stream.
+     */
+    void serialize(std::ostream& os) const;
+
     /**
      * @brief Swaps the data of two elements.
      *

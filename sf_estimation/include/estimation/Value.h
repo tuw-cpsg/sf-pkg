@@ -11,6 +11,7 @@
 #define __ESTIMATION_VALUE_H__
 
 #include <ctime>
+#include <ostream>
 
 namespace estimation 
 {
@@ -114,6 +115,13 @@ namespace estimation
     // overloading operators
     // -----------------------------------------
     /**
+     * @brief Prints an appropriate description to an output stream.
+     *
+     * @param os The output stream to print to.
+     */
+    virtual void serialize(std::ostream& os) const;
+
+    /**
      * @brief Swaps the data of two elements.
      */
     void swap(Value& first, Value& second);
@@ -160,6 +168,11 @@ namespace estimation
     bool operator>=(const Value& rhs) const;
   };
 
+  /**
+   * @brief Overloads the << operator to pass an appropriate
+   * description of the value to an output stream.
+   */
+  std::ostream& operator<<(std::ostream& lhs, const Value& rhs);
 }
 
 #endif

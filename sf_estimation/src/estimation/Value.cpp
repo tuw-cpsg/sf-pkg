@@ -72,6 +72,14 @@ namespace estimation
   // -----------------------------------------
   // overloading operators
   // -----------------------------------------
+  void Value::serialize(std::ostream& os) const
+  {
+    os << "(" 
+       << value << ","
+       << variance << ","
+       << getJitter() << ")";
+  }
+
   void Value::swap(Value& first, Value& second) // nothrow
   {
     // enable ADL (not necessary in our case, but good practice)
@@ -119,6 +127,13 @@ namespace estimation
   bool Value::operator>=(const Value& rhs) const 
   { 
     return !(*this).operator<(rhs); 
+  }
+
+  // not a member but it corresponds to class Value here..
+  std::ostream& operator<<(std::ostream& lhs, const Value& rhs)
+  {
+    rhs.serialize(lhs);
+    return lhs;
   }
 }
 

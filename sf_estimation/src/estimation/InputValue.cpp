@@ -50,6 +50,14 @@ namespace estimation
   // -----------------------------------------
   // overloading operators
   // -----------------------------------------
+  void InputValue::serialize(std::ostream& os) const
+  {
+    if (missing)
+      os << "(missing)";
+    else
+      Value::serialize(os);
+  }
+
   void InputValue::swap(InputValue& first, InputValue& second) // nothrow
   {
     // enable ADL (not necessary in our case, but good practice)

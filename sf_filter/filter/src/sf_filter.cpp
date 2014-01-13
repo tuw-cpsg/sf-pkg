@@ -162,6 +162,7 @@ int main(int argc, char **argv)
 
 	  // Change control input of estimator.
 	  estimator->setControlInput(in_ctrl);
+	  ROS_DEBUG_STREAM("Passed control input " << in_ctrl << " to estimator.");
 
 	  // Control messages are processed, so reset all receive flags
 	  // and delete values.
@@ -185,8 +186,6 @@ int main(int argc, char **argv)
 	    if (topics_meas[i].received)
 	    {
 	      // At least one message of a topic has been received.
-	      double jitter = (ros::Time::now() - topics_meas[i].stamp).toSec()*1000;
-	      //ROS_DEBUG("meas-jitter[%d] (ms): %.2f", i, jitter);
 
 	      // Average the message values and variances (when more
 	      // than one message is received from a topic in a filter
@@ -195,7 +194,7 @@ int main(int argc, char **argv)
 	      for (int j = 0; j < topics_meas[i].values.size(); j++)
 		value += topics_meas[i].values[j];
 	      value = value / topics_meas[i].values.size();	// size always > 0 when received is true
-	      //ROS_DEBUG("meas-value[%d] (avg): %.2f", i, value);
+
 	      double variance = 0;
 	      if (topics_meas[i].variances.size() > 0)		// variance may be missing when no additional field is specified
 	      {
@@ -203,6 +202,8 @@ int main(int argc, char **argv)
 		  variance += topics_meas[i].variances[j];
 		variance = variance / topics_meas[i].variances.size();
 	      }
+
+	      double jitter = (ros::Time::now() - topics_meas[i].stamp).toSec()*1000;
 
 	      // Initialize the InputValue.
 	      in_meas_val.setValue(value);
@@ -214,21 +215,11 @@ int main(int argc, char **argv)
 	  }
 
 	  // Estimate.
-	  std::stringstream ss;
-	  for (int i = 0; i < in_meas.size(); i++)
-	    ss << "(" << in_meas[i].getValue()
-	       << "," << in_meas[i].getVariance()
-	       << "," << in_meas[i].getJitter() << ") ";
-	  ROS_DEBUG_STREAM("estimate | in: " << ss.str());
+	  ROS_DEBUG_STREAM("estimate | in: " << in_meas);
 	  lastEstimation = ros::Time::now();
 	  estimation::Output out = estimator->estimate(in_meas);
 	  ROS_DEBUG("estimate | duration (ms): %.1f", (ros::Time::now() - lastEstimation).toSec()*1000);
-	  ss.str("");
-	  for (int i = 0; i < out.size(); i++)
-	    ss << "(" << out[i].getValue()
-	       << "," << out[i].getVariance()
-	       << "," << out[i].getJitter() << ") ";
-	  ROS_DEBUG_STREAM("estimate | out: " << ss.str());
+	  ROS_DEBUG_STREAM("estimate | out: " << out);
 
 	  // Set output message(s) and publish.
 	  PUBLISH(publishers, out, sampleFused);

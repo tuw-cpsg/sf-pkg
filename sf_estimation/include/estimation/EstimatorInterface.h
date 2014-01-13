@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <stdexcept>
+#include <ostream>
 
 namespace estimation 
 {
@@ -107,14 +108,21 @@ namespace estimation
     // overloading operators
     // -----------------------------------------
     /**
+     * @brief Prints an appropriate description to an output stream.
+     *
+     * @param os The output stream to print to.
+     */
+    virtual void serialize(std::ostream& os) const;
+
+    /**
      * @brief Swaps the data of two elements.
      */
-    void swap(EstimatorInterface& first, EstimatorInterface& second);
+    void swap(EstimatorInterface<T>& first, EstimatorInterface<T>& second);
 
     /**
      * @brief Overloads the assign operator.
      */
-    EstimatorInterface& operator=(EstimatorInterface right);
+    EstimatorInterface<T>& operator=(EstimatorInterface<T> right);
 
 
     /**
@@ -124,19 +132,15 @@ namespace estimation
      * Throws an out_of_range exception if the index is invalid.
      */
     T& operator[](const int index);
-
-    // remove if really not needed: == !=
-    // /**
-    //  * @brief Overloads the == (equal) operator (compares the values).
-    //  */
-    // bool operator==(const EstimatorInterface& rhs) const;
-
-    // /**
-    //  * @brief Overloads the != (not-equal) operator (compares the
-    //  * values).
-    //  */
-    // bool operator!=(const EstimatorInterface& rhs) const;
   };
+
+  /**
+   * @brief Overloads the << operator to pass an appropriate
+   * description of the interface to an output stream.
+   */
+  template <class T>
+  std::ostream& operator<<(std::ostream& lhs, const EstimatorInterface<T>& rhs);
+
 
   ////////////////////
   // Implementation //
@@ -200,6 +204,18 @@ namespace estimation
   // -----------------------------------------
   // overloading operators
   // -----------------------------------------
+  /**
+   * @brief Prints an appropriate description to an output stream.
+   *
+   * @param os The output stream to print to.
+   */
+  template <class T>
+  void EstimatorInterface<T>::serialize(std::ostream& os) const
+  {
+    for (int i = 0; i < entities.size(); i++)
+      entities[i].serialize(os);
+  }
+
   template <class T>
   void EstimatorInterface<T>::swap(EstimatorInterface<T>& first, EstimatorInterface<T>& second)
   {
@@ -226,26 +242,14 @@ namespace estimation
 
     return entities[index];
   }
-
-  // remove if really not needed: == !=
-  // bool EstimatorInterface::operator==(const EstimatorInterface& rhs) const
-  // {
-  //   bool equal = true;
-
-  //   for (int i = 0; i < (*this).data.size(); i++) {
-  //     if ((*this).data[i] != rhs.data[i]) {
-  // 	equal = false;
-  // 	break;
-  //     }
-  //   }
-
-  //   return equal;
-  // }
-
-  // bool EstimatorInterface::operator!=(const EstimatorInterface& rhs) const
-  // {
-  //   return !(*this).operator==(rhs);
-  // }
+  
+  // not a member but it corresponds to EstimatorInterface
+  template <class T>
+  std::ostream& operator<<(std::ostream& lhs, const EstimatorInterface<T>& rhs)
+  {
+    rhs.serialize(lhs);
+    return lhs;
+  }
 
 } // end namespace "estimation"
 
