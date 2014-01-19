@@ -53,8 +53,8 @@
 #endif
 
 #if !(MATRIX_ROWS(MEASUREMENT_NOISE_COVARIANCE) == M  && \
-      MATRIX_COLS(MEASUREMENT_NOISE_COVARIANCE) == N)
-  #error "Validation of configuration header failed. KalmanFilter: Measurement noise model has invalid size."
+      MATRIX_COLS(MEASUREMENT_NOISE_COVARIANCE) == M)
+  #error "Validation of configuration header failed. KalmanFilter: Measurement noise covariance has invalid size."
 #endif
 
 // check sizes of optional parameters
