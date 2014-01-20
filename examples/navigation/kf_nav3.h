@@ -116,14 +116,14 @@
 // 
 // guess...
 // max velocity = 0.7m/s
-// max slope (rosaria) = 0.03m/100ms = 0.3m/s
+// max slope (rosaria) = 0.03m/s/100ms -> acceleration = 0.3m/s/s
 //
 #define PROCESS_NOISE_COVARIANCE		\
   ( (0) (0)   (0) (0) (0)    )			\
   ( (0) (0.5) (0) (0) (0)    )			\
   ( (0) (0)   (0) (0) (0)    )			\
   ( (0) (0)   (0) (0) (0)    )			\
-  ( (0) (0)   (0) (0) (0.03) )			\
+  ( (0) (0)   (0) (0) (0.3) )			\
   /**/
 
 // Measurement noise covariance.
