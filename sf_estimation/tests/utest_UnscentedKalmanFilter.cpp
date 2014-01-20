@@ -2,12 +2,15 @@
 #include <string>
 #include <stdexcept>
 #include <Eigen/Dense>
+#include <cmath>
 
 // testing following API
 #include "estimation/UnscentedKalmanFilter.h"
+#include "probability/sampling.h"
 
 using namespace std;
 using namespace estimation;
+using namespace probability;
 
 namespace UnscentedKalmanFilterTest 
 {
@@ -32,6 +35,29 @@ namespace UnscentedKalmanFilterTest
   void h2(VectorXd& z, const VectorXd& x)
   {
     z[0] = x[1];
+  }
+
+  // 
+  // Simple nonlinear system: a robot drives with constant velocity
+  // and constant heading. Distance made per cycle and heading are
+  // measured directly. The measurements are generated with the
+  // sampling functions available.
+  // 
+  void fn(VectorXd& x, const VectorXd& u)
+  {
+    VectorXd x_apriori(x.size());
+
+    x_apriori[0] = x[0] + x[1]*cos(x[2]);	// x
+    x_apriori[1] = x[1];			// ds
+    x_apriori[2] = x[2];			// th
+    
+    x = x_apriori;    
+  }
+
+  void hn(VectorXd& z, const VectorXd& x)
+  {
+    z[0] = x[1];	// ds
+    z[1] = x[2];	// th
   }
 
   // -----------------------------------------
@@ -143,4 +169,62 @@ namespace UnscentedKalmanFilterTest
     EXPECT_NEAR(out[0].getValue(), 0.0991, 0.0001);
   }
 
+  TEST(UnscentedKalmanFilterTest, functionalityNonlinear)
+  {
+    UnscentedKalmanFilter ukf;
+    const double heading = 80*M_PI/180, distance = 1;
+    
+    ukf.setStateTransitionModel(fn);
+    ukf.setObservationModel(hn);
+    MatrixXd Q(3,3); 
+    Q << 0, 0, 0, 
+      0, 0.01, 0,
+      0, 0, 0.01;
+    ukf.setProcessNoiseCovariance(Q);
+    ukf.setInitialErrorCovariance(Q);
+    MatrixXd R(2,2); 
+    R << 0.05, 0,
+      0, 0.03;
+    ukf.setMeasurementNoiseCovariance(R);
+    VectorXd x0(3);
+    x0 << 0, distance, heading;
+    ukf.setInitialState(x0);
+    ukf.validate();
+
+    // estimate
+    VectorXd z(2);
+    VectorXd zMean(2); zMean << distance, heading;
+    MatrixXd zCov(2,2); zCov << 0.05, 0, 0, 0.03;
+
+    InputValue ds(distance);
+    InputValue th(heading);
+    Input in; 
+    in.add(ds); 
+    in.add(th);
+    Output out;
+
+    // estimate with exact values
+    out = ukf.estimate(in);
+    EXPECT_NEAR(out[0].getValue(), distance*cos(heading), 0.1);
+    EXPECT_NEAR(out[1].getValue(), distance, 0.05);
+    EXPECT_NEAR(out[2].getValue(), heading, 0.03);
+
+    // estimate with sample measurements
+    ukf.setInitialState(x0);
+    ukf.validate();
+
+    for (int i = 0; i < 20; i++)
+    {
+      // sample measurements
+      z = sampleNormalDistribution(zMean, zCov);
+      in[0].setValue(z[0]);
+      in[1].setValue(z[1]);
+
+      out = ukf.estimate(in);
+    }
+
+    EXPECT_NEAR(out[0].getValue(), 20*(distance*cos(heading)), 1);
+    EXPECT_NEAR(out[1].getValue(), distance, 0.5);
+    EXPECT_NEAR(out[2].getValue(), heading, 0.3);
+  }
 }

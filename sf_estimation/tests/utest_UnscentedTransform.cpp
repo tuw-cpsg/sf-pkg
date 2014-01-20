@@ -2,6 +2,7 @@
 #include <string>
 #include <stdexcept>
 #include <Eigen/Dense>
+#include <cmath>
 
 // testing following API
 #include "estimation/UnscentedTransform.h"
@@ -25,6 +26,12 @@ namespace UnscentedTransformTest
       y[1] = x[1];
       return y;
     }
+    VectorXd f4(const VectorXd& x) {	// nonlinear example
+      VectorXd y(x.size());
+      for (int i = 0; i < x.size(); i++)
+	y[i] = sin(x[i]);
+      return y; 
+    }
 
   public:
     TestTransformer(int choice) { this->choice = choice; }
@@ -36,6 +43,7 @@ namespace UnscentedTransformTest
       case 1: return f1(x);
       case 2: return f2(x);
       case 3: return f3(x);
+      case 4: return f4(x);
       default: return f1(x);
       }
     }
@@ -166,6 +174,46 @@ namespace UnscentedTransformTest
     for (int r = 0; r < Pxy3.rows(); r++)
       for (int c = 0; c < Pxy3.cols(); c++)
 	EXPECT_NEAR(Px(r,c), Pxy3(r,c), 0.000001);
+  }
+
+  TEST(UnscentedTransformTest, functionalityNonlinear)
+  {
+    VectorXd x(4);
+    x << 10*M_PI/180, 30*M_PI/180, 60*M_PI/180, 90*M_PI/180;	// 30°, 0°, 90°
+    MatrixXd Px(4,4);
+    Px << 1,0,0,0 , 0,0.1,0,0 , 0,0,0.01,0 , 0,0,0,0.001;
+
+    TestTransformer tt4(4);
+
+    // tt4: y[i] = sin(x[i])
+
+    UnscentedTransform ut(x, Px, &tt4);
+    VectorXd y;
+    MatrixXd Py, Pxy;
+    
+    EXPECT_NO_THROW(ut.compute());
+    EXPECT_NO_THROW(y = ut.mean());
+    EXPECT_NO_THROW(Py = ut.covariance());
+    EXPECT_NO_THROW(Pxy = ut.crossCovarianceXY());
+
+    ASSERT_EQ(x.size(), y.size());
+
+    for (int i = 0; i < y.size(); i++) {
+      EXPECT_NEAR(sin(x[i]), y[i], Px(i,i));
+    }
+
+/*
+    // TODO
+
+    ASSERT_EQ(x.rows(), y.rows());
+    ASSERT_EQ(x.cols(), y.cols());
+
+    for (int r = 0; r < Py.rows(); r++)
+      for (int c = 0; c < Py.cols(); c++) {
+	EXPECT_NEAR(Px(r,c), Py(r,c), 0.000001);
+	EXPECT_NEAR(Px(r,c), Pxy(r,c), 0.000001);
+      }
+*/
   }
 
   TEST(UnscentedTransformTest, examples)
