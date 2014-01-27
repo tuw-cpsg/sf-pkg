@@ -131,7 +131,10 @@ int main(int argc, char **argv)
     {
       try
       {
-	// Control inputs are optional. 
+	// Handle callbacks (check for next samples).
+	ros::spinOnce();
+
+	  // Control inputs are optional. 
 #ifdef TOPICS_IN_CTRL
 	// A received control value is immediately passed to the
 	// estimator. So check if at least one control input has been
@@ -238,9 +241,6 @@ int main(int argc, char **argv)
       {
 	ROS_ERROR_STREAM(e.what());
       }
-      
-      // Handle callbacks (check for next samples).
-      ros::spinOnce();
     }
 
     // --------------------------------------------

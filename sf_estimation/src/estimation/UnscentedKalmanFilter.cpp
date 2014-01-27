@@ -61,7 +61,7 @@ namespace estimation
       if (x.rows() != n)	// empty matrix or invalid size from reinit
 	x = VectorXd::Zero(n);
       if (P.rows() != n)	// empty matrix or invalid size from reinit
-	P = MatrixXd::Identity(n, n);
+	P = MatrixXd::Zero(n, n);
       // size of control input u cannot be checked in the UKF!
       // DANGEROUS! must be correctly initialized so that no out of
       // range error in the formulas of f occur!!

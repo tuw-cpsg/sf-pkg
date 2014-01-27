@@ -79,10 +79,11 @@ namespace estimation
 	// propagate the sigma points through the function and save
 	// (needed for covariance) and covariance cannot be accumulated
 	// here too because the mean is needed :(
-	sigmaPoints_post.push_back(transformer->transform(sigmaPoints_prior[i]));
+	VectorXd post = transformer->transform(sigmaPoints_prior[i]);
+	sigmaPoints_post.push_back(post);
     
 	// accumulate to the approximated mean
-	y += weights[i] * sigmaPoints_post[i];
+	y += weights[i] * post;
       }
 
       // calculate covariances Py, Pxy ----------------------
