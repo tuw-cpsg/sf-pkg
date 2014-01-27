@@ -1,16 +1,13 @@
 /**
  * @file 
  * @author Denise Ratasich
- * @date 20.01.2014
+ * @date 21.01.2014
  *
  * @brief Example configuration PF for navigation.
  *
  * This configuration only uses the accelerometer (KXTF9) and
  * gyroscope (IMU3000) to accumulate the current translation and
  * rotation to the pose.
- *
- * To improve the model the control inputs are used too. The
- * translation and rotation should correspond to the topic cmd_vel.
  */
 
 // -----------------------------------------
@@ -36,14 +33,8 @@
   ((acceleration) (geometry_msgs::Vector3Stamped) (vector.y))		\
   /**/
 
-#define TOPICS_IN_CTRL					\
-  ((cmd_vel) (geometry_msgs::Twist) (linear.x))		\
-  ((cmd_vel) (geometry_msgs::Twist) (angular.z))	\
-  /**/
-
 // The message includes.
 #include <geometry_msgs/Vector3Stamped.h>
-#include <geometry_msgs/Twist.h>
 
 // -----------------------------------------
 // output
@@ -68,26 +59,26 @@
 #define METHOD	PARTICLE_FILTER_SIR
 
 // State transition model.
+//
+// Translation and rotation are assumed to be constant, i.e. we don't
+// know what the robot will drive next.
 // 
 // x0: x = x + ds * cos(th)
 // x1: y = y + ds * sin(th)
 // x2: th = th + omega * T
-// x3: omega = cmd_vel.angular.z
+// x3: omega = omega
 // x4: ds = v * T
 // x5: v = v + a * T
-// x6: a = (cmd_vel.linear.x - v) / T
-// 
-// u0: cmd_vel.linear.x
-// u1: cmd_vel.angular.z
+// x6: a = a
 //
 #define STATE_TRANSITION_MODEL			\
   ( x[0] + x[4]*std::cos(x[2]) )		\
   ( x[1] + x[4]*std::sin(x[2]) )		\
   ( x[2] + x[3]*FILTER_T       )		\
-  ( u[1]		       )		\
+  ( x[3]		       )		\
   ( x[5]*FILTER_T	       )		\
   ( x[5] + x[6]*FILTER_T       )		\
-  ( (u[0] - x[5]) / FILTER_T   )		\
+  ( x[6]		       )		\
   /**/
 
 // Observation model.
@@ -146,4 +137,5 @@
   /**/
 
 // optional
+// Number of particles.
 #define NUMBER_OF_PARTICLES	1000
