@@ -107,7 +107,7 @@ namespace estimation
      * function \c setValue() resets an instance of \c Value,
      * i.e. jitter_ms would be set to 0.
      *
-     * @param The jitter in ms.
+     * @param jitter_ms The jitter in ms.
      */
     void setJitter(unsigned int jitter_ms);
 

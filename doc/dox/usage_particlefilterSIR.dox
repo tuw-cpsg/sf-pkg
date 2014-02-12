@@ -6,9 +6,6 @@ Choose this method with:
 #define METHOD		PARTICLE_FILTER_SIR
 \endcode
 
-\note Resampling is done in every cycle. If resampling should be
-conditioned on \f$N_{eff}\f$ define the parameter NEFF.
-
 \section Required
 
 \subsection STATE_TRANSITION_MODEL
@@ -84,24 +81,14 @@ n x 2 Matrix.
 
 \subsection NUMBER_OF_PARTICLES
 
-The number of particles which should be used for estimation. 
-
-The default number of particles is 1000.
+The number of particles which should be used for estimation. The
+default number of particles is 1000.
 
 Integer > 0.
 
 \note The performance of this estimator depends on this value.
 
-\subsection NEFF
-
-The threshold for the effective number of particles.
-
-When \f$N_{eff}\f$ falls below this threshold the particles will be
-resampled.
-
-Integer > 0.
-
-\note This value must be given in number of particles (e.g. 1..1000),
-not a percentage (0..100)!
+\note Resampling is done when the effective number of particles falls
+below 80% of the overall number of particles.
 
 */

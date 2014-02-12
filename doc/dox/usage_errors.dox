@@ -1,0 +1,66 @@
+/** 
+\page usage_errors Typical Configuration Errors
+
+
+\section Topics
+
+\code
+error: ‘Float32’ in namespace ‘std_msgs’ does not name a type
+\endcode
+
+Maybe the appropriate header file for a topic is missing. Note that
+also the package has to be included to \c package.xml .
+
+\code
+error: macro "BOOST_PP_SEQ_ELEM_1" passed 2 arguments, but takes just 1
+error: macro "BOOST_PP_SEQ_ELEM_III" requires 2 arguments, but only 1 given
+\endcode
+
+The number of elements in a topic is wrong or the syntax is
+invalid. Check your topics \c TOPIC_IN and \c TOPIC_IN_CTRL.
+
+\code
+[ERROR] [1389891282.005448371]: Index out of range (Output.data).
+\endcode
+
+This runtime error occures when an output topic is specified with an
+invalid index. Be sure to specify an index within the bounds,
+i.e. 0..size of state vector).
+
+\code
+error: ‘BOOST_PP_CAT’ was not declared in this scope
+error: expected ‘]’ at end of input
+error: expected ‘}’ at end of input
+error: expected ‘catch’ at end of input
+...
+\endcode
+
+A strange error when regarding to the syntax error which produces
+these error messages above. It was caused by a missing parantheses in
+the TOPICS_OUT macro. The desired output topic name was not terminated
+by a ')'.
+
+\section Models
+\code
+error: unterminated argument list invoking macro "BOOST_PP_SEQ_SIZE"
+error: missing ')' in expression
+error: unterminated argument list invoking macro "BOOST_PP_FOR_1"
+..
+\endcode
+
+A parantheses ')' is missing somewhere in a model or matrix. Be aware
+to close each function, e.g. "sin(", and each element is wrapped by
+parantheses correctly.
+
+\code
+sf_filter: /usr/include/eigen3/Eigen/src/Core/DenseCoeffsBase.h:391: Eigen::DenseCoeffsBase<Derived, 1>::Scalar& Eigen::DenseCoeffsBase<Derived, 1>::operator[](Eigen::DenseCoeffsBase<Derived, 1>::Index) [with Derived = Eigen::Matrix<double, -0x00000000000000001, 1>, Eigen::DenseCoeffsBase<Derived, 1>::Scalar = double, Eigen::DenseCoeffsBase<Derived, 1>::Index = int]: Assertion `index >= 0 && index < size()' failed.
+[filter-3] process has died [pid 9154, exit code -6, cmd /home/denise/diplomarbeit_workspace/catkin_ws/devel/lib/sf_filter/sf_filter RosAria/cmd_vel:=filter/cmd_vel RosAria/velocity_wheel_left:=filter/velocity_wheel_left RosAria/velocity_wheel_right:=filter/velocity_wheel_right __name:=filter __log:=/home/denise/.ros/log/cea1ca7c-81be-11e3-9b16-00216b3b4aac/filter-3.log].
+log file: /home/denise/.ros/log/cea1ca7c-81be-11e3-9b16-00216b3b4aac/filter-3*.log
+\endcode
+
+The above runtime error occurs when your nonlinear model trys to
+access a nonexisting state variable, e.g. x[6] whereas the state only
+has variables from x[0] to x[5]. Check your models to access valid
+state variables and control input variables.
+
+*/

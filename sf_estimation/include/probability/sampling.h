@@ -32,7 +32,7 @@ namespace probability
    * @brief Samples a random vector with uniform distribution.
    *
    * The probability of a continious uniform distribution is
-   * \f$1/|R|\f$ for each sample, where \$R \subseteq \R^N\f$ is the
+   * \f$1/|R|\f$ for each sample, where \f$R \subseteq R^N\f$ is the
    * region under the pdf.
    *
    * @param a The lower bound of the uniform distribution.

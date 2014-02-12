@@ -93,19 +93,19 @@ m x m Matrix.
 
 \subsection CONTROL_INPUT 
 
-The control input u. 
+The control input u. Default value is 0.
 
 l-dim Vector.
 
 \subsection INITIAL_STATE
 
-The initial state x0. 
+The initial state x0. Default value is 0.
 
 n-dim Vector.
 
 \subsection INITIAL_ERROR_COVARIANCE 
 
-The initial error covariance P0. 
+The initial error covariance P0. Default value is 0.
 
 n x n Matrix.
 

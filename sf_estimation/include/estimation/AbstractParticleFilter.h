@@ -168,7 +168,7 @@ namespace estimation
      * correct. 
      *
      * Throws on error. If the validation completes successfully the
-     * method \ref estimate can be used.
+     * method estimate can be used.
      */
     virtual void validate (void) = 0;
 

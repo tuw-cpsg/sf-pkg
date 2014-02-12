@@ -20,10 +20,10 @@ namespace estimation
    *
    * A filter for replicated sensors, i.e. sensors observating the
    * same entity, to increase accuracy and robustness. This method
-   * minimizes the variance of the expected of the fused value (proof
-   * in \cite{Elm02}). The inputs (e.g. sensor values) are weighted
-   * and added to the fused output. The weights are calculated out of
-   * the variance of the inputs.
+   * minimizes the variance of the expected of the fused value \cite Elm02
+   * The inputs (e.g. sensor values) are weighted and added to
+   * the fused output. The weights are calculated out of the variance
+   * of the inputs.
    *
    * \note The variance of the input values must not be zero! An
    * exception will be thrown if so. You can set a flag to ignore

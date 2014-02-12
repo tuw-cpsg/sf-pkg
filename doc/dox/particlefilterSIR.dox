@@ -57,7 +57,7 @@ therefore chosen with greater probability.
   \f[W = \sum_{i=1}^{N} w_k^i\f]
 - Normalize weights, \f$\forall w_k^i\f$:
   \f[w_k^i = \frac{w_k^i}{W}\f]
-- Evaluate \f$N_eff\f$ (if conditional resampling is enabled):
+- Evaluate \f$N_eff\f$:
   \f[w_k^i = \frac{1}{ \sum_{i=1}^{N} (w_k^i)^2 }\f]
 
 \subsection sec_resample resample
@@ -77,8 +77,8 @@ algorithm is taken from \cite pfTutorial (Algorithm 2, p.179).
   - Assign sample: \f$x_k^j = x_k^i\f$
   - Assign weight: \f$w_k^j = \frac1N \f$
 
-\note Resampling is done in every step, when option NEFF is not
-specified.
+\note Resampling is done only when the effective number of particles
+falls below 80% of \f$N\f$.
 
 \section Parameters
 
@@ -91,7 +91,6 @@ required:
 
 optional:
 - NUMBER_OF_PARTICLES
-- NEFF
 
 For details see \ref usage_particlefilterSIR.
 

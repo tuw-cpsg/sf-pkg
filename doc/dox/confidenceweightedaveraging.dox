@@ -1,0 +1,51 @@
+/** 
+\page confidenceweightedaveraging Confidence-Weighted Averaging
+
+\section Introduction 
+
+A filter for replicated sensors, i.e. sensors observating the same
+entity, to increase accuracy and robustness. This method minimizes the
+variance of the expected of the fused value \cite Elm02. The inputs
+(e.g. sensor values) are weighted and added to the fused output. The
+weights are calculated out of the variance of the inputs.
+
+\f[ x_{FUSED} = \frac{ 
+      \sum_{i=1}^N{ x_i \frac{1}{V(S_i)} }
+    }{
+      \sum_{i=1}^N{\frac{1}{V(S_i)}}
+    } 
+\f]
+
+with
+
+\f[ V_{FUSED} = \frac{1}{
+      \sum_{j=1}^N{ \frac{1}{V(S_j)} } 
+    } 
+\f]
+
+For more details see \cite Elm02.
+
+
+\section Estimation
+
+\note The variance of the input values must not be zero! An exception
+will be thrown if so. You can set a flag to ignore values with zero
+variance (IGNORE_ZERO_VARIANCE_VALUES). 
+
+\note Missing measurements are ignored. One should only call
+estimate() when more than one input value is available, this method
+makes no sense with a single value, it will be passed to the output.
+
+\section Parameters
+
+required:
+none
+
+optional:
+
+- IGNORE_ZERO_VARIANCE_VALUES: If set no exception will be thrown when
+an input value has zero variance. But note that values with variance 0
+are not taken into account. When all values have zero variance this
+filter performs simple averaging. 
+
+*/

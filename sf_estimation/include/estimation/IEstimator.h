@@ -49,7 +49,7 @@ namespace estimation
     virtual Output getLastEstimate(void) const = 0;
 
     /**
-     * @brief Prints a description fo the estimator.
+     * @brief Prints a description of the estimator.
      */
     virtual void serialize(std::ostream& os) const = 0;
 

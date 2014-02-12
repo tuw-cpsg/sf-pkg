@@ -159,7 +159,7 @@ namespace estimation
      * Propagating a state (the sigmaPoint here) through the
      * measurement model, means calculating the expected measurement.
      *
-     * @param sigmaPoint The sigma point representing a possible state
+     * @param x The sigma point representing a possible state
      * which should be propagated through a model.
      * @return The expected state or measurement according
      * ut_function.

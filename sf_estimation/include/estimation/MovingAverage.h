@@ -102,7 +102,8 @@ namespace estimation
      * @brief Sets the weighting coefficients for the input (b_k).
      *
      * @param b Array of weighting coefficients for input. Size of
-     * array #size must equal the window size.
+     * array must equal the window size.
+     * @param size Size of array b.
      */
     void setWeightingCoefficientsIn (double *b, unsigned int size);
 
@@ -110,7 +111,8 @@ namespace estimation
      * @brief Sets the weighting coefficients for the output (a_k).
      *
      * @param a Array of weighting coefficients for output. Size of
-     * array #size must equal the window size.
+     * array must equal the window size.
+     * @param size Size of array a.
      */
     void setWeightingCoefficientsOut (double *a, unsigned int size);
 

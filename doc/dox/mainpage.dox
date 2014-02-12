@@ -6,15 +6,14 @@
 Several estimation methods are implemented. For details and usage see
 the references below.
 
-\subsection sec_kf Kalman Filters
+\subsection sec_se State Estimation
 - \subpage kalmanfilter
 - \subpage extendedkalmanfilter
 - \subpage unscentedkalmanfilter
-
-\subsection sec_pf Particle Filters
 - \subpage particlefilterSIR
 
 \subsection sec_other Other
+- \subpage confidenceweightedaveraging
 - \subpage movingaverage
 - \subpage movingmedian
 
@@ -62,8 +61,23 @@ rosrun sf_filter sf_filter
 Where \c sf_filter is the name specified in package.xml and
 CMakeLists.txt.
 
+\section error_sec Trouble Shooting
+
+Configuration over header files (\c config.h) can be tricky and error
+messages are sometimes difficult to interpret (caused by the amount of
+preprocessor macros). In \ref usage_errors common error messages
+are listed.
+
 \section developement_sec Development
 
 - \subpage dev_addingmethod - Tutorial on how to add an algorithm.
-	
+
+
+\example navigation/kf_nav3ctrl.h
+\example navigation/ekf_nav3ctrl.h
+\example navigation/ukf_nav3ctrl.h
+\example navigation/pf_nav3ctrl.h
+\example params/ekf_param_R.h
+\example const/kf_const.h
+
 */	

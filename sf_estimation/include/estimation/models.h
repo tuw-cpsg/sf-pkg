@@ -18,10 +18,9 @@ namespace estimation
    * @brief Pointer to a function representing the state transition
    * model.
    *
-   * @param[in/out] x The state x at time k-1 (input) used to
-   * calculate the estimated (a priori) state vector at time k
-   * (output).
-   * @param[in] The control input at time k-1.
+   * @param x The state x at time k-1 (input) used to calculate the
+   * estimated (a priori) state vector at time k (output).
+   * @param The control input at time k-1.
    */
   typedef void (*func_f)(VectorXd& x, const VectorXd& u);
 
@@ -34,8 +33,8 @@ namespace estimation
   /** 
    * @brief Pointer to a function representing the observation model.
    * 
-   * @param[out] z The estimated measurement vector.
-   * @param[in] x The a priori state vector.
+   * @param z The estimated measurement vector.
+   * @param x The a priori state vector.
    */
   typedef void (*func_h)(VectorXd& z, const VectorXd& x);
 

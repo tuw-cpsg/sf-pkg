@@ -21,7 +21,7 @@ Required macros are:
 - required parameters according \c METHOD, see \ref sec_params
 
 Optional macros are:
-- \c ESTIMATION_RATE, see \ref sec_estimation_rate
+- \c ESTIMATION_PERIOD, see \ref sec_estimation_period
 - \c TOPICS_IN_CTRL, see \ref sec_inputs
 - optional parameters according \c METHOD, see \ref sec_params
 
@@ -121,24 +121,28 @@ to indicate that another line is following. Forgetting \c \ causes
 strange compile errors!
 
 
-\section sec_estimation_rate Estimation Rate
+\section sec_estimation_period Estimation Period
 
-Optional the estimation or filter rate can be specified. Default value
-is 10Hz. The value should be given in Hz, e.g.:
+Optional the estimation or filter period, i.e. the time between
+successive estimations can be specified. Default value is 100ms. The
+value should be given in ms, e.g.:
 
 \code
-#define ESTIMATION_RATE		20
+#define ESTIMATION_PERIOD		100
 \endcode
 
-The above configuration sets the estimation rate to 20Hz, i.e. the
-filter will be called every 50ms to estimate the state with new
+The above configuration sets the estimation rate to 10Hz, i.e. the
+filter will be called every 100ms to estimate the state with new
 measurements.
 
-\note With higher estimation rate you will get a better resolution of
-your state. However when the sensor's sample rates are smaller you
-should adjust the estimation rate to be close to the sample
-rates. Without measurements only a time update will be done, which is
-only a "next state guess".
+\note With higher estimation rate you will get a higher publishing
+rate of your state. However you should set the estimation period to
+correspond to the highest sample rate in your sensor system (the more
+measurements for the filter, the better the accuracy).
+
+\note Without measurements only a time update will be done, which is
+only a "next state guess". When more than one measurement is received
+in a period the values will be averaged.
 
 
 \section sec_method Method
