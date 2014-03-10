@@ -166,7 +166,7 @@
     BOOST_PP_IF(							\
       TOPIC_IN_HAS_VARIANCE(elem),					\
       BOOST_PP_SEQ_ELEM(0, data)[i].variances.push_back(		\
-	msg->TOPIC_IN_VALUE(elem)					\
+	msg->TOPIC_IN_VARIANCE(elem)					\
 	);,								\
       BOOST_PP_EMPTY())							\
       BOOST_PP_SEQ_ELEM(0, data)[i].received = true;			\
