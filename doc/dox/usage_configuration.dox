@@ -28,20 +28,24 @@ Optional macros are:
 
 \section sec_inputs Inputs
 
-An input topic is specified in a tuple of 3 elements:
+An input topic is specified in a sequence of 3 or 4 elements (the
+variance is optional):
 
 \code
-(name, field, type)
+((name) (type) (value) (variance))
 \endcode
 
 - \em name The name of the topic to subscribe to. This name follows
   the conventions on <a href="http://wiki.ros.org/Names">ROS
   names</a>.
-- \em field The field in the topic which holds the value of the entity
-  to fuse. This field must be of numeric type, it is cast to \c
-  double.
 - \em type The message type as it would be used when instantiating
   such a message in C++.
+- \em value The field in the topic which holds the value of the entity
+  to fuse. This field must be of numeric type, it is cast to \c
+  double.  
+- \em variance The field in the topic which holds the variance of the
+  value of the entity to fuse. This field must be of numeric type, it
+  is cast to \c double.
 
 An input topic can be a measurement, e.g. a sensor value, or a control
 input variable (optional). The topics containing measurements are
@@ -57,8 +61,8 @@ order) in the macro \c TOPICS_IN, e.g.:
 
 \code
 #define TOPICS_IN \
-  ((angular_velocity, vector.z, geometry_msgs::Vector3Stamped))	\
-  ((acceleration, vector.y, geometry_msgs::Vector3Stamped))
+  ((angular_velocity) (geometry_msgs::Vector3Stamped) (vector.z)) \
+  ((acceleration) (geometry_msgs::Vector3Stamped) (vector.y))
 \endcode
 
 In the above example the topics are defined in a relative way to the
@@ -69,8 +73,9 @@ your filter. Its a good practice to do remapping separately,
 e.g. within a launch file.
 
 Similar is valid for \c TOPIC_IN_CTRL, the tuples in \c TOPIC_IN_CTRL
-are mapped to the control input u. The number of topics in the
-sequence \c TOPICS_IN and \c TOPICS_IN_CTRL is not bounded.
+are mapped to the control input u (additional variance will be
+ignored). The number of topics in the sequence \c TOPICS_IN and \c
+TOPICS_IN_CTRL is not bounded.
 
 \note Invalid \em field or \em type can raise exceptions during
 runtime.
@@ -86,10 +91,10 @@ package.xml too.
 
 \section sec_outputs Outputs
 
-An output topic is specified in a tuple of 2 elements:
+An output topic is specified in a sequence of 2 elements:
 
 \code
-(name, index)
+((name) (index))
 \endcode
 
 - \em name The name of the topic to subscribe to. This name follows
@@ -106,7 +111,7 @@ called \c TOPICS_OUT, e.g.:
 
 \code
 #define TOPICS_OUT \
-  ((signal_fused, 0))
+  ((signal_fused) (0))
 \endcode
 
 The number of topics in the sequence \c TOPICS_OUT is not bounded,
