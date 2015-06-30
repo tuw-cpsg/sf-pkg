@@ -74,8 +74,8 @@ Correct (measurement update):
    \f[ \hat x_k(+) = \hat x_k(-) + K_k (z_k - h(\hat x_k(-))) \f]
    \f[ P_k(+) = P_k(-) - K_k H_k P_k(-) \f]
 
-For details about the derivation of this formulas, see \cite Wel06 and
-\cite Gre08.
+For details about the derivation of these formulas, see \cite Wel06
+and \cite Gre08.
 
 \section Parameters
 

@@ -1,6 +1,31 @@
 /** 
 \page movingaverage Moving Average
 
+\section Introduction
+
+Moving Average Filter is a low-pass filter and can be used to smooth
+data. It is performed on several samples of an entity over time. The
+number of samples is defined by the window size (note, a greater time
+window means less output values of the method). Usually, averaging is
+used when fluctuations are normally distributed.
+
+Averaging in general: 
+
+\f[ y[n] = \sum_{k=1}^N a_k \, y[n-k] + \sum_{k=0}^N b_k \,
+x[n-k] \f]
+
+- \f$x[n-k]\f$ ... samples (input values), #in
+- \f$y[n-k]\f$ ... output values, #out
+- \f$N\f$ ... size of the "moving" window, #windowSize.
+
+Kind of filters you can establish with this class:
+- FIR filters: \f$\forall k : a_k = 0 \f$ 
+- IIR filters: \f$\exists k : a_k \ne 0\f$ (also called autoregressive
+  moving average filter).
+
+An instance of this filter can only smooth a single entity. The
+samples over time are collected automatically w.r.t. the window size.
+
 \section Parameters
 
 required: none

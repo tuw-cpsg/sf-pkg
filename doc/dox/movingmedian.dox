@@ -1,6 +1,18 @@
 /** 
 \page movingmedian Moving Median
 
+\section Introduction
+
+Estimation is done by sorting the last N elements and taking the
+median of it.
+
+Use this filter for samples ...
+- where very large deviations (outliers) can occur.
+- which are Laplace distributed.
+
+An instance of this method can only filter a single entity. The
+samples over time are collected automatically w.r.t. the window size.
+
 \section Parameters
 
 required: none

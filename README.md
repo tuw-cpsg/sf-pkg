@@ -60,8 +60,11 @@ directory structure of a concrete filter is:
   in package.xml.
 
 
-Generating Documentation
-------------------------
+Documentation
+-------------
+
+The documentation contains tutorials, examples, trouble shooting and
+of course the documentation of the source code.
 
 A configuration file for generating the documentation with doxygen is
 provided in the *doc*-folder(s).
