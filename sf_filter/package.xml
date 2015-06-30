@@ -19,10 +19,12 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <build_depend>cmake_modules</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>sf_msgs</build_depend>
   <build_depend>sf_estimation</build_depend>
 
+  <run_depend>cmake_modules</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>sf_msgs</run_depend>
   <run_depend>sf_estimation</run_depend>

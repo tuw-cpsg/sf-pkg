@@ -5,10 +5,11 @@ set(CONFIG_PATH ../${CONFIG_PATH})	# optional from parent CMakeLists.txt
 set(NAME ${PROJECT_NAME})
 
 ## Find catkin and any catkin packages.
-find_package(catkin REQUIRED COMPONENTS roscpp sf_msgs)
+find_package(catkin REQUIRED COMPONENTS cmake_modules roscpp sf_msgs)
 find_package(sf_estimation REQUIRED)
 
 ## System dependencies are found with CMake's conventions.
+find_package(cmake_modules REQUIRED)
 find_package(Boost REQUIRED)
 find_package(Eigen REQUIRED)
 

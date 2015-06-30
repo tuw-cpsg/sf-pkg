@@ -15,6 +15,6 @@
 
 // Place your configuration here. Include or insert it directly, I
 // chose to include an example.
-#include "../examples/unscented-kalman-filter_nav.h"
+#include "../examples/navigation/ukf_nav3ctrl.h"
 
 #endif

@@ -2,9 +2,10 @@ cmake_minimum_required(VERSION 2.8.3)
 project(sf_estimation)
 
 ## Find catkin - needed for build.
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS cmake_modules)
 
 ## System dependencies are found with CMake's conventions
+find_package(cmake_modules REQUIRED)
 find_package(Boost REQUIRED)
 find_package(Eigen REQUIRED)
 
