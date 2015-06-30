@@ -163,13 +163,7 @@
     BOOST_PP_SEQ_ELEM(0, data)[i].values.push_back(			\
       msg->TOPIC_IN_VALUE(elem)						\
       );								\
-    BOOST_PP_IF(							\
-      TOPIC_IN_HAS_VARIANCE(elem),					\
-      BOOST_PP_SEQ_ELEM(0, data)[i].variances.push_back(		\
-	msg->TOPIC_IN_VARIANCE(elem)					\
-	);,								\
-      BOOST_PP_EMPTY())							\
-      BOOST_PP_SEQ_ELEM(0, data)[i].received = true;			\
+    BOOST_PP_SEQ_ELEM(0, data)[i].received = true;			\
     ROS_DEBUG("RECV '%s.%s': %.2f.",					\
 	      TOPIC_IN_NAME_STR(elem),					\
       	      TOPIC_IN_VALUE_STR(elem),					\

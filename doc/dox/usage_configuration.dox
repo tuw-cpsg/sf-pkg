@@ -28,8 +28,7 @@ Optional macros are:
 
 \section sec_inputs Inputs
 
-An input topic is specified in a sequence of 3 or 4 elements (the
-variance is optional):
+An input topic is specified in a sequence of 3 or 4 elements:
 
 \code
 ((name) (type) (value) (variance))
@@ -88,6 +87,10 @@ strange compile errors!
 message types. The packages containing the messages, e.g. \c
 geometry_msgs have to be specified in \c CMakeLists.txt and \c
 package.xml too.
+
+\note The variance is optional. However, extracting the variance from
+a message is not yet fully implemented. The variance is needed for
+confidence-weighted averaging (currently its simple averaging).
 
 \section sec_outputs Outputs
 
