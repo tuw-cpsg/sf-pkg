@@ -1,12 +1,8 @@
-Low-Level Sensor Fusion Package for ROS
-=======================================
+Generic Sensor Fusion Package for ROS
+=====================================
 
 Implementation of estimation methods for low-level sensor fusion in
 C++ libraries with a generic ROS node using this framework.
-
-* Author: Denise Ratasich 
-* Start: June 2013 
-* Keywords: ROS, Sensor Fusion, Data Fusion, State Estimation, Filtering
 
 Implemented methods/algorithms are:
 
@@ -15,7 +11,7 @@ Implemented methods/algorithms are:
 * Kalman Filter
 * Extended Kalman Filter
 * Unscented Kalman Filter
-* Sampling Importance Resampling
+* Sampling Importance Resampling (Particle Filtering)
 
 
 Installation
@@ -38,6 +34,8 @@ Directory Structure
   publish.
 * sf_filter: the source for the ROS node with configuration. Copy this
   folder to create another concrete filter.
+* doc: documentation of code, examples, tutorials, trouble shooting
+* examples: some example configurations for a filtering ROS node.
 
 
 Usage
